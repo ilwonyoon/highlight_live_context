@@ -1,0 +1,43 @@
+name: Brief
+options:
+  bundleIdPrefix: ing.highlight
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    GENERATE_INFOPLIST_FILE: NO
+    INFOPLIST_FILE: Brief/Info.plist
+    PRODUCT_BUNDLE_IDENTIFIER: ing.highlight.brief
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_HARDENED_RUNTIME: YES
+    ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: NO
+targets:
+  Brief:
+    type: application
+    platform: macOS
+    sources:
+      - path: Brief
+        excludes:
+          - "Resources/Fonts/**"
+          - "Resources/Icons/**"
+          - "Resources/Mocks/**"
+          - "Info.plist"
+      - path: Brief/Resources/Fonts
+        type: folder
+      - path: Brief/Resources/Icons
+        type: folder
+      - path: Brief/Resources/Mocks
+        type: folder
+    info:
+      path: Brief/Info.plist
+    settings:
+      base:
+        INFOPLIST_FILE: Brief/Info.plist
+        PRODUCT_NAME: Brief
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"

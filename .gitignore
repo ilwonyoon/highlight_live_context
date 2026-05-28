@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+*.swp
+
+# Claude Code session/memory data — local only
+.claude/
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+DerivedData/
+*.xcscmblueprint
+*.xccheckout
+build/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# XcodeGen artifact (regenerable from project.yml — don't commit)
+# (leaving Brief.xcodeproj in for now since it's generated; revisit if it churns)
+
+# Swift package manager
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Stray screenshots / scratch files at repo root
+Brief/execution
+
+# Temp
+*.tmp
+*.log

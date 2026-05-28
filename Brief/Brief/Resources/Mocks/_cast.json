@@ -1,0 +1,193 @@
+{
+  "_comment": "Cast for the Brief prototype. 'real: true' = actual Highlight people from LinkedIn screenshots / research (names & roles factual; their mock dialogue is invented). 'real: false' = invented for the scenario (Dani + recruiting candidates). IDs are referenced as speaker/sender/assignee across all Mocks/*.jsonl streams.",
+
+  "colleagues": [
+    {
+      "id": "dani",
+      "name": "Dani Reyes",
+      "role": "Head of Product",
+      "real": false,
+      "isPersona": true,
+      "initials": "DR",
+      "slackHandle": "@dani",
+      "email": "dani@highlightai.com"
+    },
+    {
+      "id": "sergei",
+      "name": "Sergei Sorokin",
+      "role": "Co-Founder & CEO",
+      "real": true,
+      "initials": "SS",
+      "slackHandle": "@sergei",
+      "email": "sergei@highlightai.com",
+      "relationToDani": "Manager. ex-Discord VP Product. Recruited Dani.",
+      "note": "Real. Vision quotes in dossier are verbatim-public; his mock messages here are invented."
+    },
+    {
+      "id": "parris",
+      "name": "Parris Khachi",
+      "role": "Head of Product Engineering",
+      "real": true,
+      "initials": "PK",
+      "slackHandle": "@parris",
+      "email": "parris@highlightai.com",
+      "relationToDani": "Peer (eng counterpart). ex-Discord Senior Eng Manager. Dani's main partner on launch blockers.",
+      "note": "Real (Parris Khachi). Different function from Dani: he owns eng, she owns product."
+    },
+    {
+      "id": "sam",
+      "name": "Sam Eckert",
+      "role": "Head of Design",
+      "real": true,
+      "initials": "SE",
+      "slackHandle": "@sam",
+      "email": "sam@highlightai.com",
+      "relationToDani": "Peer. Design partner on launch surface polish.",
+      "note": "Real (LinkedIn: 'Head of Design at Highlight AI'). Also the assignment contact (sam.eckert@highlight.ing)."
+    },
+    {
+      "id": "sarah",
+      "name": "Sarah Wu",
+      "role": "Operations",
+      "real": true,
+      "initials": "SW",
+      "slackHandle": "@sarah",
+      "email": "sarah@highlightai.com",
+      "relationToDani": "Peer. Runs ops; coordinates recruiting logistics + launch ops.",
+      "note": "Real (LinkedIn: 'ops @ highlight AI | forbes 30u30 | ex-vc & ib')."
+    },
+    {
+      "id": "adrian",
+      "name": "Adrian Casares",
+      "role": "Backend Engineer",
+      "real": true,
+      "initials": "AC",
+      "slackHandle": "@adrian",
+      "email": "adrian@highlightai.com",
+      "relationToDani": "Eng. Owns backend pieces of launch-critical work.",
+      "note": "Real (LinkedIn: 'Backend Engineer @ Highlight')."
+    },
+    {
+      "id": "julian",
+      "name": "Julian Curtis-Ziff",
+      "role": "Lead Engineer",
+      "real": true,
+      "initials": "JC",
+      "slackHandle": "@julian",
+      "email": "julian@highlightai.com",
+      "relationToDani": "Eng lead. Heavy on Connections / MCP integration work.",
+      "note": "Real (LinkedIn: 'Lead Engineer @ Highlight AI'). Last name truncated in screenshot ('Curtis-Zi…') — 'Curtis-Ziff' is a plausible completion; flag as inferred."
+    },
+    {
+      "id": "michael",
+      "name": "Michael Jelly",
+      "role": "AI Engineer",
+      "real": true,
+      "initials": "MJ",
+      "slackHandle": "@michael",
+      "email": "michael@highlightai.com",
+      "relationToDani": "AI eng. Owns summarization / model quality for Daily Summaries.",
+      "note": "Real (LinkedIn: 'AI @ Highlight')."
+    },
+    {
+      "id": "vasudev",
+      "name": "Vasudev Menon",
+      "role": "Design Engineer",
+      "real": true,
+      "initials": "VM",
+      "slackHandle": "@vasudev",
+      "email": "vasudev@highlightai.com",
+      "relationToDani": "Design eng. Bridges Sam's design and the front-end.",
+      "note": "Real (LinkedIn: 'design eng @ highlight | masters cs')."
+    },
+    {
+      "id": "samantha",
+      "name": "Samantha Taube",
+      "role": "Brand & Launch (Fractional)",
+      "real": true,
+      "initials": "ST",
+      "slackHandle": "@samantha",
+      "email": "samantha@highlightai.com",
+      "relationToDani": "Fractional brand/launch lead. Dani's partner on external messaging until the Founding Product Marketer is hired.",
+      "note": "Real (LinkedIn: 'Driving brand development and product launches as Fractional…')."
+    }
+  ],
+
+  "candidates": [
+    {
+      "id": "cand_pmm",
+      "name": "Naomi Feldman",
+      "role": "Founding Product Marketer (candidate)",
+      "real": false,
+      "initials": "NF",
+      "email": "naomi.feldman@gmail.com",
+      "forRole": "Founding Product Marketer",
+      "stage": "Coffee chat → onsite decision pending",
+      "background": "ex-Notion PMM, led a 0→1 launch; strong narrative taste. Top of Dani's list to own launch messaging.",
+      "note": "Invented candidate. Open role is real (on Highlight careers page)."
+    },
+    {
+      "id": "cand_ai",
+      "name": "Dr. Wei Zhang",
+      "role": "Head of AI (candidate)",
+      "real": false,
+      "initials": "WZ",
+      "email": "wei.zhang.ml@gmail.com",
+      "forRole": "Head of AI",
+      "stage": "Coffee chat scheduled",
+      "background": "ex-research lab + applied AI at a consumer-scale company. Being courted for summarization/agent quality leadership.",
+      "note": "Invented candidate. Open role is real."
+    },
+    {
+      "id": "cand_swe",
+      "name": "Marcus Bell",
+      "role": "Senior SWE, Full-Stack (candidate)",
+      "real": false,
+      "initials": "MB",
+      "email": "marcus.bell.dev@gmail.com",
+      "forRole": "Senior SWE, Full-Stack",
+      "stage": "Recruiter screen passed; Dani coffee chat optional",
+      "background": "Full-stack generalist, fast shipper, has built MCP integrations before.",
+      "note": "Invented candidate. Open role is real."
+    }
+  ],
+
+  "externalContacts": [
+    {
+      "id": "ext_press",
+      "name": "Priya Raman",
+      "role": "Reporter, tech publication",
+      "real": false,
+      "email": "praman@techpress.example",
+      "context": "Briefed under embargo on the launch; wants an exec quote + product access.",
+      "note": "Invented. Stands in for the press relationship around a real-style launch."
+    },
+    {
+      "id": "ext_design_partner",
+      "name": "Theo Lang",
+      "role": "Head of Ops, design-partner company",
+      "real": false,
+      "email": "theo@partnerco.example",
+      "context": "Early team design partner trialing Highlight's team features; source of a launch testimonial.",
+      "note": "Invented design-partner contact."
+    },
+    {
+      "id": "ext_noreply_cursor",
+      "name": "Cursor Billing",
+      "role": "No-reply (billing)",
+      "real": false,
+      "email": "no-reply@cursor.com",
+      "context": "Automated billing receipt. Low-signal noise the brief should filter.",
+      "note": "Invented no-reply sender."
+    },
+    {
+      "id": "ext_noreply_mychart",
+      "name": "SF Health MyChart",
+      "role": "No-reply (health portal)",
+      "real": false,
+      "email": "no-reply@sfhealth.example",
+      "context": "Automated medical notification. Source of the personal-privacy sensitive item that bled into work capture.",
+      "note": "Invented no-reply sender; fictional health system."
+    }
+  ]
+}

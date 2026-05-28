@@ -1,0 +1,88 @@
+{
+  "_comment": "Structured mirror of _history-2mo.md — the COMPRESSED long-term Live Context behind the minute-level hot data. Not raw events; this is the archived trajectory. Models how an ambient system scales: recent=precise (jsonl), older=summarized (this). Voice: neutral system summary. Dani-specific content fictional; anchored to real milestones in _research-dossier.md.",
+  "kind": "long_term_rollup",
+  "personId": "dani",
+  "window": {
+    "start": "2026-03-24",
+    "end": "2026-05-26",
+    "weeks": 9,
+    "label": "Join (~Series A) → day before hot window"
+  },
+  "atAGlance": {
+    "tenureWeeks": 9,
+    "role": "Head of Product",
+    "joinContext": "Joined around the $40M Series A (2026-03-24); Sergei named CEO; company repositioned to 'shared intelligence layer for the agentic age of work.'",
+    "arc": "Arrived to make the personal product great; left Month 1 convinced the wedge is proactivity + coordination, not capture; spent Month 2 bending the Jun 9 launch around that conviction.",
+    "dominantThread": "The Jun 9 public launch (D-12 in hot data)."
+  },
+  "realAnchors": [
+    { "date": "2026-03-24", "event": "Series A ($40M, Khosla); Sergei Sorokin named CEO; repositioning to shared intelligence layer", "real": true },
+    { "date": "2026-05-11", "event": "Blog: How to build agentic chat with Durable Objects", "real": true },
+    { "date": "2026-05-26", "event": "Blog: What Cheap Code Did to Design (day before hot window)", "real": true }
+  ],
+  "productThinkingEvolution": [
+    {
+      "phase": "A",
+      "label": "Make capture excellent",
+      "weeks": "1-3 (late Mar → mid Apr)",
+      "summary": "Joined assuming the job was polishing the personal product — meeting notes, Screen Context, Magic Dot. Treated capture as the moat."
+    },
+    {
+      "phase": "B",
+      "label": "Capture is table stakes",
+      "weeks": "4-6 (mid Apr → early May)",
+      "summary": "Competitor trials (Granola, Superhuman, esp. Littlebird's near-identical ambient pitch) collapsed that assumption. Language shifts from 'capture' to 'brief' and 'act'."
+    },
+    {
+      "phase": "C",
+      "label": "Proactivity + coordination is the wedge",
+      "weeks": "7-9 (early → late May)",
+      "summary": "Framing converges with Sergei's thesis. Every launch decision filtered through 'briefs you, then moves work forward.' Resolved the company's positioning tension for herself before the team did collectively."
+    }
+  ],
+  "ownership": {
+    "deFacto": [
+      "Launch readiness (end-to-end, primary surface)",
+      "External narrative / positioning (by default — no Founding PMM hired yet; carried with Samantha)",
+      "Product voice (recurring copy reviewer; enforces 'brief not capture')",
+      "Competitive strategy (runs trials personally)"
+    ],
+    "notableDecisions": [
+      "Reprioritized roadmap so launch-blocking Connections reliability outranks net-new features",
+      "Treats honesty about limitations as a launch asset (visible 'reconnect' states, known-limitations notes)",
+      "Chose to hire the launch-narrative owner (Founding PMM) before launch, accepting recruiting load mid-crunch"
+    ],
+    "carriedForwardIntoHotWindow": [
+      { "item": "Slack-Connection OAuth reliability", "becomes": "HL-1042 P0 in hot data" },
+      { "item": "Unresolved launch one-liner", "becomes": "Resolved Day 2 of hot data ('Highlight briefs you, then moves your work forward')" },
+      { "item": "Founding PMM hire", "becomes": "Naomi Feldman in pipeline" }
+    ]
+  },
+  "relationships": [
+    { "personId": "sergei", "tie": "CEO / manager; ex-Discord", "summary": "Highest-trust, lowest-friction; recruited her. Treats his vision as the constitution; her Month-2 reframe operationalizes his thesis. Light-touch management." },
+    { "personId": "parris", "tie": "Head of Product Eng / peer; ex-Discord", "summary": "Primary cross-functional partner; product↔eng seam runs through them. Direct, occasionally in tension over scope (quality vs. more)." },
+    { "personId": "sam", "tie": "Head of Design / peer", "summary": "Tight launch-surface collaboration; design often blocked on her words." },
+    { "personId": "samantha", "tie": "Fractional brand/launch", "summary": "Current messaging partner; mutually understood stopgap until founding marketer lands." },
+    { "personId": "sarah", "tie": "Ops", "summary": "Recruiting logistics + launch ops; operational backbone." },
+    { "personId": "adrian", "tie": "Backend eng", "summary": "Launch-critical work; trust built via fast defensible calls." },
+    { "personId": "julian", "tie": "Lead eng", "summary": "Connections / MCP integration work." },
+    { "personId": "michael", "tie": "AI eng", "summary": "Daily Summaries quality." }
+  ],
+  "networkShape": "Tight Discord-alumni core (Sergei, Parris, Dani) at center; thin senior launch layer (Sam, Samantha, Sarah); small eng bench. ~15-person company; Dani is one of few senior product voices. Every relationship load-bearing.",
+  "recurringPatterns": [
+    { "id": "evidence_over_vibes", "label": "Decides with evidence, not vibes", "detail": "Defers binary calls until there's a number or a landed artifact.", "hotEcho": "'let's see the patch land, then decide with real numbers'" },
+    { "id": "artifact_over_adjective", "label": "Leads with the artifact, not the adjective", "detail": "Shows the concrete thing (brief, demo, proof point); distrusts abstract claims; resists overpromising verbs.", "hotEcho": "chose a one-liner with a verb she can back over 'runs your day'" },
+    { "id": "transparency_as_feature", "label": "Treats transparency as a feature", "detail": "Prefers visible failure states and honest limitations over hidden polish." },
+    { "id": "focus_then_fast", "label": "Protects focus windows, responds fast on blockers", "detail": "Batches deep work (positioning, PRD in Cursor) mid-morning / late-afternoon; clears blockers near-synchronously in Slack." },
+    { "id": "moves_on_people_fast", "label": "Moves on people fast when conviction is high", "detail": "Compresses hiring process when a candidate feels right.", "hotEcho": "Naomi onsite urgency" },
+    { "id": "personal_competitive_ritual", "label": "Competitive trials are a personal ritual", "detail": "Installs and uses rivals herself; sharpest positioning comes from those sessions." }
+  ],
+  "toolingFingerprint": {
+    "cursor": "Vibe-coding prototypes + PRD drafting",
+    "linear": "Watched through a launch-blocker lens, not a personal task list",
+    "slack": "Slack-first; light email (mostly external)",
+    "github": "Reviewer only, not author",
+    "gmail": "Low internal volume; candidate threads + external/press"
+  },
+  "briefUsage": "Long-memory backdrop enabling claims the 2-day hot data can't: e.g. 'You've been converging on proactivity-over-capture for six weeks; today's one-liner is where it lands' or 'third time you've chosen a visible failure state over hidden polish.' Also answers the scale question: the system holds this compressed trajectory + a precise recent window, not thousands of live raw items."
+}

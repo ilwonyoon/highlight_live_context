@@ -1,0 +1,444 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01076087A26D969564D78F05 /* LiveContextEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD99B54395E7ECC596D7F78B /* LiveContextEvent.swift */; };
+		059ABEA19F4F02489E108991 /* BriefDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756C3405C161A7DC48CD0AD5 /* BriefDuration.swift */; };
+		0FF001A575F9BC515E6F9BAB /* BriefIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 239BA6C11B9F3029C3E756EA /* BriefIcon.swift */; };
+		265FDB92F53A475CB416EE84 /* ProvenancePopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */; };
+		2C031C886B22F7271BF7E6B7 /* BriefApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45DD47D3327320C5CC93B85 /* BriefApp.swift */; };
+		44FA6F684489E41C4CEF05A1 /* Mocks in Resources */ = {isa = PBXBuildFile; fileRef = 148B8D29124CE99F14142CFD /* Mocks */; };
+		4EE103ECDB10A642D58C7ED2 /* BriefSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */; };
+		4FF142FCFA8E955D79DD278B /* LinearModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E341461981E57F45A0792F3 /* LinearModels.swift */; };
+		53475C8A6AACC6925B3759B7 /* TypeSpecimenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */; };
+		5849B2B978FB820A244EB10E /* BriefMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215FDB06CD6B2432EFAA419 /* BriefMotion.swift */; };
+		7613C7CEA171F31BEB3FA1D5 /* LiveContextStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410302074F14E65F26427829 /* LiveContextStore.swift */; };
+		7F469B37931CD2146F53CC56 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = B94690AA4C412EEBDD0DEC68 /* Fonts */; };
+		8397289E122FF6486BC3837A /* Icons in Resources */ = {isa = PBXBuildFile; fileRef = 82A24849D02419FA783CE207 /* Icons */; };
+		920091F157EE93D97E36564F /* MeetingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63024516F875C046AD3EC37B /* MeetingModels.swift */; };
+		939D2DCE502EC4065D298644 /* BriefShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF7A462938AB5835F27B15 /* BriefShadow.swift */; };
+		9D2DD1A2A8D938DF3C9B08F8 /* ReferenceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17950B2DE2CB3060D9D59C7B /* ReferenceModels.swift */; };
+		A880F0E63639DA2FB2FFD921 /* BriefOpacity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB109916AFE0C1B0343A324E /* BriefOpacity.swift */; };
+		A8ED8D114218670619B9700D /* MessageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DBB424D3D7FA38B10BAA317 /* MessageModels.swift */; };
+		AD9D96E684B5C00EA4F275A9 /* BriefColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD2A54ECE203BF2422314CFB /* BriefColor.swift */; };
+		D191F961A186CA9486499C52 /* InteractionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106854B888494669D7792517 /* InteractionState.swift */; };
+		D1966E757BCF7C97518B45B4 /* BriefLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */; };
+		E47A7DDAC3301CDE6B24526D /* LiveContextStore+Verify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */; };
+		E9D6B02E39C00E7C6C94E5A8 /* BriefFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1262DD57D8AF95516EA6819 /* BriefFont.swift */; };
+		EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */; };
+		EC6246F485CD66A186801F37 /* ProvenanceTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D711534F2CB90256C209C64A /* ProvenanceTag.swift */; };
+		EFC7567A43435D818C9C546E /* BriefRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefRadius.swift; sourceTree = "<group>"; };
+		0DBB424D3D7FA38B10BAA317 /* MessageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModels.swift; sourceTree = "<group>"; };
+		106854B888494669D7792517 /* InteractionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionState.swift; sourceTree = "<group>"; };
+		1215FDB06CD6B2432EFAA419 /* BriefMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefMotion.swift; sourceTree = "<group>"; };
+		148B8D29124CE99F14142CFD /* Mocks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Mocks; path = Brief/Resources/Mocks; sourceTree = SOURCE_ROOT; };
+		17950B2DE2CB3060D9D59C7B /* ReferenceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceModels.swift; sourceTree = "<group>"; };
+		1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefSource.swift; sourceTree = "<group>"; };
+		239BA6C11B9F3029C3E756EA /* BriefIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefIcon.swift; sourceTree = "<group>"; };
+		29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContextStore+Verify.swift"; sourceTree = "<group>"; };
+		2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenancePopover.swift; sourceTree = "<group>"; };
+		410302074F14E65F26427829 /* LiveContextStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextStore.swift; sourceTree = "<group>"; };
+		63024516F875C046AD3EC37B /* MeetingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModels.swift; sourceTree = "<group>"; };
+		756C3405C161A7DC48CD0AD5 /* BriefDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefDuration.swift; sourceTree = "<group>"; };
+		7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefSpacing.swift; sourceTree = "<group>"; };
+		82A24849D02419FA783CE207 /* Icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Icons; path = Brief/Resources/Icons; sourceTree = SOURCE_ROOT; };
+		83AF7A462938AB5835F27B15 /* BriefShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefShadow.swift; sourceTree = "<group>"; };
+		8E341461981E57F45A0792F3 /* LinearModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearModels.swift; sourceTree = "<group>"; };
+		A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeSpecimenView.swift; sourceTree = "<group>"; };
+		AD99B54395E7ECC596D7F78B /* LiveContextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextEvent.swift; sourceTree = "<group>"; };
+		B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefLayout.swift; sourceTree = "<group>"; };
+		B94690AA4C412EEBDD0DEC68 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fonts; path = Brief/Resources/Fonts; sourceTree = SOURCE_ROOT; };
+		CD2A54ECE203BF2422314CFB /* BriefColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefColor.swift; sourceTree = "<group>"; };
+		D711534F2CB90256C209C64A /* ProvenanceTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenanceTag.swift; sourceTree = "<group>"; };
+		EB109916AFE0C1B0343A324E /* BriefOpacity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefOpacity.swift; sourceTree = "<group>"; };
+		F1262DD57D8AF95516EA6819 /* BriefFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefFont.swift; sourceTree = "<group>"; };
+		F45DD47D3327320C5CC93B85 /* BriefApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefApp.swift; sourceTree = "<group>"; };
+		FB25DC1EDF61B4EDF1995FC4 /* Brief.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Brief.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		33DC5F19E12BBB1AB45C0BF1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B94690AA4C412EEBDD0DEC68 /* Fonts */,
+				82A24849D02419FA783CE207 /* Icons */,
+				148B8D29124CE99F14142CFD /* Mocks */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4C2F30CD198000D9EC8C50D1 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				CD2A54ECE203BF2422314CFB /* BriefColor.swift */,
+				756C3405C161A7DC48CD0AD5 /* BriefDuration.swift */,
+				F1262DD57D8AF95516EA6819 /* BriefFont.swift */,
+				239BA6C11B9F3029C3E756EA /* BriefIcon.swift */,
+				B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */,
+				1215FDB06CD6B2432EFAA419 /* BriefMotion.swift */,
+				EB109916AFE0C1B0343A324E /* BriefOpacity.swift */,
+				0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */,
+				83AF7A462938AB5835F27B15 /* BriefShadow.swift */,
+				1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */,
+				7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */,
+				106854B888494669D7792517 /* InteractionState.swift */,
+				2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */,
+				D711534F2CB90256C209C64A /* ProvenanceTag.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		6D121E9BF25EC1F5647A8F6A /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				8E341461981E57F45A0792F3 /* LinearModels.swift */,
+				AD99B54395E7ECC596D7F78B /* LiveContextEvent.swift */,
+				410302074F14E65F26427829 /* LiveContextStore.swift */,
+				29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */,
+				63024516F875C046AD3EC37B /* MeetingModels.swift */,
+				0DBB424D3D7FA38B10BAA317 /* MessageModels.swift */,
+				17950B2DE2CB3060D9D59C7B /* ReferenceModels.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		74FB3B99A757F9351687E760 = {
+			isa = PBXGroup;
+			children = (
+				78053B9C7D6B016AAE9F8B29 /* Brief */,
+				FD51A504B145170C7A4C2450 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		78053B9C7D6B016AAE9F8B29 /* Brief */ = {
+			isa = PBXGroup;
+			children = (
+				F45DD47D3327320C5CC93B85 /* BriefApp.swift */,
+				4C2F30CD198000D9EC8C50D1 /* DesignSystem */,
+				6D121E9BF25EC1F5647A8F6A /* Mocks */,
+				33DC5F19E12BBB1AB45C0BF1 /* Resources */,
+				B52AED8AB0A9B78AADA0F9FB /* Views */,
+			);
+			path = Brief;
+			sourceTree = "<group>";
+		};
+		B52AED8AB0A9B78AADA0F9FB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		FD51A504B145170C7A4C2450 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FB25DC1EDF61B4EDF1995FC4 /* Brief.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8C7ABB0468ECC824A6230F28 /* Brief */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F66AD22EF7B9C71CDF533CC5 /* Build configuration list for PBXNativeTarget "Brief" */;
+			buildPhases = (
+				62EDA1659AEB616941D3FDAD /* Sources */,
+				E00A5206434637375DA942D3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Brief;
+			packageProductDependencies = (
+			);
+			productName = Brief;
+			productReference = FB25DC1EDF61B4EDF1995FC4 /* Brief.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0E360AA7CF9DE43846D61CA8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					8C7ABB0468ECC824A6230F28 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 7630EE1DC7282C02FEC8D7A5 /* Build configuration list for PBXProject "Brief" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 74FB3B99A757F9351687E760;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FD51A504B145170C7A4C2450 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8C7ABB0468ECC824A6230F28 /* Brief */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E00A5206434637375DA942D3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F469B37931CD2146F53CC56 /* Fonts in Resources */,
+				8397289E122FF6486BC3837A /* Icons in Resources */,
+				44FA6F684489E41C4CEF05A1 /* Mocks in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		62EDA1659AEB616941D3FDAD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C031C886B22F7271BF7E6B7 /* BriefApp.swift in Sources */,
+				AD9D96E684B5C00EA4F275A9 /* BriefColor.swift in Sources */,
+				059ABEA19F4F02489E108991 /* BriefDuration.swift in Sources */,
+				E9D6B02E39C00E7C6C94E5A8 /* BriefFont.swift in Sources */,
+				0FF001A575F9BC515E6F9BAB /* BriefIcon.swift in Sources */,
+				D1966E757BCF7C97518B45B4 /* BriefLayout.swift in Sources */,
+				5849B2B978FB820A244EB10E /* BriefMotion.swift in Sources */,
+				A880F0E63639DA2FB2FFD921 /* BriefOpacity.swift in Sources */,
+				EFC7567A43435D818C9C546E /* BriefRadius.swift in Sources */,
+				939D2DCE502EC4065D298644 /* BriefShadow.swift in Sources */,
+				4EE103ECDB10A642D58C7ED2 /* BriefSource.swift in Sources */,
+				EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */,
+				D191F961A186CA9486499C52 /* InteractionState.swift in Sources */,
+				4FF142FCFA8E955D79DD278B /* LinearModels.swift in Sources */,
+				01076087A26D969564D78F05 /* LiveContextEvent.swift in Sources */,
+				E47A7DDAC3301CDE6B24526D /* LiveContextStore+Verify.swift in Sources */,
+				7613C7CEA171F31BEB3FA1D5 /* LiveContextStore.swift in Sources */,
+				920091F157EE93D97E36564F /* MeetingModels.swift in Sources */,
+				A8ED8D114218670619B9700D /* MessageModels.swift in Sources */,
+				265FDB92F53A475CB416EE84 /* ProvenancePopover.swift in Sources */,
+				EC6246F485CD66A186801F37 /* ProvenanceTag.swift in Sources */,
+				9D2DD1A2A8D938DF3C9B08F8 /* ReferenceModels.swift in Sources */,
+				53475C8A6AACC6925B3759B7 /* TypeSpecimenView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3ECAC0BF1A1121502A578823 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Brief/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_NAME = Brief;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		7CF734B202624B7D46E577FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Brief/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = ing.highlight.brief;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		90EF446F21400D8C7618C814 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Brief/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = ing.highlight.brief;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		DEE35BC00D1A873D34E377F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Brief/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_NAME = Brief;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7630EE1DC7282C02FEC8D7A5 /* Build configuration list for PBXProject "Brief" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				90EF446F21400D8C7618C814 /* Debug */,
+				7CF734B202624B7D46E577FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F66AD22EF7B9C71CDF533CC5 /* Build configuration list for PBXNativeTarget "Brief" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3ECAC0BF1A1121502A578823 /* Debug */,
+				DEE35BC00D1A873D34E377F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0E360AA7CF9DE43846D61CA8 /* Project object */;
+}

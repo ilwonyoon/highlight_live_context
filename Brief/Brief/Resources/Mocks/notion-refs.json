@@ -1,0 +1,61 @@
+{
+  "_comment": "Notion is the assumed company knowledge base — NOT an event stream. This is a static reference index the Brief can cite/link when a meeting/Slack/issue references a canonical doc. Per Ilwon: 'Notion에 company-wise 문서가 모두 정리되었다고 전제.'",
+  "workspace": "Highlight AI",
+  "docs": [
+    {
+      "id": "ntn_launch_plan",
+      "title": "Public Launch Plan — Jun 9",
+      "space": "Launch",
+      "owner": "sarah",
+      "url": "https://www.notion.so/highlight/Public-Launch-Plan-Jun-9",
+      "lastEditedBy": "sarah",
+      "lastEdited": "2026-05-28T08:30:00-07:00",
+      "referencedBy": ["mtg_d1_standup", "mtg_d2_standup", "lin_hl1033_issue"],
+      "summary": "Master launch checklist, owners, and go/no-go criteria."
+    },
+    {
+      "id": "ntn_positioning",
+      "title": "Launch Positioning & Messaging",
+      "space": "Marketing",
+      "owner": "samantha",
+      "url": "https://www.notion.so/highlight/Launch-Positioning-Messaging",
+      "lastEditedBy": "dani",
+      "lastEdited": "2026-05-28T10:46:00-07:00",
+      "referencedBy": ["mtg_d1_messaging", "lin_hl0998_issue"],
+      "summary": "Positioning doc — wedge (proactive brief, not capture), competitor differentiation, the chosen one-liner."
+    },
+    {
+      "id": "ntn_competitive",
+      "title": "Competitive Landscape",
+      "space": "Product",
+      "owner": "dani",
+      "url": "https://www.notion.so/highlight/Competitive-Landscape",
+      "lastEditedBy": "dani",
+      "lastEdited": "2026-05-27T16:00:00-07:00",
+      "referencedBy": ["cur_d1_002"],
+      "summary": "Living competitor teardown: Granola, Superhuman, Littlebird, Claude Cowork. Littlebird flagged as closest ambient-context rival."
+    },
+    {
+      "id": "ntn_hiring_pmm",
+      "title": "Founding Product Marketer — Role & Loop",
+      "space": "Hiring",
+      "owner": "sarah",
+      "url": "https://www.notion.so/highlight/Founding-Product-Marketer-Role-Loop",
+      "lastEditedBy": "sarah",
+      "lastEdited": "2026-05-27T12:50:00-07:00",
+      "referencedBy": ["th_naomi"],
+      "summary": "Role scope, interview loop, scorecard. Naomi Feldman in pipeline."
+    },
+    {
+      "id": "ntn_company_vision",
+      "title": "Company Vision & Strategy",
+      "space": "Company",
+      "owner": "sergei",
+      "url": "https://www.notion.so/highlight/Company-Vision-Strategy",
+      "lastEditedBy": "sergei",
+      "lastEdited": "2026-05-20T09:00:00-07:00",
+      "referencedBy": [],
+      "summary": "Sergei's canonical framing: coordination tax, shared intelligence layer, proactive execution. The 'why' behind the launch."
+    }
+  ]
+}

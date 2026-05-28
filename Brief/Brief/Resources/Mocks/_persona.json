@@ -1,0 +1,97 @@
+{
+  "_comment": "Fictional persona for the Brief prototype. Background is grounded in real Highlight facts (see _research-dossier.md) so the scenario reads true. Dani Reyes is invented; do not confuse with any real person in the LinkedIn screenshots.",
+  "persona": {
+    "id": "dani",
+    "name": "Dani Reyes",
+    "role": "Head of Product",
+    "company": "Highlight AI",
+    "pronouns": "she/her",
+    "location": "San Francisco, CA",
+    "joinedCompany": "2026-03",
+    "tenureNote": "Joined ~2 months ago, right around the $40M Series A and Sergei's CEO appointment.",
+    "background": {
+      "summary": "ex-Discord. Built coordination/community product for years — the kind of work about synchronizing many people's effort. That's why Sergei's ambient-coordination vision landed for her.",
+      "priorRoles": [
+        "Discord — Product lead on coordination & community surfaces (overlaps Sergei's and Parris's Discord tenure; part of why she was recruited)"
+      ],
+      "whyJoined": "Sergei (ex-Discord VP Product) pitched her on 'AI that you don't have to ask, because it already knows what to do.' After years making humans coordinate inside Discord, building the layer that removes the coordination tax was the obvious next thing."
+    },
+    "managerId": "sergei",
+    "usesHighlightInDevMode": true,
+    "devModeNote": "Dani dogfoods Highlight with developer mode on, so she can see her own Live Context raw — she is user #1 of the surface she's designing.",
+    "currentGoal": {
+      "headline": "Ship Highlight's public launch in ~2 weeks.",
+      "launchDate": "2026-06-09",
+      "launchLabel": "Public launch — Tue Jun 9",
+      "today": "2026-05-28",
+      "daysToLaunch": 12,
+      "countdownLabel": "D-12",
+      "subGoals": [
+        {
+          "id": "launch",
+          "label": "Public launch readiness",
+          "detail": "Drive the cross-functional launch to done: product polish, blocker burn-down, and the external story. Primary obsession.",
+          "weight": "primary"
+        },
+        {
+          "id": "marketing",
+          "label": "External launch messaging",
+          "detail": "Coordinate how we tell the world — positioning, press, launch channels, the founding Product Marketer hire's first deliverable. How do we land 'the AI that already knows your work' without sounding like every other AI tool?",
+          "weight": "primary"
+        },
+        {
+          "id": "hiring",
+          "label": "Recruiting (coffee chats)",
+          "detail": "Run candidate coffee chats for open roles — esp. Founding Product Marketer and Head of AI — while shipping. Team is ~15 people; every hire is load-bearing.",
+          "weight": "secondary"
+        },
+        {
+          "id": "competitive",
+          "label": "Competitive analysis",
+          "detail": "Personally trialing Granola, Superhuman, Littlebird, and Claude Cowork to sharpen our launch positioning. Littlebird (ambient on-screen context) is the most direct rival.",
+          "weight": "secondary"
+        }
+      ]
+    },
+    "timeline": {
+      "days": [
+        {
+          "dayId": "day1",
+          "date": "2026-05-27",
+          "weekday": "Wednesday",
+          "label": "Day 1 — Wed May 27",
+          "approxHours": 10,
+          "heroSurface": "Evening Debrief (end of Day 1)"
+        },
+        {
+          "dayId": "day2",
+          "date": "2026-05-28",
+          "weekday": "Thursday",
+          "label": "Day 2 — Thu May 28 (today)",
+          "approxHours": 10,
+          "heroSurface": "Morning Brief (start of Day 2)"
+        }
+      ],
+      "heroMoments": [
+        "Day 1 Evening Debrief — recap of Wednesday, what got handled, what carries to Thursday",
+        "Day 2 Morning Brief — yesterday in one breath + what today needs from Dani"
+      ]
+    },
+    "connections": {
+      "_comment": "Which Highlight Connections feed Dani's Live Context, and how heavily, per Ilwon's weighting. Mirrors the 8 BriefSource cases + chrome (newly added).",
+      "active": [
+        { "source": "voice", "weight": "core", "note": "Meetings: launch syncs, 1:1s, recruiting coffee chats, competitor demo reviews." },
+        { "source": "slack", "weight": "core", "note": "Company-wide coordination — launch channel, eng/design ping-pong, async decisions." },
+        { "source": "chrome", "weight": "core", "note": "Chrome history — competitor trials + launch-metric/benchmark research. NEW source beyond the original enum." },
+        { "source": "gmail", "weight": "medium", "note": "Slack-first company → light internal email. Mostly candidate threads + external (press/partner/launch) mail." },
+        { "source": "linear", "weight": "medium", "note": "Launch-blocker view — P0/P1 issues gating Jun 9, things she commented on / triaged." },
+        { "source": "cursor", "weight": "medium", "note": "Cursor cloud agents — vibe-coding prototypes + PRD drafting. Re-scoped from generic editor to cloud agents." },
+        { "source": "github", "weight": "low", "note": "This product's repo. Dani isn't an engineer → PR merge notifications / review requests only." },
+        { "source": "notion", "weight": "background", "note": "Company docs all live here (assumed fully organized). A reference target, not an event stream — see notion-refs.json." }
+      ],
+      "excluded": [
+        { "source": "docs", "reason": "Google Docs intentionally excluded from this scenario per Ilwon." }
+      ]
+    }
+  }
+}
