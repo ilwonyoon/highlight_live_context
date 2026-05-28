@@ -21,10 +21,12 @@ struct TimelineItem: Identifiable, Hashable {
     /// Sensitive flag, if the underlying event carries one.
     var sensitive: SensitiveFlag? {
         switch event {
-        case .slack(let m):  return m.sensitive
-        case .email(let m):  return m.sensitive
-        case .chrome(let v): return v.sensitive
-        default:             return nil
+        case .slack(let m):      return m.sensitive
+        case .email(let m):      return m.sensitive
+        case .chrome(let v):     return v.sensitive
+        case .clipboard(let c):  return c.sensitive
+        case .screenshot(let s): return s.sensitive
+        default:                 return nil
         }
     }
 }
@@ -39,6 +41,10 @@ enum AnyLiveContextEvent: Hashable {
     case github(GitHubEvent)
     case cursor(CursorEvent)
     case linear(LinearEvent)
+    case clipboard(ClipboardEntry)
+    case screenshot(ScreenshotCapture)
+    case chatSession(ChatSession)
+    case chatMessage(ChatMessage)
 }
 
 @MainActor
@@ -59,6 +65,10 @@ final class LiveContextStore: ObservableObject {
     @Published private(set) var github: [GitHubEvent] = []
     @Published private(set) var cursor: [CursorEvent] = []
     @Published private(set) var linear: [LinearEvent] = []
+    @Published private(set) var clipboard: [ClipboardEntry] = []
+    @Published private(set) var screenshots: [ScreenshotCapture] = []
+    @Published private(set) var chatSessions: [ChatSession] = []
+    @Published private(set) var chatMessages: [ChatMessage] = []
 
     /// All hot events from all sources, merged and sorted ascending by time.
     @Published private(set) var timeline: [TimelineItem] = []
@@ -125,9 +135,12 @@ final class LiveContextStore: ObservableObject {
         github = decodeLines(GitHubEvent.self, "github", decoder)
         cursor = decodeLines(CursorEvent.self, "cursor", decoder)
         linear = decodeLines(LinearEvent.self, "linear", decoder)
+        clipboard = decodeLines(ClipboardEntry.self, "clipboard", decoder)
+        screenshots = decodeLines(ScreenshotCapture.self, "screenshot", decoder)
 
-        // Voice stream mixes meeting headers + transcript segments.
+        // Voice + chat streams each mix a header kind with detail kinds.
         loadVoiceStream(decoder)
+        loadChatStream(decoder)
 
         rebuildTimeline()
     }
@@ -158,6 +171,42 @@ final class LiveContextStore: ObservableObject {
         transcripts = ts
     }
 
+    /// Split chat.jsonl into session headers + message turns by `kind`.
+    private func loadChatStream(_ decoder: JSONDecoder) {
+        guard let lines = bundleLines("chat") else { return }
+        var sessions: [ChatSession] = []
+        var msgs: [ChatMessage] = []
+        for (i, line) in lines.enumerated() {
+            guard let data = line.data(using: .utf8) else { continue }
+            guard let kind = try? decoder.decode(VoiceKind.self, from: data).kind else {
+                loadErrors.append("chat.jsonl:\(i + 1) missing kind")
+                continue
+            }
+            do {
+                switch kind {
+                case "session": sessions.append(try decoder.decode(ChatSession.self, from: data))
+                case "message": msgs.append(try decoder.decode(ChatMessage.self, from: data))
+                default:        loadErrors.append("chat.jsonl:\(i + 1) unknown kind \(kind)")
+                }
+            } catch {
+                loadErrors.append("chat.jsonl:\(i + 1) \(error)")
+            }
+        }
+        chatSessions = sessions
+        chatMessages = msgs
+    }
+
+    /// Chat sessions paired with their turns (turns time-sorted).
+    func chatSessionsWithMessages() -> [ChatSessionWithMessages] {
+        let bySession = Dictionary(grouping: chatMessages, by: { $0.sessionId })
+        return chatSessions
+            .sorted { $0.timestamp < $1.timestamp }
+            .map { s in
+                let turns = (bySession[s.id] ?? []).sorted { $0.timestamp < $1.timestamp }
+                return ChatSessionWithMessages(session: s, messages: turns)
+            }
+    }
+
     /// Merge every hot source into one ascending timeline.
     private func rebuildTimeline() {
         var items: [TimelineItem] = []
@@ -173,9 +222,13 @@ final class LiveContextStore: ObservableObject {
         add(slack,       AnyLiveContextEvent.slack)
         add(email,       AnyLiveContextEvent.email)
         add(chrome,      AnyLiveContextEvent.chrome)
-        add(github,      AnyLiveContextEvent.github)
-        add(cursor,      AnyLiveContextEvent.cursor)
-        add(linear,      AnyLiveContextEvent.linear)
+        add(github,       AnyLiveContextEvent.github)
+        add(cursor,       AnyLiveContextEvent.cursor)
+        add(linear,       AnyLiveContextEvent.linear)
+        add(clipboard,    AnyLiveContextEvent.clipboard)
+        add(screenshots,  AnyLiveContextEvent.screenshot)
+        add(chatSessions, AnyLiveContextEvent.chatSession)
+        add(chatMessages, AnyLiveContextEvent.chatMessage)
         timeline = items.sorted { $0.timestamp < $1.timestamp }
     }
 

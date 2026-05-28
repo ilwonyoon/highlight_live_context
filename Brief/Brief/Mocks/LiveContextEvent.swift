@@ -72,7 +72,9 @@ protocol SensitiveFlaggable {
 // `source` string through `BriefSourceTag` below, which is a superset of
 // BriefSource that includes chrome.
 
-/// Superset of BriefSource that also covers `chrome` (raw browsing history).
+/// Superset of BriefSource that also covers raw signals that aren't branded
+/// Connection cards: `chrome` (browsing history), `clipboard`, `screenshot`
+/// (user captures), and `chat` (direct conversation with Highlight).
 /// Decoded from the `source` field of every raw event.
 enum BriefSourceTag: String, Codable, Hashable, CaseIterable {
     case voice
@@ -84,12 +86,21 @@ enum BriefSourceTag: String, Codable, Hashable, CaseIterable {
     case linear
     case cursor
     case chrome
+    case clipboard
+    case screenshot
+    case chat
 
-    /// The design-system BriefSource, when one exists (everything except chrome).
+    /// The design-system BriefSource, when one exists (the 8 Connections).
     var briefSource: BriefSource? { BriefSource(rawValue: rawValue) }
 
     var label: String {
         if let s = briefSource { return s.label }
-        return "Chrome"
+        switch self {
+        case .chrome:     return "Chrome"
+        case .clipboard:  return "Clipboard"
+        case .screenshot: return "Screenshot"
+        case .chat:       return "Chat"
+        default:          return rawValue.capitalized
+        }
     }
 }

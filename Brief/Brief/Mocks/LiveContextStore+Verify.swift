@@ -28,6 +28,9 @@ extension LiveContextStore {
         line("github:      \(store.github.count)")
         line("cursor:      \(store.cursor.count)")
         line("linear:      \(store.linear.count)")
+        line("clipboard:   \(store.clipboard.count)")
+        line("screenshots: \(store.screenshots.count)")
+        line("chat:        \(store.chatSessions.count) sessions / \(store.chatMessages.count) turns")
         line("--- merged timeline ---")
         line("total items: \(store.timeline.count)")
         line("day1:        \(store.timeline(for: .day1).count)")
@@ -40,6 +43,7 @@ extension LiveContextStore {
             line("range:       \(f.string(from: first.timestamp)) → \(f.string(from: last.timestamp))")
         }
         line("meetings+transcripts assembled: \(store.meetingsWithTranscripts().count) meetings")
+        line("chat sessions assembled: \(store.chatSessionsWithMessages().count)")
         line("linear issues: \(store.linearByIssue().keys.sorted().joined(separator: ", "))")
         let sensitive = store.sensitiveItems()
         line("sensitive items: \(sensitive.count)")

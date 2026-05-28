@@ -35,6 +35,12 @@ targets:
         type: folder
     info:
       path: Brief/Info.plist
+      properties:
+        # Makes bundled fonts (Resources/Fonts) load at runtime. Declared
+        # here so it survives `xcodegen generate` (previously it lived only
+        # in the hand-edited plist and got stripped on regen).
+        ATSApplicationFontsPath: Fonts/
+        NSHumanReadableCopyright: "Brief — Highlight take-home prototype"
     settings:
       base:
         INFOPLIST_FILE: Brief/Info.plist
