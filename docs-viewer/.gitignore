@@ -1,0 +1,10 @@
+node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
+/.vitepress
+.claude
+.DS_Store
+*.log
+
+# Local-only sample docs (not part of the template)
+docs/samples

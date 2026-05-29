@@ -8,10 +8,17 @@ import SwiftUI
 
 extension Color {
 
-    // Surface
-    static let briefPaper       = Color(red: 0.984, green: 0.976, blue: 0.965) // F1ECEC / warm off-white
-    static let briefPaperRaised = Color(red: 1.000, green: 0.996, blue: 0.988) // raised card surface
-    static let briefPaperSunken = Color(red: 0.965, green: 0.957, blue: 0.945) // recessed area
+    // Surface — warm-yellow off-whites. Three tones, differing only slightly
+    // (the "same paper under slightly different light" effect). Yellow-warm
+    // (B is the lowest channel) keeps them in the E7FE0B highlight family.
+    //
+    // Reading-first hierarchy: the CONTENT surface is the brightest (you read
+    // there). The sidebar/nav sits one step down. Cards/recesses go lower still.
+    static let briefPaper       = Color(red: 0.996, green: 0.992, blue: 0.973) // FEFDF8 — content (brightest, reading surface)
+    static let briefPaperRaised = Color(red: 1.000, green: 0.998, blue: 0.984) // FFFFFB — cards lifted above content
+    static let briefPaperSunken = Color(red: 0.969, green: 0.961, blue: 0.937) // F7F5EF — recessed areas
+    /// Sidebar / nav surface — one step down from content so reading stays brightest.
+    static let briefPaperNav    = Color(red: 0.980, green: 0.973, blue: 0.945) // FAF8F1
 
     // Ink (text)
     static let briefInkPrimary   = Color(red: 0.137, green: 0.118, blue: 0.090) // near-black, warm

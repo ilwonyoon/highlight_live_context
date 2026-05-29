@@ -14,15 +14,30 @@ struct DesignSystemView: View {
         HStack(spacing: 0) {
             sidebar
                 .frame(width: 248)
-                .background(Color.briefPaperSunken)   // sidebar recedes
-            Divider()
-                .overlay(Color.briefHairline)
+                .background(sidebarBackground)         // liquid glass + warm tint (macOS 26), solid fallback
+            Rectangle()
+                .fill(Color.briefHairline.opacity(0.4))
+                .frame(width: 0.5)
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(Color.briefPaper)          // content comes forward
+                .background(Color.briefPaper)          // content = brightest reading surface
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.briefPaper)
+    }
+
+    // MARK: Sidebar background — liquid glass with a warm tint on macOS 26+,
+    // a solid warm-paper fill on earlier systems. The tint keeps the glass in
+    // our yellow-warm family instead of the system's cool gray.
+    @ViewBuilder
+    private var sidebarBackground: some View {
+        if #available(macOS 26.0, *) {
+            Rectangle()
+                .fill(.regularMaterial)
+                .overlay(Color.briefPaperNav.opacity(0.55))   // warm tint over the glass
+        } else {
+            Color.briefPaperNav
+        }
     }
 
     // MARK: Sidebar (custom — design-system controlled, no native List chrome)
@@ -165,11 +180,12 @@ struct DSPlaceholderPage: View {
 struct DSColorsPage: View {
     var body: some View {
         DSPageScaffold(title: "Color", subtitle: "Warm-paper foundation, warm-ink text, and a single highlight family. Brand color appears only where the AI marks meaning.") {
-            DSGroup(title: "Paper", note: "Surfaces. Warm off-white, never pure white.") {
+            DSGroup(title: "Paper", note: "Surfaces. Warm off-white, never pure white. Content is brightest; nav sits one step down.") {
                 DSSwatchGrid(swatches: [
-                    DSSwatch(color: .briefPaper,       name: "paper",       detail: "F1ECEC", ringForLight: true),
-                    DSSwatch(color: .briefPaperRaised, name: "paperRaised", detail: "raised",  ringForLight: true),
-                    DSSwatch(color: .briefPaperSunken, name: "paperSunken", detail: "sunken",  ringForLight: true),
+                    DSSwatch(color: .briefPaper,       name: "paper",       detail: "FEFDF8 content", ringForLight: true),
+                    DSSwatch(color: .briefPaperRaised, name: "paperRaised", detail: "FFFFFB cards",   ringForLight: true),
+                    DSSwatch(color: .briefPaperNav,    name: "paperNav",    detail: "FAF8F1 sidebar", ringForLight: true),
+                    DSSwatch(color: .briefPaperSunken, name: "paperSunken", detail: "F7F5EF recess",  ringForLight: true),
                 ])
             }
             DSGroup(title: "Ink", note: "Text and lines. Warm-shifted neutrals, four steps.") {
