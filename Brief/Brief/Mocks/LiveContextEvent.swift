@@ -35,8 +35,21 @@ protocol LiveContextEvent {
 // inside the ritual rather than in a separate privacy panel.
 
 enum SensitiveKind: String, Codable, Hashable {
-    case security   // a credential / secret captured by accident
-    case privacy    // personal (e.g. medical) content that isn't work
+    case security      // a credential / secret captured by accident
+    case privacy       // personal (e.g. medical/financial) content that isn't work
+    case confidential  // sensitive in THIS context (comp, HR, a private disclosure)
+}
+
+/// How the item came to be flagged — the core privacy distinction.
+/// `auto`: the system knows it shouldn't persist without being told
+///   (universal personal info — banking/medical — and universal secrets
+///   like API keys/credentials). This is the casual user's "peace of mind."
+/// `user`: only sensitive in this person's/company's context (comp, HR,
+///   a colleague's private disclosure). The system can't infer it; the
+///   user has to draw the line. This is the power user's "granular control."
+enum SensitiveDetection: String, Codable, Hashable {
+    case auto
+    case user
 }
 
 enum SensitiveAction: String, Codable, Hashable {
@@ -46,13 +59,14 @@ enum SensitiveAction: String, Codable, Hashable {
 
 struct SensitiveFlag: Codable, Hashable {
     let type: SensitiveKind
+    let detection: SensitiveDetection
     let reason: String
     let suggestedAction: SensitiveAction
     /// Extra advice beyond the primary action (e.g. "rotate token").
     let alsoAdvise: String?
 
     private enum CodingKeys: String, CodingKey {
-        case type, reason, suggestedAction, alsoAdvise
+        case type, detection, reason, suggestedAction, alsoAdvise
     }
 }
 

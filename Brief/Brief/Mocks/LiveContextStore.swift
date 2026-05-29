@@ -109,11 +109,23 @@ final class LiveContextStore: ObservableObject {
                    by: { $0.issueKey })
     }
 
-    /// Rare captured items flagged sensitive (security leak / personal privacy),
-    /// time-sorted. These are what the brief surfaces for one-tap removal —
-    /// the assignment's "delete sensitive moments," inside the ritual.
+    /// Rare captured items flagged sensitive, time-sorted. What the brief
+    /// surfaces for removal — the assignment's "delete sensitive moments."
     func sensitiveItems() -> [TimelineItem] {
         timeline.filter { $0.sensitive != nil }
+    }
+
+    /// Auto-detected items: universal personal info / secrets the system
+    /// catches without being told. The casual user's peace-of-mind guardrail.
+    func autoDetectedSensitive() -> [TimelineItem] {
+        timeline.filter { $0.sensitive?.detection == .auto }
+    }
+
+    /// User-defined sensitive: only sensitive in this context (comp, HR,
+    /// private disclosures). Requires the user to draw the line — the power
+    /// user's granular control.
+    func userFlaggedSensitive() -> [TimelineItem] {
+        timeline.filter { $0.sensitive?.detection == .user }
     }
 
     // MARK: Load

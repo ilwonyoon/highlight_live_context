@@ -46,9 +46,9 @@ extension LiveContextStore {
         line("chat sessions assembled: \(store.chatSessionsWithMessages().count)")
         line("linear issues: \(store.linearByIssue().keys.sorted().joined(separator: ", "))")
         let sensitive = store.sensitiveItems()
-        line("sensitive items: \(sensitive.count)")
+        line("sensitive items: \(sensitive.count) (auto: \(store.autoDetectedSensitive().count), user: \(store.userFlaggedSensitive().count))")
         for s in sensitive {
-            line("  [\(s.sensitive?.type.rawValue ?? "?")] \(s.id) (\(s.source.rawValue)) → \(s.sensitive?.suggestedAction.rawValue ?? "?")")
+            line("  [\(s.sensitive?.type.rawValue ?? "?")/\(s.sensitive?.detection.rawValue ?? "?")] \(s.id) (\(s.source.rawValue)) → \(s.sensitive?.suggestedAction.rawValue ?? "?")")
         }
         // resolve a sample person ref through the cast
         if let firstMeeting = store.meetings.first, let p = store.person(firstMeeting.participants.first) {
