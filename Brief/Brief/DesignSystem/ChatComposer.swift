@@ -1,117 +1,53 @@
 import SwiftUI
 
 // MARK: - ChatComposer
-// Two-state floating composer that appears next to a selected line.
+// A minimal chat popover that appears beside a selected block. The input field
+// is the main affordance — selecting a block invites you to "ask or act on this"
+// directly, which makes the next move obvious without a row of buttons creating
+// extra depth. Copy lives as a small icon at the input's right (option A); it's
+// the one action that needs no conversation. Everything else (delete, reprioritize,
+// draft an action…) is expressed by talking to the AI, so the intent is captured
+// rather than scattered across buttons.
 //
-//   Collapsed (rest):   small chat icon, hint of presence
-//   Expanded  (hover):  Ask input + 4 quick action chips
-//
-// The user can:
-//   - Type into the Ask field and Enter to start a chat
-//   - Click any chip: Ask / Task / Summarize / Copy / Share
-//
-// Actions are stubbed — they print for now and will route to real handlers
-// once chat / task creation are wired up.
+// Layout note: the popover is positioned by SelectionSurface so its right edge
+// stays within the selected block's capsule (trailing-aligned, never overflowing).
 
 struct ChatComposer: View {
+    /// The selected text — shown as a context chip and used as the chat seed.
     let seedText: String
 
-    @State private var expanded = false
     @State private var draft = ""
+    @State private var copied = false
     @FocusState private var draftFocused: Bool
 
     var body: some View {
-        Group {
-            if expanded {
-                expandedView
-            } else {
-                collapsedView
-            }
-        }
-        .animation(.briefStandard, value: expanded)
-        .onHover { hovering in
-            if hovering {
-                expanded = true
-            } else if !draftFocused {
-                expanded = false
-                draft = ""
-            }
-        }
-    }
+        VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+            // Context chip — what's being passed to the AI (the selected block).
+            ContextChip(text: seedText)
 
-    // MARK: - Collapsed
-
-    private var collapsedView: some View {
-        Button {
-            expanded = true
-            draftFocused = true
-        } label: {
-            Image(systemName: "bubble.left")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color.briefHighlightInk)
-                .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(Color.briefHighlightWash)
-                        .overlay(Circle().stroke(Color.briefHighlight.opacity(BriefOpacity.washHeavy), lineWidth: 1))
-                )
-        }
-        .buttonStyle(.plain)
-        .help("Ask Highlight about this")
-    }
-
-    // MARK: - Expanded
-    // Follows Highlight's chat pattern: context chip row → input row → action row.
-
-    private var expandedView: some View {
-        VStack(alignment: .leading, spacing: BriefSpacing.md) {
-            // Row 1 — context chip(s) + add button
+            // Input row — the main affordance. Copy sits at the right while idle;
+            // once you start typing it gives way to Send (you won't copy mid-draft).
             HStack(spacing: BriefSpacing.sm) {
-                ContextChip(text: seedText)
-                Button {
-                    // future: open context picker
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Color.briefInkSecondary)
-                        .frame(width: 22, height: 22)
-                        .background(
-                            Circle()
-                                .stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
-                        )
-                }
-                .buttonStyle(.plain)
-                .help("Add context")
-                Spacer(minLength: 0)
-            }
-
-            // Row 2 — input + voice + mention
-            HStack(spacing: BriefSpacing.md) {
-                TextField("Draft an action or ask a question…", text: $draft)
+                TextField("Ask or act on this…", text: $draft)
                     .textFieldStyle(.plain)
                     .font(.briefBodySmall)
                     .foregroundStyle(Color.briefInkPrimary)
                     .focused($draftFocused)
                     .onSubmit(submitAsk)
-                Spacer(minLength: 0)
-                UtilityButton(icon: "mic", action: { perform(.voice) })
-                UtilityButton(icon: "at",  action: { perform(.mention) })
-                if !draft.isEmpty {
-                    UtilityButton(icon: "return", action: submitAsk)
+
+                if draft.isEmpty {
+                    // Copy (option A): the only non-chat action — shown while idle.
+                    InputIconButton(icon: copied ? "checkmark" : "doc.on.doc",
+                                    tint: copied ? Color.briefHighlightInk : nil,
+                                    help: "Copy text") { copy() }
+                } else {
+                    // Send — replaces Copy once there's a draft.
+                    InputIconButton(icon: "arrow.up", filled: true, help: "Send") { submitAsk() }
                 }
             }
-
-            // Row 3 — quick action chips, divider above
-            Divider().background(Color.briefHairline)
-            HStack(spacing: BriefSpacing.sm) {
-                ActionChip(icon: "checklist",            label: "Make task",  onTap: { perform(.makeTask) })
-                ActionChip(icon: "text.aligncenter",     label: "Summarize",  onTap: { perform(.summarize) })
-                ActionChip(icon: "doc.on.doc",           label: "Copy",       onTap: { perform(.copy) })
-                ActionChip(icon: "square.and.arrow.up",  label: "Share",      onTap: { perform(.share) })
-            }
         }
-        .padding(BriefSpacing.lg)
-        .frame(width: 420, alignment: .leading)
+        .padding(BriefLayout.Composer.inset)
+        .frame(width: BriefLayout.Composer.width, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
                 .fill(Color.briefPaper)
@@ -125,38 +61,27 @@ struct ChatComposer: View {
                         lineWidth: draftFocused ? 1.5 : BriefLayout.Card.strokeWidth)
         )
         .animation(.briefHover, value: draftFocused)
+        .animation(.briefHover, value: copied)
+        .onAppear { draftFocused = true }
     }
 
     // MARK: - Actions
 
-    enum ComposerAction { case makeTask, summarize, copy, share, ask, voice, mention }
-
     private func submitAsk() {
         guard !draft.isEmpty else { return }
-        perform(.ask)
+        print("Ask: \"\(draft)\" — context: \(seedText)")
+        draft = ""
     }
 
-    private func perform(_ action: ComposerAction) {
-        switch action {
-        case .ask:        print("Ask: \"\(draft)\" — context: \(seedText)")
-        case .makeTask:   print("Make task from: \(seedText)")
-        case .summarize:  print("Summarize: \(seedText)")
-        case .copy:
-            #if os(macOS)
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(seedText, forType: .string)
-            #endif
-            print("Copied: \(seedText)")
-        case .share:      print("Share: \(seedText)")
-        case .voice:      print("Voice input — not implemented")
-        case .mention:    print("Mention picker — not implemented")
-        }
-        // Collapse after action (except voice/mention which open further UI)
-        if action != .voice && action != .mention {
-            draft = ""
-            expanded = false
-            draftFocused = false
-        }
+    private func copy() {
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(seedText, forType: .string)
+        #endif
+        copied = true
+        // Reset the check after a moment (no Timer in this layer — rely on the
+        // next interaction; keep it simple: a brief async reset).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { copied = false }
     }
 }
 
@@ -177,8 +102,8 @@ private struct ContextChip: View {
                 .foregroundStyle(Color.briefInkPrimary)
                 .lineLimit(1)
         }
-        .padding(.horizontal, BriefSpacing.md)
-        .padding(.vertical, BriefSpacing.xs + 1)
+        .padding(.horizontal, BriefSpacing.sm)
+        .padding(.vertical, BriefSpacing.xs)
         .background(
             Capsule()
                 .fill(Color.briefPaperSunken)
@@ -189,68 +114,39 @@ private struct ContextChip: View {
     }
 
     private var truncated: String {
-        let limit = 36
+        let limit = 34
         if text.count <= limit { return text }
         return String(text.prefix(limit)) + "…"
     }
 }
 
-// MARK: - UtilityButton
-// Circular icon-only button used in the input row (mic, @, return).
+// MARK: - InputIconButton
+// Small icon button living inside the input row (copy, send).
 
-private struct UtilityButton: View {
+private struct InputIconButton: View {
     let icon: String
+    var filled: Bool = false
+    var tint: Color? = nil
+    let help: String
     let action: () -> Void
     @State private var hovering = false
 
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-                .frame(width: 26, height: 26)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(filled ? Color.briefInkPrimary
+                                 : (tint ?? (hovering ? Color.briefInkPrimary : Color.briefInkSecondary)))
+                .frame(width: 24, height: 24)
                 .background(
                     Circle()
-                        .fill(hovering ? Color.briefHighlightWash : Color.briefPaperSunken.opacity(0.5))
-                        .overlay(Circle().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth))
+                        .fill(filled ? Color.briefHighlight.opacity(BriefOpacity.washHeavy)
+                              : (hovering ? Color.briefHighlightWash : Color.clear))
                 )
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
         .animation(.briefHover, value: hovering)
-    }
-}
-
-// MARK: - ActionChip
-
-private struct ActionChip: View {
-    let icon: String
-    let label: String
-    let onTap: () -> Void
-
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: BriefSpacing.xs) {
-                Image(systemName: icon)
-                    .font(.system(size: 10, weight: .medium))
-                Text(label)
-                    .briefStyle(.label)
-            }
-            .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-            .padding(.horizontal, BriefSpacing.md)
-            .padding(.vertical, BriefSpacing.sm - 1)
-            .background(
-                Capsule()
-                    .fill(hovering ? Color.briefHighlightWash : Color.briefPaperSunken)
-                    .overlay(
-                        Capsule().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.briefHover, value: hovering)
+        .help(help)
     }
 }

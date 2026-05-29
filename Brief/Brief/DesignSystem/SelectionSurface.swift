@@ -54,12 +54,16 @@ struct SelectionSurface<Content: View>: View {
                     .allowsHitTesting(false)
             }
 
-            // Floating composer at bottom-trailing of selection
+            // Floating composer — trailing-aligned within the selection capsule
+            // (its right edge sits at the capsule's right edge, never overflowing),
+            // dropped just below the selected block. We right-align by giving the
+            // wrapper the capsule's width and pushing the composer to .trailing.
             if !selection.selectedIDs.isEmpty, let anchor = selection.anchorFrame {
                 ChatComposer(seedText: selection.selectedText)
-                    .offset(x: anchor.maxX + BriefSpacing.md,
-                            y: anchor.minY)
-                    .transition(.opacity.combined(with: .move(edge: .leading)))
+                    .frame(width: anchor.width, alignment: .trailing)
+                    .offset(x: anchor.minX,
+                            y: anchor.maxY + BriefSpacing.xs)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .coordinateSpace(name: SelectionCoordSpace.name)
