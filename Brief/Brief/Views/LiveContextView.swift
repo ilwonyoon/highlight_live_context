@@ -17,6 +17,9 @@ struct LiveContextView: View {
     @State private var selection: SidebarItem = .variation(.brief)
     // Shared live design tokens — the editor tunes this; the document reads it.
     @StateObject private var docStyle = DocStyle()
+    // Day-switcher: which day's context is shown + popover visibility.
+    @State private var selectedDay: BriefDayOption = .today
+    @State private var showDayPicker = false
 
     private var selectedVariation: Variation? {
         if case let .variation(v) = selection { return v }
@@ -111,20 +114,103 @@ struct LiveContextView: View {
         }
     }
 
-    // MARK: Header — cleaned up + always-visible privacy chip
+    // MARK: Header — title + day, day-switcher, privacy chip
 
     private var header: some View {
-        // H1 title, with the trust chip sitting directly beneath it (not in
-        // the corner) so the privacy signal reads as part of the identity.
+        // H1 title sits on a baseline row with the day it covers + a dropdown to
+        // jump to another day's context, so "this is today's brief" is explicit
+        // and other days are one click away. Trust chip sits beneath the identity.
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
             VStack(alignment: .leading, spacing: 1) {
-                BriefH1(text: "Live Context")
+                HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
+                    BriefH1(text: "Live Context")
+                    daySwitcher
+                }
                 Text("Dani Reyes · 24 highlights")
                     .briefStyle(.monoMeta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
             PrivacyChip()
         }
+    }
+
+    /// The day this brief covers, with a dropdown to switch days.
+    private var daySwitcher: some View {
+        Button { showDayPicker.toggle() } label: {
+            HStack(spacing: BriefSpacing.xs) {
+                Text(selectedDay.label)
+                    .briefStyle(.body)
+                    .foregroundStyle(Color.briefInkSecondary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+            .padding(.horizontal, BriefSpacing.sm)
+            .padding(.vertical, BriefSpacing.xs)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(showDayPicker ? Color.briefSelectionRest : Color.clear)
+            )
+            .contentShape(Rectangle())
+            // The Family serif H1 and Söhne report baselines that don't line up
+            // visually (the date floats above the title). Nudge the switcher's
+            // reported baseline up so the view drops to sit on the H1 baseline.
+            .alignmentGuide(.firstTextBaseline) { d in
+                d[.firstTextBaseline] + 3
+            }
+        }
+        .buttonStyle(.plain)
+        .help("Switch day")
+        .popover(isPresented: $showDayPicker, arrowEdge: .bottom) {
+            dayPickerPopover
+        }
+    }
+
+    /// Popover listing the available days of context. Scrolls — real Live Context
+    /// accrues many days, so the list is capped in height and scrollable.
+    private var dayPickerPopover: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(BriefDayOption.all) { day in
+                    // A hairline above the cold rollup separates "days" from "summary".
+                    if day == .earlier {
+                        Divider()
+                            .background(Color.briefHairlineSoft)
+                            .padding(.horizontal, BriefSpacing.sm)
+                            .padding(.vertical, BriefSpacing.xs)
+                    }
+                    Button { selectedDay = day; showDayPicker = false } label: {
+                        HStack(spacing: BriefSpacing.md) {
+                            VStack(alignment: .leading, spacing: 1) {
+                                // The date is the title; the relative name (Today /
+                                // Yesterday / weekday) is the quiet subtitle.
+                                Text(day.label)
+                                    .briefStyle(.body)
+                                    .foregroundStyle(Color.briefInkPrimary)
+                                Text(day.title)
+                                    .briefStyle(.monoMeta)
+                                    .foregroundStyle(Color.briefInkTertiary)
+                            }
+                            Spacer(minLength: BriefSpacing.xxl)
+                            if day == selectedDay {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Color.briefHighlightInk)
+                            }
+                        }
+                        .padding(.horizontal, BriefSpacing.lg)
+                        .padding(.vertical, BriefSpacing.md)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(DayRowButtonStyle())
+                }
+            }
+            .padding(BriefSpacing.sm)
+        }
+        .scrollIndicators(.hidden)   // scrolls, but no visible scrollbar
+        .frame(width: 256)
+        .frame(maxHeight: 320)       // cap height → scrolls when days pile up
     }
 
     // MARK: Latest-update card
@@ -150,7 +236,7 @@ struct LiveContextView: View {
         }
         // Card inset, Notion-style: generous, with vertical > horizontal.
         .padding(.horizontal, BriefSpacing.xxl)   // 20
-        .padding(.vertical, BriefSpacing.xxxl)     // 28
+        .padding(.vertical, 24)                     // tightened from 28
         .frame(maxWidth: .infinity, alignment: .leading)
         // White/raised surface with a whisper border (Ilwon: this card is
         // white). Border is near-paper so it reads as a soft edge, not a box.
@@ -177,6 +263,53 @@ struct LiveContextView: View {
         }
     }
 
+}
+
+// MARK: - Brief day (day-switcher model)
+// The days of context available to switch between. Dates track the mock
+// timeline (Dani's Live Context runs day1 5/27 → day2 5/28, plus a cold
+// 2-month rollup). "Today" is the latest day the brief covers.
+
+struct BriefDayOption: Identifiable, Hashable {
+    let id: String
+    let title: String   // "Today", "Yesterday", weekday, or "Earlier"
+    let label: String   // "Thursday, May 28" / "2-month summary"
+
+    static let today     = BriefDayOption(id: "d2", title: "Today",     label: "Thursday, May 28")
+    static let yesterday = BriefDayOption(id: "d1", title: "Yesterday", label: "Wednesday, May 27")
+    static let earlier   = BriefDayOption(id: "cold", title: "Earlier", label: "2-month summary")
+
+    /// A fuller history — real Live Context accrues a day per active day, so the
+    /// switcher scrolls. Today/Yesterday are named; older days show their weekday;
+    /// the cold rollup sits at the bottom.
+    static let all: [BriefDayOption] = [
+        today,
+        yesterday,
+        BriefDayOption(id: "d-0526", title: "Monday",   label: "Monday, May 26"),
+        BriefDayOption(id: "d-0523", title: "Friday",   label: "Friday, May 23"),
+        BriefDayOption(id: "d-0522", title: "Thursday", label: "Thursday, May 22"),
+        BriefDayOption(id: "d-0521", title: "Wednesday", label: "Wednesday, May 21"),
+        BriefDayOption(id: "d-0520", title: "Tuesday",  label: "Tuesday, May 20"),
+        BriefDayOption(id: "d-0519", title: "Monday",   label: "Monday, May 19"),
+        BriefDayOption(id: "d-0516", title: "Friday",   label: "Friday, May 16"),
+        earlier,
+    ]
+}
+
+// MARK: - Day-picker row button style
+
+private struct DayRowButtonStyle: ButtonStyle {
+    @State private var hovering = false
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(hovering ? Color.briefSelectionRest : Color.clear)
+            )
+            .contentShape(Rectangle())
+            .onHover { hovering = $0 }
+            .animation(.briefHover, value: hovering)
+    }
 }
 
 // MARK: - Sidebar row
