@@ -14,7 +14,6 @@ import SwiftUI
 
 struct LiveContextView: View {
     @State private var selectedView: ContextView = .liveContext
-    @State private var selectedHistory: String = "Latest"
 
     var body: some View {
         NavigationSplitView {
@@ -52,8 +51,6 @@ struct LiveContextView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 header
-                historyBar
-                    .padding(.top, BriefSpacing.xl)
                 latestUpdateCard
                     .padding(.top, BriefSpacing.xl)
                 document
@@ -73,24 +70,12 @@ struct LiveContextView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: BriefSpacing.lg) {
-            // Workspace identity
-            HStack(alignment: .center, spacing: BriefSpacing.md) {
-                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
-                    .fill(Color.briefPaperSunken)
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        Image(systemName: "folder")
-                            .font(.system(size: 15, weight: .regular))
-                            .foregroundStyle(Color.briefInkSecondary)
-                    )
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Live Context")
-                        .briefStyle(.title2)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    Text("Dani Reyes · 24 highlights")
-                        .briefStyle(.monoMeta)
-                        .foregroundStyle(Color.briefInkTertiary)
-                }
+            // Workspace identity — H1 title, no icon chrome.
+            VStack(alignment: .leading, spacing: 1) {
+                BriefH1(text: "Live Context")
+                Text("Dani Reyes · 24 highlights")
+                    .briefStyle(.monoMeta)
+                    .foregroundStyle(Color.briefInkTertiary)
             }
 
             Spacer()
@@ -119,47 +104,6 @@ struct LiveContextView: View {
                 .fill(Color.briefHighlightWash.opacity(0.5))
                 .overlay(Capsule(style: .continuous).stroke(Color.briefHairline, lineWidth: 1))
         )
-    }
-
-    // MARK: History timeline
-
-    private var historyBar: some View {
-        HStack(spacing: BriefSpacing.sm) {
-            Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(Color.briefInkTertiary)
-            Text("History")
-                .briefStyle(.label)
-                .foregroundStyle(Color.briefInkSecondary)
-                .padding(.trailing, BriefSpacing.xs)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: BriefSpacing.sm) {
-                    ForEach(historyPoints, id: \.self) { point in
-                        historyChip(point)
-                    }
-                }
-            }
-        }
-        .padding(BriefSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
-                .fill(Color.briefPaperSunken.opacity(0.6))
-        )
-    }
-
-    private func historyChip(_ label: String) -> some View {
-        let isSelected = label == selectedHistory
-        return Text(label)
-            .briefStyle(.monoMeta)
-            .foregroundStyle(isSelected ? Color.briefInkPrimary : Color.briefInkTertiary)
-            .padding(.horizontal, BriefSpacing.md)
-            .padding(.vertical, BriefSpacing.xs)
-            .background(
-                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
-                    .fill(isSelected ? Color.briefPaperRaised : Color.clear)
-            )
-            .onTapGesture { selectedHistory = label }
     }
 
     // MARK: Latest-update card
@@ -354,13 +298,6 @@ private enum ContextView: String, CaseIterable, Identifiable, Hashable {
         }
     }
 }
-
-// MARK: - History points (mock)
-
-private let historyPoints = [
-    "Latest", "Today 9:42 AM", "Yesterday 6:18 PM", "May 27 5:05 PM",
-    "May 27 12:46 PM", "May 27 9:03 AM",
-]
 
 #Preview {
     LiveContextView()

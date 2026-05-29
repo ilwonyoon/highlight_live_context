@@ -15,10 +15,20 @@ struct BriefApp: App {
     @StateObject private var selection = SelectionContext()
 
     var body: some Scene {
-        // Live Context panel — primary window on the live-context-panel branch.
-        // (DesignSystemView remains available; swap the view below to see it.)
-        WindowGroup("Live Context") {
+        // Two independent windows so each surface can be worked on / reviewed
+        // separately. Both open at launch; close whichever you don't need.
+
+        // 1) Live Context — the product surface.
+        WindowGroup("Live Context", id: "live-context") {
             LiveContextView()
+                .environmentObject(selection)
+                .frame(minWidth: 1000, minHeight: 720)
+        }
+        .windowResizability(.contentSize)
+
+        // 2) Design System — the token / component reference.
+        WindowGroup("Design System", id: "design-system") {
+            DesignSystemView()
                 .environmentObject(selection)
                 .frame(minWidth: 1000, minHeight: 720)
         }
