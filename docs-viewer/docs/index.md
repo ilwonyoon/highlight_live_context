@@ -1,23 +1,26 @@
 ---
 layout: home
-
 hero:
-  name: Markdown Preview
-  text: A clean local viewer for your markdown docs
-  tagline: Notion-grade readability on desktop and mobile. Inter + Pretendard for Latin and Korean alike.
-  actions:
-    - theme: brand
-      text: Read the guide
-      link: /guides/
-    - theme: alt
-      text: GitHub
-      link: https://github.com/ilwonyoon/markdown-preview
-
+  name: Brief
+  text: Highlight take-home — working docs
+  tagline: Design thinking, scope, and the privacy model for the Memory interface.
 features:
-  - title: Desktop and mobile
-    details: Hamburger sidebar, auto outline, LAN-exposed dev server. Open it on your phone over the same Wi-Fi.
-  - title: Inter + Pretendard
-    details: Inter for Latin body and UI, Pretendard Variable for Korean, JetBrains Mono fallback for code.
-  - title: Drop-in for any project
-    details: One line — npx degit ilwonyoon/markdown-preview docs-viewer — clones a self-contained viewer into any folder.
+  - title: Assignment
+    details: The original take-home brief (source of truth).
+    link: /brief/ASSIGNMENT
+  - title: Priorities
+    details: P0 privacy/curation · P1 proactive brief · P2 light-user onboarding.
+    link: /brief/PRIORITIES
+  - title: Privacy model
+    details: The three-action model — silent filter, visible filter, user control.
+    link: /brief/PRIVACY_MODEL
+  - title: Onboarding & trust
+    details: First-run permission negotiation + ongoing trust accrual.
+    link: /brief/ONBOARDING
+  - title: Research dossier
+    details: Real-world grounding (Highlight, founder, competitors) with sources.
+    link: /brief/research-dossier
+  - title: Scenario & history
+    details: Dani's two-day scenario spine and the compressed 2-month history.
+    link: /brief/scenario-spine
 ---

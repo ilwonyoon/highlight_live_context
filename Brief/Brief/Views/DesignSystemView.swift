@@ -26,18 +26,11 @@ struct DesignSystemView: View {
         .background(Color.briefPaper)
     }
 
-    // MARK: Sidebar background — liquid glass with a warm tint on macOS 26+,
-    // a solid warm-paper fill on earlier systems. The tint keeps the glass in
-    // our yellow-warm family instead of the system's cool gray.
-    @ViewBuilder
+    // MARK: Sidebar background — pure macOS liquid glass (the .sidebar material
+    // that samples behind the window). No tint overlay; this is the native
+    // glass look. Requires the window to be non-opaque (see BriefApp).
     private var sidebarBackground: some View {
-        if #available(macOS 26.0, *) {
-            Rectangle()
-                .fill(.regularMaterial)
-                .overlay(Color.briefPaperNav.opacity(0.55))   // warm tint over the glass
-        } else {
-            Color.briefPaperNav
-        }
+        VisualEffectView(material: .sidebar, blending: .behindWindow)
     }
 
     // MARK: Sidebar (custom — design-system controlled, no native List chrome)

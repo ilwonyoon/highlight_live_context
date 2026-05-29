@@ -42,6 +42,7 @@
 		EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */; };
 		EC6246F485CD66A186801F37 /* ProvenanceTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D711534F2CB90256C209C64A /* ProvenanceTag.swift */; };
 		EFC7567A43435D818C9C546E /* BriefRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */; };
+		FDD9F80B537B78631A207B0E /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 		756C3405C161A7DC48CD0AD5 /* BriefDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefDuration.swift; sourceTree = "<group>"; };
 		7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefSpacing.swift; sourceTree = "<group>"; };
 		82A24849D02419FA783CE207 /* Icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Icons; path = Brief/Resources/Icons; sourceTree = SOURCE_ROOT; };
+		831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		83AF7A462938AB5835F27B15 /* BriefShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefShadow.swift; sourceTree = "<group>"; };
 		8E341461981E57F45A0792F3 /* LinearModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearModels.swift; sourceTree = "<group>"; };
 		A18A1010220C9121DFAD767A /* DesignSystemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemView.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				4FC0624F98A3D54E4CE1D39F /* SelectableLine.swift */,
 				240320E3F565DBB9F2D34F16 /* SelectionContext.swift */,
 				581E2D8C918E275E19D2E4AA /* SelectionSurface.swift */,
+				831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -294,6 +297,7 @@
 				067A25AB69E06CD8F50213A5 /* SelectionContext.swift in Sources */,
 				5615A9BB38FDF5EBB5252EA5 /* SelectionSurface.swift in Sources */,
 				53475C8A6AACC6925B3759B7 /* TypeSpecimenView.swift in Sources */,
+				FDD9F80B537B78631A207B0E /* VisualEffectView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
