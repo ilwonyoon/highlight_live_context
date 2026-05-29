@@ -163,41 +163,7 @@ private func hoverAwareIcon(source: BriefSource, size: CGFloat, restMode: Proven
 
 // (source-specific hover tint removed — all sources share briefHighlightSoft background on hover)
 
-// MARK: - 2. Inline mention (lightest at rest, promotes on hover)
-// Rest: icon barely visible, text in secondary ink — almost plain prose.
-// Hover: promotes to inline citation appearance.
-
-struct ProvenanceMention: View {
-    let source: BriefSource
-    let phrase: String
-    var color: ProvenanceColorMode = .inkSecondary
-    var small: Bool = false
-
-    @State private var hovering = false
-
-    private var iconSize: CGFloat { small ? 11 : 12 }
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        HStack(spacing: BriefSpacing.xs) {
-            tintedIcon(source: source, size: iconSize, mode: hovering ? .inkPrimary : color)
-                .opacity(hovering ? BriefOpacity.rest : BriefOpacity.muted)
-                .offset(y: BriefLayout.InlineCitation.baselineNudge)
-            Text(phrase)
-                .briefStyle(token)
-                .foregroundStyle(hovering ? Color.briefInkPrimary : color.textColor)
-        }
-        .padding(.horizontal, BriefLayout.InlineCitation.paddingH)
-        .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-        .background(
-            RoundedRectangle(cornerRadius: BriefLayout.InlineCitation.cornerRadius, style: .continuous)
-                .fill(hovering ? Color.briefPaperSunken : Color.clear)
-        )
-        .animation(.briefHover, value: hovering)
-        .onHover { hovering = $0 }
-        .help(source.label)
-    }
-}
+// (Register 02 — Inline mention — removed.)
 
 // MARK: - 11. Brand-tint citation
 // Phrase text itself is tinted with the highlighter ink color (deep olive).
@@ -236,204 +202,12 @@ struct ProvenanceBrandTint: View {
     }
 }
 
-// MARK: - 12. Source = ink primary, body = downshifted
-// Provenance phrase stays full black/primary.
-// Body text around it is rendered in inkSecondary — citations stand out
-// by *contrast* alone, no decoration needed.
-// This struct is just the citation half — the body downshift happens at
-// the call site (use Text with inkSecondary).
+// (Register 12 — Contrast — removed.)
+// (Register 13 — Chromatic — removed.)
 
-struct ProvenanceContrastBold: View {
-    let source: BriefSource
-    let phrase: String
-    var small: Bool = false
-
-    @State private var hovering = false
-
-    private var iconSize: CGFloat { small ? 11 : 12 }
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        HStack(spacing: BriefSpacing.xs) {
-            BriefIcon(source, size: iconSize, rendering: .template)
-                .foregroundStyle(Color.briefInkPrimary)
-                .opacity(hovering ? BriefOpacity.rest : BriefOpacity.active)
-                .offset(y: BriefLayout.InlineCitation.baselineNudge)
-            Text(phrase)
-                .briefStyle(token)
-                .foregroundStyle(Color.briefInkPrimary)
-        }
-        .padding(.horizontal, BriefLayout.InlineCitation.paddingH)
-        .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-        .background(
-            RoundedRectangle(cornerRadius: BriefLayout.InlineCitation.cornerRadius, style: .continuous)
-                .fill(hovering ? Color.briefPaperSunken : Color.clear)
-        )
-        .animation(.briefHover, value: hovering)
-        .onHover { hovering = $0 }
-        .help(source.label)
-    }
-}
-
-// MARK: - 13. Chromatic citation (source-colored text)
-// The phrase text itself is tinted with the source's brand color.
-// Brand identity carries the citation — most visually rich.
-// Risk: rainbow effect if many sources in one sentence.
-
-struct ProvenanceChromatic: View {
-    let source: BriefSource
-    let phrase: String
-    var small: Bool = false
-
-    @State private var hovering = false
-
-    private var iconSize: CGFloat { small ? 11 : 12 }
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        let tint = sourceTint(for: source)
-        return HStack(spacing: BriefSpacing.xs) {
-            BriefIcon(source, size: iconSize, rendering: .original)
-                .opacity(hovering ? BriefOpacity.rest : BriefOpacity.active)
-                .offset(y: BriefLayout.InlineCitation.baselineNudge)
-            Text(phrase)
-                .briefStyle(token)
-                .foregroundStyle(tint)
-        }
-        .padding(.horizontal, BriefLayout.InlineCitation.paddingH)
-        .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-        .background(
-            RoundedRectangle(cornerRadius: BriefLayout.InlineCitation.cornerRadius, style: .continuous)
-                .fill(hovering ? tint.opacity(BriefOpacity.washSoft) : Color.clear)
-        )
-        .animation(.briefHover, value: hovering)
-        .onHover { hovering = $0 }
-        .help(source.label)
-    }
-}
-
-/// Per-source brand text tint for chromatic citation register.
-/// Picks a representative color from each brand's identity.
-private func sourceTint(for source: BriefSource) -> Color {
-    switch source {
-    case .voice:  return Color(red: 0.231, green: 0.275, blue: 0.039)  // highlightInk olive
-    case .gmail:  return Color(red: 0.871, green: 0.231, blue: 0.180)  // Gmail red
-    case .github: return Color(red: 0.137, green: 0.118, blue: 0.090)  // inkPrimary (mono brand)
-    case .notion: return Color(red: 0.137, green: 0.118, blue: 0.090)  // inkPrimary (mono brand)
-    case .docs:   return Color(red: 0.258, green: 0.522, blue: 0.957)  // Google docs blue
-    case .slack:  return Color(red: 0.878, green: 0.118, blue: 0.353)  // Slack pink/red
-    case .linear: return Color(red: 0.357, green: 0.376, blue: 0.788)  // Linear indigo
-    case .cursor: return Color(red: 0.137, green: 0.118, blue: 0.090)  // inkPrimary (mono brand)
-    }
-}
-
-// MARK: - 7. Numbered superscript (Perplexity style)
-// phrase[1] [2] — small numbered badges after a claim. Best when many
-// sources need to be cited densely.
-
-struct ProvenanceNumbered: View {
-    let phrase: String
-    let sources: [BriefSource]
-    var startNumber: Int = 1
-    var small: Bool = false
-
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.xxs + 1) {
-            Text(phrase)
-                .briefStyle(token)
-                .foregroundStyle(Color.briefInkPrimary)
-            HStack(spacing: BriefSpacing.xxs) {
-                ForEach(Array(sources.enumerated()), id: \.offset) { idx, src in
-                    NumberedBadge(number: startNumber + idx, source: src)
-                }
-            }
-        }
-    }
-}
-
-private struct NumberedBadge: View {
-    let number: Int
-    let source: BriefSource
-    @State private var hovering = false
-
-    var body: some View {
-        Text("\(number)")
-            .briefStyle(.monoMeta)
-            .foregroundStyle(hovering ? Color.briefHighlightInk : Color.briefInkSecondary)
-            .padding(.horizontal, BriefSpacing.xs)
-            .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-            .background(
-                RoundedRectangle(cornerRadius: BriefRadius.inline + 1, style: .continuous)
-                    .fill(hovering ? Color.briefHighlightSoft : Color.briefPaperSunken)
-            )
-            .baselineOffset(BriefSpacing.xs)
-            .animation(.briefHover, value: hovering)
-            .onHover { hovering = $0 }
-            .help(source.label)
-    }
-}
-
-// MARK: - 8. Hover-only magnifier (Granola style)
-// Rest: plain text, ZERO decoration. Hover: small source icon button
-// fades in beside the text. Click reveals source.
-
-struct ProvenanceMagnifier: View {
-    let source: BriefSource
-    let phrase: String
-    var small: Bool = false
-
-    @State private var hovering = false
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.xs) {
-            Text(phrase)
-                .briefStyle(token)
-                .foregroundStyle(Color.briefInkPrimary)
-            if hovering {
-                BriefIcon(source, size: BriefLayout.InlineIcon.regular, rendering: .template)
-                    .foregroundStyle(Color.briefInkSecondary)
-                    .padding(BriefSpacing.xxs + 1)
-                    .background(
-                        Circle().fill(Color.briefPaperSunken)
-                    )
-                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
-            }
-        }
-        .animation(.briefStandard, value: hovering)
-        .onHover { hovering = $0 }
-        .help(source.label)
-    }
-}
-
-// MARK: - 9. Highlight + popover (Sana / Adobe style)
-// Text has a subtle highlight background (highlighter trace).
-// Click would open popover with source excerpt.
-
-struct ProvenanceHighlight: View {
-    let source: BriefSource
-    let phrase: String
-    var small: Bool = false
-
-    @State private var hovering = false
-    private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
-
-    var body: some View {
-        Text(phrase)
-            .briefStyle(token)
-            .foregroundStyle(Color.briefHighlightInk)
-            .padding(.horizontal, BriefSpacing.xxs + 1)
-            .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-            .background(
-                Color.briefHighlightSoft.opacity(hovering ? BriefOpacity.rest : 0.7)
-            )
-            .animation(.briefHover, value: hovering)
-            .onHover { hovering = $0 }
-            .help("\(source.label) — click to view source")
-    }
-}
+// (Register 07 — Numbered superscript — removed.)
+// (Register 08 — Hover-only magnifier — removed.)
+// (Register 09 — Highlight + popover — removed.)
 
 // MARK: - 10. Favicon-prefix superscript
 // phrase ᴹ ᴺ — tiny source icons as superscript after a phrase.
@@ -631,6 +405,13 @@ struct ProvenanceLine: View {
         self.small = small
     }
 
+    /// Direct-array init for callers that pre-compose segments (e.g. helper
+    /// functions that need to forward a result-builder closure).
+    init(segments: [ProvenanceSegment], small: Bool = false) {
+        self.segments = segments
+        self.small = small
+    }
+
     var body: some View {
         // Body text segments use the body token (Söhne Buch).
         // Source segments use the heavier provenance token via their own view.
@@ -644,8 +425,6 @@ struct ProvenanceLine: View {
                         .foregroundStyle(Color.briefInkPrimary)
                 case .source(let src, let phrase):
                     ProvenanceInline(source: src, phrase: phrase, small: small)
-                case .mention(let src, let phrase):
-                    ProvenanceMention(source: src, phrase: phrase, small: small)
                 case .stacked(let srcs, let phrase):
                     ProvenanceStacked(sources: srcs, phrase: phrase, small: small)
                 }
@@ -657,7 +436,6 @@ struct ProvenanceLine: View {
 enum ProvenanceSegment {
     case text(String)
     case source(BriefSource, String)
-    case mention(BriefSource, String)
     case stacked([BriefSource], String)
 }
 
@@ -670,10 +448,6 @@ enum ProvenanceLineBuilder {
 
 func src(_ source: BriefSource, _ phrase: String) -> ProvenanceSegment {
     .source(source, phrase)
-}
-
-func mention(_ source: BriefSource, _ phrase: String) -> ProvenanceSegment {
-    .mention(source, phrase)
 }
 
 func stacked(_ sources: [BriefSource], _ phrase: String) -> ProvenanceSegment {

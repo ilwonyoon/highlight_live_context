@@ -12,10 +12,13 @@ struct BriefApp: App {
         #endif
     }
 
+    @StateObject private var selection = SelectionContext()
+
     var body: some Scene {
         WindowGroup {
-            TypeSpecimenView()
-                .frame(minWidth: 900, minHeight: 700)
+            DesignSystemView()
+                .environmentObject(selection)
+                .frame(minWidth: 1000, minHeight: 720)
         }
         .windowStyle(.titleBar)
         .windowResizability(.contentSize)

@@ -38,4 +38,12 @@ extension Color {
     // Borders / dividers
     static let briefDivider  = Color(red: 0.890, green: 0.875, blue: 0.847)
     static let briefHairline = Color(red: 0.831, green: 0.812, blue: 0.776)
+
+    // Selection background — warm gray tuned to the paper foundation.
+    // Used for selected rows and macOS-style multi-select highlighting,
+    // so we don't repurpose the highlighter brand color for selection.
+    static let briefSelectionRest  = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.06)
+    static let briefSelectionHover = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.10)
+    /// Stronger warm-gray fill for a *committed* nav selection (sidebar row).
+    static let briefSelectionActive = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.13)
 }

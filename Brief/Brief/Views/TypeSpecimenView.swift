@@ -9,6 +9,7 @@ struct TypeSpecimenView: View {
         case provenance = "Provenance"
         case colorModes = "Color modes"
         case typography = "Typography"
+        case selection  = "Selection"
     }
 
     var body: some View {
@@ -40,12 +41,15 @@ struct TypeSpecimenView: View {
                             colorModesShowcase
                         case .typography:
                             typographyTokens
+                        case .selection:
+                            selectionShowcase
                         }
                     }
                     .padding(.horizontal, 64)
                     .padding(.vertical, 40)
                     .frame(maxWidth: 880, alignment: .leading)
                 }
+                .scrollIndicators(.hidden)
                 .onChange(of: scrollAnchor) { _, newVal in
                     withAnimation(.easeInOut(duration: 0.25)) {
                         proxy.scrollTo("reg\(newVal)", anchor: .top)
@@ -53,7 +57,7 @@ struct TypeSpecimenView: View {
                 }
                 .overlay(alignment: .topTrailing) {
                     HStack(spacing: 4) {
-                        ForEach(1...13, id: \.self) { i in
+                        ForEach(1...7, id: \.self) { i in
                             Button("\(i)") { scrollAnchor = i }
                                 .buttonStyle(.bordered)
                                 .controlSize(.small)
@@ -97,18 +101,12 @@ struct TypeSpecimenView: View {
             }
 
             register1
-            register2
             register3
             register4
             register5
             register6
-            register7
-            register8
-            register9
             register10
             register11
-            register12
-            register13
         }
     }
 
@@ -124,29 +122,24 @@ struct TypeSpecimenView: View {
             }
 
             register1.id("reg1")
-            register2.id("reg2")
-            register3.id("reg3")
-            register4.id("reg4")
-            register5.id("reg5")
-            register6.id("reg6")
-            register7.id("reg7")
-            register8.id("reg8")
-            register9.id("reg9")
-            register10.id("reg10")
-            register11.id("reg11")
-            register12.id("reg12")
-            register13.id("reg13")
+            register3.id("reg2")
+            register4.id("reg3")
+            register5.id("reg4")
+            register6.id("reg5")
+            register10.id("reg6")
+            register11.id("reg7")
         }
     }
 
     private func registerName(_ n: Int) -> String {
         switch n {
         case 1: return "Inline"
-        case 2: return "Mention"
-        case 3: return "Footnote"
-        case 4: return "Badge"
-        case 5: return "Header tag"
-        default: return "Stacked"
+        case 2: return "Footnote"
+        case 3: return "Badge"
+        case 4: return "Header tag"
+        case 5: return "Stacked"
+        case 6: return "Favicon"
+        default: return "Brand tint"
         }
     }
 
@@ -174,25 +167,6 @@ struct TypeSpecimenView: View {
                 " and dropped a "
                 src(.slack, "note in number eng")
                 " about the open question."
-            }
-        }
-    }
-
-    private var register2: some View {
-        registerBlock(
-            number: 2,
-            name: "Inline mention — hover promotes",
-            purpose: "Rest: almost invisible — icon faint, text in secondary ink, reads as plain prose. Hover: promotes to inline citation appearance. For casual references that shouldnt disrupt reading."
-        ) {
-            ProvenanceLine {
-                "Saw the update in "
-                mention(.slack, "number leadership")
-                " this morning."
-            }
-            ProvenanceLine {
-                "Maya is heads down on the migration thread — last touched in "
-                mention(.cursor, "her agent session")
-                " yesterday."
             }
         }
     }
@@ -297,81 +271,6 @@ struct TypeSpecimenView: View {
         }
     }
 
-    private var register7: some View {
-        registerBlock(
-            number: 7,
-            name: "Numbered superscript — Perplexity style",
-            purpose: "Small numbered badges after a claim. Best when many sources need to cite densely. Hover a badge to highlight its source card."
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                ProvenanceNumbered(
-                    phrase: "Sergei confirmed the Founding Design Lead role in a flat org",
-                    sources: [.voice, .gmail]
-                )
-                ProvenanceNumbered(
-                    phrase: "v2 onboarding cutover is locked for Thursday",
-                    sources: [.linear, .github, .slack],
-                    startNumber: 3
-                )
-                Text("Numbers map to a source rail or sidebar (not shown). Hover any number to preview.")
-                    .briefStyle(.meta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-        }
-    }
-
-    private var register8: some View {
-        registerBlock(
-            number: 8,
-            name: "Hover-only magnifier — Granola style",
-            purpose: "Rest: text is plain, zero decoration. Hover: a small source icon button fades in beside the text. Most aggressive at preserving reading flow."
-        ) {
-            VStack(alignment: .leading, spacing: 14) {
-                ProvenanceMagnifier(
-                    source: .voice,
-                    phrase: "Sergei confirmed a Founding Design Lead role in a flat org"
-                )
-                ProvenanceMagnifier(
-                    source: .gmail,
-                    phrase: "Paris sent a follow up note before the strategy doc was updated"
-                )
-                ProvenanceMagnifier(
-                    source: .linear,
-                    phrase: "v2 sprint plan updated 12 minutes ago"
-                )
-                Text("Closest spirit to Highlights existing voice waveform icon. Hover over any line.")
-                    .briefStyle(.meta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-        }
-    }
-
-    private var register9: some View {
-        registerBlock(
-            number: 9,
-            name: "Highlight + popover — Sana / Adobe style",
-            purpose: "Text has subtle highlight background using the brand yellow trace. Click would open popover with source excerpt. Honors the highlighter metaphor literally."
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                ProvenanceHighlight(
-                    source: .voice,
-                    phrase: "Founding Design Lead role in a flat org"
-                )
-                ProvenanceHighlight(
-                    source: .gmail,
-                    phrase: "Paris will follow up by EOD Friday"
-                )
-                ProvenanceHighlight(
-                    source: .notion,
-                    phrase: "team strategy doc, section 3, ownership matrix"
-                )
-                Text("Strongest visual presence. Pulls double duty with the brand-color thesis.")
-                    .briefStyle(.meta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-        }
-    }
-
     private var register10: some View {
         registerBlock(
             number: 10,
@@ -412,90 +311,6 @@ struct TypeSpecimenView: View {
                 ProvenanceBrandTint(source: .gmail, phrase: "Paris will follow up by EOD Friday")
                 ProvenanceBrandTint(source: .notion, phrase: "team strategy doc, section 3, ownership matrix")
                 Text("Note: line 1 is reg 01 for comparison. The three lines below are the brand-tint variant.")
-                    .briefStyle(.meta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-        }
-    }
-
-    private var register12: some View {
-        registerBlock(
-            number: 12,
-            name: "Contrast — source bold, body downshifted",
-            purpose: "Provenance stays at full ink primary. Body text around it is rendered at ink secondary. Citations stand out by typographic *contrast* alone — no decoration, no color. The most minimal approach."
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                FlowLayout(spacing: 0, lineSpacing: 6) {
-                    Text("Sergei confirmed a ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkSecondary)
-                    ProvenanceContrastBold(source: .voice, phrase: "Founding Design Lead role")
-                    Text(" in a flat org during yesterdays call.")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkSecondary)
-                }
-                FlowLayout(spacing: 0, lineSpacing: 6) {
-                    Text("Paris sent a ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkSecondary)
-                    ProvenanceContrastBold(source: .gmail, phrase: "follow up note")
-                    Text(" before the ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkSecondary)
-                    ProvenanceContrastBold(source: .notion, phrase: "team strategy doc")
-                    Text(" was updated.")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkSecondary)
-                }
-                Text("Body around provenance is intentionally one ink step down. Provenance reads as the load-bearing word.")
-                    .briefStyle(.meta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-        }
-    }
-
-    private var register13: some View {
-        registerBlock(
-            number: 13,
-            name: "Chromatic — source-colored text",
-            purpose: "Phrase text itself tinted with the sources brand color. Most visually rich — but watch for rainbow effect when many sources appear in one sentence."
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                FlowLayout(spacing: 0, lineSpacing: 6) {
-                    Text("Sergei confirmed a ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .voice, phrase: "Founding Design Lead role")
-                    Text(" in a flat org. Paris sent a ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .gmail, phrase: "follow up note")
-                    Text(" before the ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .notion, phrase: "team strategy doc")
-                    Text(" was updated.")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                }
-                FlowLayout(spacing: 0, lineSpacing: 6) {
-                    Text("Mayas ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .github, phrase: "PR for onboarding")
-                    Text(" was merged, and the ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .linear, phrase: "v2 sprint plan")
-                    Text(" reflects the change. ")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                    ProvenanceChromatic(source: .slack, phrase: "Thread in eng-leads")
-                    Text(" has the full discussion.")
-                        .briefStyle(.provenance)
-                        .foregroundStyle(Color.briefInkPrimary)
-                }
-                Text("Source palette: voice = olive, gmail = red, docs = blue, slack = pink, linear = indigo, others = ink primary.")
                     .briefStyle(.meta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
@@ -619,6 +434,223 @@ struct TypeSpecimenView: View {
     }
 
     private let bodyParagraph = "The brief is yesterdays lived context, compressed into what you need to decide today. Selective deepening where action requires more than memory."
+
+    // MARK: - Selection + ChatComposer showcase
+
+    private var selectionShowcase: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Selection + ChatComposer")
+                    .briefStyle(.title3)
+                    .foregroundStyle(Color.briefInkPrimary)
+                Text("Drag across one or more lines to select. A rubber-band rectangle shows the active region; every line whose frame is touched joins the selection. Release to lock; the chat composer floats beside the selection.")
+                    .briefStyle(.meta)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+
+            SelectionSurface {
+                liveContextFakeContent
+            }
+            .frame(height: 920, alignment: .topLeading)
+
+            Text("Try: drag across the margin or between lines to multi-select. Click empty space to clear.")
+                .briefStyle(.meta)
+                .foregroundStyle(Color.briefInkTertiary)
+        }
+    }
+
+    // MARK: - Fake Live Context content
+    // Hierarchy follows BriefMarkdown semantic mapping:
+    //   H1  workspace title
+    //   H2  numbered sections (1. PRIMARY GOAL, 2. TOP TIER PRIORITIES, ...)
+    //   H3  sub-groups (1. Highlight (Highlighter, Inc.), 2. Cartesia, ...)
+    //   H4  bullet-group lead-in (Next Steps)
+    //   •   bullet (SelectableLine)
+
+    private var liveContextFakeContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header strip: workspace title + count
+            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
+                Image(systemName: "folder")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundStyle(Color.briefInkSecondary)
+                BriefH1(text: "Default")
+                Text("20 highlights")
+                    .briefStyle(.monoMeta)
+                    .foregroundStyle(Color.briefInkTertiary)
+                Spacer()
+            }
+
+            // Latest update card
+            VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+                HStack(spacing: BriefSpacing.sm) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Color.briefHighlightDeep)
+                    Text("Latest update")
+                        .briefStyle(.label)
+                        .foregroundStyle(Color.briefInkPrimary)
+                    Text("5/28/2026, 1:56 PM")
+                        .briefStyle(.monoMeta)
+                        .foregroundStyle(Color.briefInkTertiary)
+                }
+                Text("Ilwon has officially designated Highlight as his number one priority and Cartesia as number two, while dropping the Bondi Studio track to focus his efforts. He has completed a meeting with Highlights Head of Engineering and is preparing a take-home assignment and an in-person San Francisco visit for next Tuesday June 2nd.")
+                    .briefStyle(.bodySmall)
+                    .foregroundStyle(Color.briefInkPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(BriefSpacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(Color.briefHighlightWash.opacity(0.6))
+            )
+            .padding(.top, BriefSpacing.xl)
+
+            // Live Context sub-title
+            Text("Live Context — Ilwon Yoon")
+                .briefStyle(.headline)
+                .foregroundStyle(Color.briefInkSecondary)
+                .padding(.top, BriefSpacing.xxl)
+
+            // 1. PRIMARY GOAL
+            BriefH2(text: "1. PRIMARY GOAL — EMPLOYMENT (Top Priority)")
+
+            bullets {
+                bullet("primary-target", text: "Target Role — Founding Design Lead / Product Design Lead at an early-stage AI-native startup.") {
+                    bulletText("Target Role — ")
+                    src(.voice, "Founding Design Lead / Product Design Lead")
+                    " at an early-stage AI-native startup."
+                }
+                bullet("primary-value", text: "Core Value Prop — Expert in AI-augmented product design and reducing coordination tax via agentic workflows.") {
+                    bulletText("Core Value Prop — Expert in ")
+                    src(.voice, "AI-augmented product design")
+                    " and reducing coordination tax via agentic workflows."
+                }
+                bullet("primary-location", text: "Location — San Jose CA willing to commute to SF.") {
+                    bulletText("Location — San Jose, CA (willing to ")
+                    src(.voice, "commute to SF")
+                    ")."
+                }
+            }
+
+            // 2. TOP TIER PRIORITIES
+            BriefH2(text: "2. TOP TIER PRIORITIES (Ranked by User)")
+
+            BriefH3(text: "1. Highlight (Highlighter, Inc.)")
+            bullets {
+                bullet("hl-status", text: "Status — Number one priority opportunity with strong vision alignment.") {
+                    bulletText("Status — ")
+                    src(.voice, "Number one priority opportunity")
+                    " with strong vision alignment."
+                }
+                bullet("hl-role", text: "Role Alignment — Sergei CEO confirmed a Founding Design Lead role in a flat org. Ilwon wont report to Sam.") {
+                    bulletText("Role Alignment — Sergei (CEO) confirmed a ")
+                    src(.voice, "Founding Design Lead role")
+                    " in a flat org. Ilwon "
+                    src(.voice, "wont report to Sam")
+                    "."
+                }
+                bullet("hl-progress", text: "Progress — Completed meeting with Paris Head of Engineering; conversation was technically detailed and went well.") {
+                    bulletText("Progress — Completed meeting with ")
+                    src(.voice, "Paris (Head of Engineering)")
+                    "; conversation was technically detailed and went well."
+                }
+            }
+
+            BriefH4(text: "Next Steps")
+            bullets {
+                bullet("hl-next-1", text: "Submitting the take-home assignment next Tuesday June 2nd.", indent: 1) {
+                    bulletText("Submitting the ")
+                    src(.gmail, "take-home assignment")
+                    " next Tuesday (June 2nd)."
+                }
+                bullet("hl-next-2", text: "Visiting the SF office to meet Sergei in person on Tuesday afternoon 3 PM.", indent: 1) {
+                    bulletText("Visiting the SF office to ")
+                    src(.gmail, "meet Sergei in person")
+                    " on Tuesday afternoon (3:00 PM)."
+                }
+                bullet("hl-next-3", text: "Jacob to coordinate extending the visit to potentially present the assignment results the same day.", indent: 1) {
+                    bulletText("Jacob to coordinate ")
+                    src(.gmail, "extending the visit")
+                    " to potentially present the assignment results the same day."
+                }
+            }
+
+            BriefH3(text: "2. Cartesia")
+            bullets {
+                bullet("cart-status", text: "Status — Top two choice alongside Highlight.") {
+                    bulletText("Status — ")
+                    src(.voice, "Top two choice")
+                    " alongside Highlight."
+                }
+                bullet("cart-next", text: "Next Step — Plans to focus on the Cartesia assignment later this week after completing Highlights tasks.") {
+                    bulletText("Next Step — Plans to focus on the ")
+                    src(.gmail, "Cartesia assignment")
+                    " later this week after completing Highlights tasks."
+                }
+            }
+
+            // 3. ACTIVE PIPELINE
+            BriefH2(text: "3. ACTIVE PIPELINE")
+
+            BriefH3(text: "Fabrion")
+            bullets {
+                bullet("fab-status", text: "Status — Founding Designer evaluation.") {
+                    bulletText("Status — ")
+                    src(.voice, "Founding Designer evaluation")
+                    "."
+                }
+                bullet("fab-assess", text: "Assessment — Ilwon considers it the most promising product seen recently due to its full-stack enterprise AI approach.") {
+                    bulletText("Assessment — Ilwon considers it the ")
+                    src(.voice, "most promising product")
+                    " seen recently due to its "
+                    src(.voice, "full-stack enterprise AI approach")
+                    "."
+                }
+            }
+        }
+        .padding(BriefSpacing.xxl)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                .fill(Color.briefPaper)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                        .stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
+                )
+        )
+    }
+
+    /// Wraps a sequence of bullets in a VStack with consistent bullet spacing.
+    private func bullets<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: BriefMarkdown.bulletTop) {
+            content()
+        }
+        .padding(.top, BriefSpacing.sm)
+    }
+
+    /// A single bullet row with provenance content; wrapped in SelectableLine.
+    private func bullet(
+        _ id: String,
+        text: String,
+        indent: Int = 0,
+        @ProvenanceLineBuilder _ segments: () -> [ProvenanceSegment]
+    ) -> some View {
+        let segs = segments()
+        return SelectableLine(id: id, kind: .line, text: text) {
+            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
+                Text("•")
+                    .briefStyle(.body)
+                    .foregroundStyle(Color.briefInkTertiary)
+                    .frame(width: 8, alignment: .center)
+                ProvenanceLine(segments: segs)
+            }
+            .padding(.leading, CGFloat(indent) * BriefMarkdown.indentStep)
+        }
+    }
+
+    /// Helper to make body text segment with the same styling defaults
+    /// when composed inside ProvenanceLine.
+    private func bulletText(_ s: String) -> ProvenanceSegment { .text(s) }
 }
 
 #Preview {
