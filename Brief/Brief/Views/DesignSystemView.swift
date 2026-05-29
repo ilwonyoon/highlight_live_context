@@ -14,16 +14,13 @@ struct DesignSystemView: View {
         HStack(spacing: 0) {
             sidebar
                 .frame(width: 248)
-                .background(sidebarBackground)         // liquid glass + warm tint (macOS 26), solid fallback
-            Rectangle()
-                .fill(Color.briefHairline.opacity(0.4))
-                .frame(width: 0.5)
+                .background(sidebarBackground)         // real Liquid Glass — no divider, glass UI separates by tone
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(Color.briefPaper)          // content = brightest reading surface
+                .background(Color.briefPaper)          // content = brightest opaque reading surface
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.briefPaper)
+        .ignoresSafeArea()
     }
 
     // MARK: Sidebar background — real macOS 26 Liquid Glass (NSGlassEffectView).
@@ -87,13 +84,26 @@ struct DesignSystemView: View {
             .padding(.horizontal, BriefSpacing.md)
             .padding(.vertical, BriefSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
-                    .fill(isSelected ? Color.briefSelectionActive : Color.clear)
-            )
+            .background(selectedRowBackground(isSelected))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    // Selected nav row floats on a Liquid Glass capsule (macOS 26+), with a
+    // warm-gray fill fallback below. Unselected rows are clear.
+    @ViewBuilder
+    private func selectedRowBackground(_ isSelected: Bool) -> some View {
+        if isSelected {
+            if #available(macOS 26.0, *) {
+                LiquidGlassView(cornerRadius: BriefRadius.chip, tint: nil)
+            } else {
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(Color.briefSelectionActive)
+            }
+        } else {
+            Color.clear
+        }
     }
 
     // MARK: Detail
