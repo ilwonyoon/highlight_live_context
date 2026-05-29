@@ -65,9 +65,25 @@ struct BriefProseLayout: Layout {
         var maxAscent: CGFloat = 0
     }
 
-    /// Greedy line breaking: each child is proposed the remaining width so a
-    /// Text wraps; if its wrapped block is taller than one line we place it and
-    /// continue from its last-line trailing edge (approximated), else flow inline.
+    /// Greedy line breaking.
+    ///
+    /// The cascading one-glyph-per-line break we used to hit came from continuing a
+    /// line *after* a child had wrapped internally. SwiftUI's Layout API exposes no
+    /// per-line geometry, and a placed `Text` renders *all* its lines from the origin
+    /// it's given — it does not reflow its continuation back to the container's left
+    /// edge. So "fill the tail of this line, then wrap to the margin" is impossible
+    /// for a single child; attempting it is what corrupted the pen.
+    ///
+    /// Given that, the rule is simple and correct: a child is **atomic on a line**.
+    /// • If its natural width fits the remaining space, place it inline.
+    /// • Otherwise break to a fresh, full-width line and place it there — where, if it
+    ///   is a long run, it wraps cleanly because every one of its lines shares the
+    ///   left edge. A long run then closes the line after itself (no child may sit on
+    ///   its unknowable last line).
+    ///
+    /// The cost is an occasional short line before a long run — ragged, but never
+    /// broken. (To pack tighter, split runs into word-children upstream; not needed
+    /// for the brief's short clauses.)
     private func layoutLines(maxWidth: CGFloat, subviews: Subviews) -> [Line] {
         var lines: [Line] = []
         var current = Line()
@@ -75,34 +91,40 @@ struct BriefProseLayout: Layout {
 
         func closeLine() {
             if !current.items.isEmpty {
-                current.width = penX - (current.items.isEmpty ? 0 : itemSpacing)
+                current.width = penX - itemSpacing
                 lines.append(current)
             }
             current = Line()
             penX = 0
         }
 
-        for index in subviews.indices {
-            let sv = subviews[index]
-            let remaining = max(0, maxWidth - penX)
-            // Propose remaining width first; if the child doesn't fit and the
-            // line already has content, wrap and re-propose full width.
-            var size = sv.sizeThatFits(ProposedViewSize(width: remaining == 0 ? maxWidth : remaining, height: nil))
-            if size.width > remaining && !current.items.isEmpty {
-                closeLine()
-                size = sv.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
-            }
+        func append(_ index: Int, _ sv: Subviews.Element, _ size: CGSize) {
             let ascent = sv.dimensions(in: ProposedViewSize(width: size.width, height: size.height))[.firstTextBaseline]
             current.items.append(Item(index: index, x: penX, size: size, ascent: ascent))
             current.height = max(current.height, size.height)
             current.maxAscent = max(current.maxAscent, ascent)
             penX += size.width + itemSpacing
+        }
 
-            // If this child wrapped to multiple lines (taller than its own first
-            // line), the visual pen is at its last line; approximate by starting
-            // the next child on a fresh line for safety.
-            // (Our content keeps long runs as the trailing segment, so this is
-            // visually clean; documented limitation in the architecture spec.)
+        for index in subviews.indices {
+            let sv = subviews[index]
+            let remaining = max(0, maxWidth - penX)
+
+            // Natural single-line footprint, and whether it fits in what's left.
+            let natural = sv.sizeThatFits(ProposedViewSize(width: .infinity, height: nil))
+
+            if natural.width <= remaining + 0.5 {
+                append(index, sv, natural)        // fits inline, unbroken
+                continue
+            }
+
+            // Doesn't fit: break first so the child owns the full line width.
+            if !current.items.isEmpty { closeLine() }
+
+            let full = sv.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
+            append(index, sv, full)
+            // If it wrapped to multiple lines, nothing may follow on its last line.
+            if full.height > natural.height + 0.5 { closeLine() }
         }
         closeLine()
         return lines

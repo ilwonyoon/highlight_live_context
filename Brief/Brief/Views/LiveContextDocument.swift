@@ -11,90 +11,148 @@ struct LiveContextDocument: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 1. PRIMARY GOAL — section with bullets directly under it.
-            h2("1. Primary goal — public launch", first: true)
+            // The whole document is generated from BriefContent (tracks), per
+            // LIVE_CONTEXT_DESIGN.md: the goal organizes; tracks are classified by
+            // the user's intent (needs-you / in-motion / done); each track is
+            // did→next with a first-class, prominent NextStep.
+
+            // Primary goal — what organizes everything.
+            h2("1. Primary goal — \(BriefContent.goalTitle.lowercased())", first: true)
             group(depth: 1) {
-                bullet("g-target", 1, "Target: ship Highlight's public launch on Tuesday, June 9 — D-12.") {
-                    label("Target:"); " ship Highlight's public launch on "; src(.gmail, "Tuesday, June 9"); " — D-12."
-                }
-                bullet("g-prop", 1, "Value prop: the AI that already knows your work — brief, then act.") {
-                    label("Value prop:"); " the AI that already knows your work — brief, then act, not just recall."
-                }
-                bullet("g-role", 1, "Role: Head of Product, ex-Discord; recruited on the ambient-coordination vision.") {
-                    label("Role:"); " Head of Product, ex-Discord — recruited on the ambient-coordination vision."
-                }
+                ForEach(BriefContent.goalUnits) { u in recapLine(u) }
             }
 
-            // 2. TOP PRIORITIES — section with numbered sub-headings (1), 2)).
-            h2("2. Top priorities")
-            h3("1)", "Launch readiness")
-            group(depth: 2) {
-                bullet("p1-status", 2, "Status: on track — the Slack-Connection blocker (HL-1042) is cleared.") {
-                    label("Status:"); " on track — the "; src(.linear, "Slack-Connection blocker (HL-1042)"); " is cleared."
-                }
-                bullet("p1-decision", 2, "Decision: shipped the patch — 0 failures in 200 runs; the edge case now shows an honest reconnect prompt.") {
-                    label("Decision:"); " shipped the patch — 0 failures in 200 runs; the edge case now shows an honest reconnect prompt."
-                }
-            }
-            h3("2)", "External launch messaging")
-            group(depth: 2) {
-                bullet("p2-line", 2, "One-liner: locked — Highlight briefs you, then moves your work forward.") {
-                    label("One-liner:"); " locked — "; src(.cursor, "Highlight briefs you, then moves your work forward"); "."
-                }
-                bullet("p2-wedge", 2, "Wedge: lead with the proactive brief, not capture — rivals made capture table stakes.") {
-                    label("Wedge:"); " lead with the proactive brief, not capture — rivals made capture table stakes."
-                }
-            }
+            // 2. NEEDS YOU — your decision/action pending. Ranked by the user.
+            stateSection(.needsYou, number: "2",
+                         titleSuffix: "ranked by you")
 
-            // 3. ACTIVE PIPELINE
-            h2("3. Active pipeline")
-            h3("1)", "Founding Product Marketer")
-            group(depth: 2) {
-                bullet("pl-pmm", 2, "Naomi Feldman: moving to an onsite — reframed our problem as category creation.") {
-                    label("Naomi Feldman:"); " moving to an "; src(.voice, "onsite"); " — reframed our problem as category creation."
-                }
-                bullet("pl-next", 2, "Next: confirm comp with Sergei after the onsite, not before.") {
-                    label("Next:"); " confirm comp with Sergei after the onsite, not before."
-                }
-            }
-            h3("2)", "Competitive analysis")
-            group(depth: 2) {
-                bullet("pl-comp", 2, "Littlebird: closest rival — ambient on-screen context. Stops at recall; we go to action.") {
-                    label("Littlebird:"); " closest rival — ambient on-screen context. Stops at recall; we go to action."
-                }
-            }
+            // 3. IN MOTION — rolling; nothing needed from you right now.
+            stateSection(.inMotion, number: "3")
 
-            // 4. CONCLUDED
-            h2("4. Concluded this week")
+            // 4. CONCLUDED — done; reference only.
+            stateSection(.done, number: "4")
+
+            // 5. ABOUT DANI — permanent context (sourced: things she's stated).
+            h2("5. About Dani")
             group(depth: 1) {
-                bullet("c-oauth", 1, "OAuth ship call: made with real numbers — cleared for launch.") {
-                    label("OAuth ship call:"); " made with real numbers — cleared for launch."
-                }
-                bullet("c-line", 1, "Launch one-liner: locked after the positioning debate.") {
-                    label("Launch one-liner:"); " locked after the positioning debate."
-                }
+                ForEach(BriefContent.aboutUnits) { u in recapLine(u) }
             }
 
-            // 5. USER CONTEXT
-            h2("5. User context (permanent)")
-            group(depth: 1) {
-                bullet("u-bg", 1, "Background: ex-Discord product lead on coordination & community.") {
-                    label("Background:"); " ex-Discord product lead on coordination & community."
-                }
-                bullet("u-phil", 1, "Philosophy: evidence over vibes; artifact over adjective; transparency as a feature.") {
-                    label("Philosophy:"); " evidence over vibes; artifact over adjective; transparency as a feature."
-                }
-            }
-
-            // Information map
+            // Information map.
             h2("Information map")
             infoMap
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // Indent for a hierarchy depth (H2 = 0, H3 = 1, their bullets = depth+1).
+    // Indent for a hierarchy depth (H2 = 0, tracks = 1, recap/next = deeper).
     private func indent(_ depth: Int) -> CGFloat { CGFloat(depth) * style.indentStep }
+
+    // Selection-capsule geometry — promoted to BriefLayout.Selection tokens.
+    private let linePad: CGFloat = BriefLayout.Selection.linePad
+    private let lineGap: CGFloat = BriefLayout.Selection.lineGap
+
+    // MARK: Model-driven rendering (BriefContent tracks → views)
+
+    /// A state section (NEEDS YOU / IN MOTION / CONCLUDED): an H2 heading, then
+    /// each track under it. Renders nothing if the state has no tracks.
+    @ViewBuilder
+    private func stateSection(_ state: TrackState, number: String, titleSuffix: String? = nil) -> some View {
+        let tracks = BriefContent.tracks(in: state)
+        if !tracks.isEmpty {
+            sectionHeading(number: number, title: state.sectionTitle, suffix: titleSuffix)
+            VStack(alignment: .leading, spacing: style.bulletGap * 2) {
+                ForEach(Array(tracks.enumerated()), id: \.element.id) { i, t in
+                    trackView(t, number: i + 1)
+                }
+            }
+            .padding(.leading, indent(1))
+        }
+    }
+
+    /// One track: a numbered sub-heading ("1) OAuth launch-blocker"), the recap
+    /// lines (calm), then the next step (prominent). The did→next shape, visible.
+    private func trackView(_ t: Track, number: Int) -> some View {
+        VStack(alignment: .leading, spacing: lineGap) {
+            // Numbered sub-heading — restores the "1) 2) 3)" track numbering.
+            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
+                Text("\(number))")
+                    .font(style.h3.font).foregroundStyle(style.h3.color)
+                Text(t.title)
+                    .font(style.h3.font).tracking(style.h3.tracking)
+                    .foregroundStyle(style.h3.color)
+            }
+            .padding(.bottom, style.groupGapBelow * 0.5)
+
+            // Recap — what happened (calm).
+            ForEach(t.recap) { recapLine($0) }
+
+            // Next — what to do (prominent).
+            if let next = t.next { nextStepView(next, trackId: t.id) }
+        }
+    }
+
+    /// A recap line (the *did* half): an optional label + clauses, flattened to
+    /// prose segments. Multi-strand phrases render cross-confirmed; single inline.
+    private func recapLine(_ u: MeaningUnit) -> some View {
+        let segs = segments(for: u)
+        return SelectableLine(id: u.id, kind: .line, text: u.plainText, verticalPadding: linePad) {
+            HStack(alignment: .firstTextBaseline, spacing: style.markerInset) {
+                marker
+                StyledProse(segments: segs, style: style)
+            }
+        }
+    }
+
+    /// The next step (the *next* half) — set apart from the recap by an explicit
+    /// "Next step:" label so the action is unmistakable. The owner/when ride as a
+    /// quiet meta after the label; the action text carries the meaning; the entry
+    /// point (if any) is an inline citation — the door to the work.
+    private func nextStepView(_ step: NextStep, trackId: String) -> some View {
+        var segs: [ProvenanceSegment] = []
+        segs.append(.label("Next step: "))
+        // Owner · when as a quiet meta, e.g. "You, today — ".
+        var meta = step.owner.plain.capitalizedFirst
+        if let when = step.when { meta += ", \(when)" }
+        if let chain = step.chainedTo { meta += " · with \(chain)" }
+        segs.append(.text(meta + " — "))
+        segs.append(.text(step.text))
+        if let entry = step.entry {
+            segs.append(.text(" "))
+            segs.append(.source(entry.source, entry.evidence))
+        }
+        let captured = segs
+        return SelectableLine(id: "\(trackId)-next", kind: .line, text: "Next step: \(step.plainText)", verticalPadding: linePad) {
+            HStack(alignment: .firstTextBaseline, spacing: style.markerInset) {
+                // Same bullet family as the recap — the "Next step:" label, not a
+                // different marker, is what sets the action apart.
+                marker
+                StyledProse(segments: captured, style: style)
+            }
+        }
+        // Lift the action off the calm recap.
+        .padding(.top, style.bulletGap * 0.25)
+    }
+
+    /// Flatten a recap unit's label + clauses into prose segments.
+    private func segments(for u: MeaningUnit) -> [ProvenanceSegment] {
+        var segs: [ProvenanceSegment] = []
+        if let label = u.label { segs.append(.label(label)); segs.append(.text(" ")) }
+        for c in u.clauses {
+            if !c.lead.isEmpty { segs.append(.text(c.lead)) }
+            if !c.phrase.isEmpty {
+                if c.strands.count > 1 {
+                    segs.append(.stacked(c.strands.map(\.source), c.phrase))
+                } else if let s = c.strands.first {
+                    segs.append(.source(s.source, c.phrase))
+                } else {
+                    segs.append(.text(c.phrase))
+                }
+            }
+            if !c.trail.isEmpty { segs.append(.text(c.trail)) }
+        }
+        return segs
+    }
 
     // MARK: Headings (driven by DocStyle)
 
@@ -104,16 +162,19 @@ struct LiveContextDocument: View {
             .padding(.bottom, style.headingToBody)
     }
 
-    /// Numbered sub-heading: "1) Launch readiness", indented one level under H2.
-    private func h3(_ number: String, _ text: String) -> some View {
+    /// A section heading with an optional quiet suffix ("ranked by you") that
+    /// names the user as the author of the ordering (P3 — trust + edit right).
+    private func sectionHeading(number: String, title: String, suffix: String?) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
-            Text(number).font(style.h3.font).foregroundStyle(style.h3.color)
-            Text(text).font(style.h3.font).tracking(style.h3.tracking).foregroundStyle(style.h3.color)
+            styled("\(number). \(title)", style.h2)
+            if let suffix {
+                Text("· \(suffix)")
+                    .font(style.label.font)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
         }
-        .lineSpacing(style.h3.extraLineSpacing)
-        .padding(.leading, indent(1))
-        .padding(.top, style.groupGapAbove)
-        .padding(.bottom, style.groupGapBelow)
+        .padding(.top, style.headingTop)
+        .padding(.bottom, style.headingToBody)
     }
 
     private func styled(_ text: String, _ s: DocTextStyle, color: Color? = nil) -> some View {
@@ -124,26 +185,13 @@ struct LiveContextDocument: View {
             .foregroundStyle(color ?? s.color)
     }
 
-    // MARK: Bullet group + bullet
+    // MARK: Group + marker
 
     private func group<Content: View>(depth: Int, @ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: style.bulletGap) {
+        VStack(alignment: .leading, spacing: lineGap) {
             content()
         }
         .padding(.leading, indent(depth))
-    }
-
-    private func bullet(
-        _ id: String, _ depth: Int, _ text: String,
-        @ProvenanceLineBuilder _ segments: () -> [ProvenanceSegment]
-    ) -> some View {
-        let segs = segments()
-        return SelectableLine(id: id, kind: .line, text: text, verticalPadding: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: style.markerInset) {
-                marker
-                StyledProse(segments: segs, style: style)
-            }
-        }
     }
 
     private var marker: some View {
@@ -154,54 +202,160 @@ struct LiveContextDocument: View {
             .frame(width: 6, alignment: .center)
     }
 
-    // MARK: Information map
+    // MARK: Information map — people (captured) + resources (external links)
 
     private var infoMap: some View {
-        VStack(alignment: .leading, spacing: style.bulletGap) {
-            mapRow("im-lead", "Highlight leadership:", "Sergei Sorokin (CEO) — ambient-coordination vision")
-            mapRow("im-eng", "Product engineering:", "Parris Khachi — launch-blocker partner")
-            mapRow("im-design", "Design:", "Sam Eckert — launch-surface partner")
-            mapRow("im-ops", "Operations:", "Sarah Wu — recruiting + launch logistics")
-            mapRow("im-pmm", "Founding PMM:", "Naomi Feldman (candidate) — moving to onsite")
-            mapRow("im-plan", "Launch plan:", "Notion · Public Launch Plan")
-            mapRow("im-blockers", "Launch blockers:", "Linear · Public Launch cycle")
+        VStack(alignment: .leading, spacing: style.bulletGap * 1.5) {
+            // People — the relationship carries a captured (inline) source.
+            VStack(alignment: .leading, spacing: lineGap) {
+                ForEach(BriefContent.mapPeople) { mapPersonRow($0) }
+            }
+            // Resources — external links ("where to go look"), a different kind.
+            VStack(alignment: .leading, spacing: lineGap) {
+                ForEach(BriefContent.mapResources) { mapResourceRow($0) }
+            }
+            .padding(.top, style.bulletGap * 0.5)
         }
         .padding(.leading, indent(1))
     }
 
-    /// Info-map entry as a bullet — same look as the document's other bullets.
-    private func mapRow(_ id: String, _ lead: String, _ rest: String) -> some View {
-        SelectableLine(id: id, kind: .line, text: "\(lead) \(rest)", verticalPadding: 0) {
+    /// A person row: "Role — Name: note" with the captured source inline.
+    private func mapPersonRow(_ e: BriefContent.MapEntry) -> some View {
+        var segs: [ProvenanceSegment] = [.label("\(e.role) — "), .text("\(e.name): ")]
+        if let cap = e.captured {
+            segs.append(.source(cap.source, e.note))
+        } else {
+            segs.append(.text(e.note))
+        }
+        let captured = segs
+        return SelectableLine(id: e.id, kind: .line, text: "\(e.role) — \(e.name): \(e.note)", verticalPadding: linePad) {
             HStack(alignment: .firstTextBaseline, spacing: style.markerInset) {
                 marker
-                StyledProse(segments: [.label(lead), .text(" " + rest)], style: style)
+                StyledProse(segments: captured, style: style)
             }
         }
+    }
+
+    /// A resource row: an external link form, visibly a different kind than the
+    /// body's captured citations — "Role — Name · Source ↗".
+    private func mapResourceRow(_ e: BriefContent.MapEntry) -> some View {
+        SelectableLine(id: e.id, kind: .line, text: "\(e.role): \(e.name)", verticalPadding: linePad) {
+            HStack(alignment: .firstTextBaseline, spacing: style.markerInset) {
+                marker
+                StyledProse(segments: [.label("\(e.role) — "), .text("\(e.name) · \(e.note)")], style: style)
+                if let r = e.resource {
+                    ResourceTag(source: r.source, label: r.label)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - ResourceTag — external-resource link (a different kind than a citation)
+// Captured facts use inline citations (an underline on a removable phrase). An
+// external resource is "where to go look" — shown as a small bordered link chip
+// with the connector icon and an outward arrow, so the two kinds never blur.
+
+private struct ResourceTag: View {
+    let source: BriefSource
+    let label: String
+    @State private var hovering = false
+
+    var body: some View {
+        HStack(spacing: BriefSpacing.xs) {
+            BriefIcon(source, size: 11, rendering: .original)
+            Text(label)
+                .briefStyle(.monoMeta)
+                .foregroundStyle(Color.briefInkSecondary)
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundStyle(Color.briefInkTertiary)
+        }
+        .padding(.horizontal, BriefSpacing.sm)
+        .padding(.vertical, 1)
+        .background(
+            Capsule(style: .continuous)
+                .fill(hovering ? Color.briefHighlightSoft : Color.briefPaperSunken)
+                .overlay(Capsule(style: .continuous).stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth))
+        )
+        .onHover { hovering = $0 }
+        .help("Open in \(source.label)")
     }
 }
 
 // MARK: - StyledProse
 // Renders provenance segments with per-type styling pulled from DocStyle
 // (label vs value vs provenance), laid out by the width-aware BriefProseLayout.
+//
+// Plain text/label segments are split into PER-WORD children so the line wraps
+// word-by-word like real prose — a long run no longer jumps wholesale to the next
+// line, which was producing stray short lines (e.g. "Next step: You, today —" then
+// the action on its own line). Source/stacked citations stay atomic (one chip).
+
+private enum ProseAtom: Identifiable {
+    case word(String, isLabel: Bool)      // one whitespace-delimited token (+ trailing space)
+    case source(BriefSource, String)
+    case stacked([BriefSource], String)
+
+    var id: String {
+        switch self {
+        case .word(let s, let l):    return "w\(l ? "L" : ""):\(s)"
+        case .source(let s, let p):  return "s:\(s.rawValue):\(p)"
+        case .stacked(let ss, let p):return "k:\(ss.map(\.rawValue).joined()):\(p)"
+        }
+    }
+}
 
 struct StyledProse: View {
     let segments: [ProvenanceSegment]
     @ObservedObject var style: DocStyle
 
+    /// Flatten segments into atoms, splitting prose into words so wrapping is
+    /// word-level. A trailing space is kept on each word to preserve spacing.
+    private var atoms: [(Int, ProseAtom)] {
+        var out: [ProseAtom] = []
+        func addWords(_ s: String, isLabel: Bool) {
+            // Split on spaces, keep each word with a trailing space (except none
+            // for an empty tail). Leading/trailing single spaces in `s` become
+            // a thin spacer word so segment joins read correctly.
+            let parts = s.components(separatedBy: " ")
+            for (i, p) in parts.enumerated() {
+                let isLast = i == parts.count - 1
+                if p.isEmpty {
+                    // Preserve an explicit space between segments.
+                    if !isLast || s.hasSuffix(" ") { out.append(.word(" ", isLabel: isLabel)) }
+                    continue
+                }
+                out.append(.word(isLast ? p : p + " ", isLabel: isLabel))
+            }
+        }
+        for seg in segments {
+            switch seg {
+            case .text(let s):           addWords(s, isLabel: false)
+            case .label(let s):          addWords(s, isLabel: true)
+            case .source(let src, let p):  out.append(.source(src, p))
+            case .stacked(let ss, let p):  out.append(.stacked(ss, p))
+            }
+        }
+        return Array(out.enumerated())
+    }
+
     var body: some View {
         BriefProseLayout(lineGap: style.value.extraLineSpacing) {
-            ForEach(segments.indices, id: \.self) { i in
-                switch segments[i] {
-                case .text(let s):
-                    Text(s).font(style.value.font).tracking(style.value.tracking)
-                        .foregroundStyle(style.value.color)
-                case .label(let s):
-                    Text(s).font(style.label.font).tracking(style.label.tracking)
-                        .foregroundStyle(style.label.color)
+            ForEach(atoms, id: \.0) { _, atom in
+                switch atom {
+                case .word(let s, let isLabel):
+                    if isLabel {
+                        Text(s).font(style.label.font).tracking(style.label.tracking)
+                            .foregroundStyle(style.label.color)
+                    } else {
+                        Text(s).font(style.value.font).tracking(style.value.tracking)
+                            .foregroundStyle(style.value.color)
+                    }
                 case .source(let src, let phrase):
                     ProvenanceInline(source: src, phrase: phrase, fontOverride: style.provenance.font)
                 case .stacked(let srcs, let phrase):
-                    ProvenanceStacked(sources: srcs, phrase: phrase)
+                    ProvenanceStacked(sources: srcs, phrase: phrase, fontOverride: style.provenance.font)
                 }
             }
         }
