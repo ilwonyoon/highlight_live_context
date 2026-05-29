@@ -84,6 +84,93 @@ Actions 1+2 are both "automatic," but the dividing line is **risk vs. privacy**:
 
 ---
 
+## Filter catalog — what actually lands in each bucket
+
+A plain-language list of *what gets filtered where*, grounded in the 9 sensitive items planted across our mock sources (chrome, clipboard, gmail, meetings, screenshot, slack). The point isn't a per-connector spec — it's a glanceable answer to "so what does silent / visible / user-control actually catch?"
+
+### 🔒 Silent filter — dropped before storage, never mentioned
+
+Universal secrets. Pure pattern-match, no judgment call, no user rule needed. **Detection: auto.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| API keys | `sk-ant-api03-Rj4mZ2…` pasted into the Cursor terminal | clipboard |
+| DB connection strings (with password) | `postgresql://highlight_app:Hk9$wRn2…@db-prod-1…` copied | clipboard |
+| OAuth / bot tokens | a live Slack `xoxb-…` token pasted while debugging | slack |
+| (same class) passwords, private keys (`-----BEGIN … PRIVATE KEY-----`), JWTs (`eyJ…`), 2FA seeds, `.env` / `.pem` / `.aws/credentials` contents | — | any |
+
+Rule of thumb: **if storing it is itself a breach, it's silent.** Never echo the value back — "I removed your key AKIA…" re-leaks it.
+
+### 🟡 Visible filter — auto-excluded, *and the user is told* (calmly)
+
+Personal-but-legitimate. The user isn't hiding these; they just aren't the work context's business. The reassurance line *is* the feature. **Detection: auto.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| Medical / health portals | "Lab Results — MyChart", "Message your care team — MyChart" tabs open mid-workday | chrome |
+| Medical notifications in the work inbox | "Your recent lab results have been posted…" (MyChart email) | gmail |
+| Personal finance behind a work capture | a personal banking tab visible behind an interview-scheduling screenshot | screenshot |
+| (same class) personal banking/investments/taxes, family & personal messages, GDPR Art. 9 special-category data (religion, politics, sexual orientation, home location) | — | any |
+
+Rule of thumb: **legitimate to exist on a work device, none of the work context's business** → exclude *and say so* ("I kept your therapy appointment private"), never the details. Proves it can tell **personal finance (out) from company finance (in)**.
+
+### ✋ User control — only the user/org knows it crosses a line
+
+Looks like ordinary work content; a classifier can't tell. The user draws the line via a **rule**. **Detection: user.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| Candidate compensation in a hiring context | "if she clears the onsite, what's the band? Sergei floated $215k base + 0.4%…" | slack |
+| A colleague's private disclosure shared in confidence | a teammate's family/health situation mentioned in a 1:1 | meetings |
+| (same class) customer PII under DPAs, contract/pricing terms, source-code/IP, internal financials, unreleased roadmap, comp/HR, legal/privilege, M&A, layoffs | — | any |
+
+Rule of thumb: **sensitivity is contextual, not pattern-detectable** ("order #75337" benign vs. "wallet #75337" sensitive — same digits). One *rule* covers infinite future items ("never keep anything about the Acorn account").
+
+> The three buckets map cleanly onto the three actions above: Silent = Action 1, Visible = Action 2, User control = Action 3. This catalog is the "what"; the next section is the "how you steer it."
+
+---
+
+## Two paths to control: conversational (primary) + manual (fallback)
+
+The three actions define *what* the system does. This section defines *how the user steers it* — and the opinionated bet is that **steering happens through conversation, not a settings panel.**
+
+> **Ilwon's framing:** "Who manually controls settings anymore? You tell the AI." The privacy control surface is, first, a **conversation** — and only secondarily a manual panel for people who want to drive by hand. Same *proactive + action* spine as the rest of Brief: the assistant explains the current state and changes it for you, rather than handing you toggles.
+
+This is the concrete answer to the model's own open question ("how does a natural-language Action-3 rule get authored?") and to the assignment's central tension (control *without* a cognitive-overload dashboard).
+
+### Path A — Conversational control (the primary surface)
+
+Entering "Privacy" from the Live Context surface opens a **chat scoped to privacy** — the composer's context chip reads "Privacy," not a document. Two moves:
+
+1. **It briefs you on the current state first (proactive).** Before you ask anything, it states what each action is doing right now, in plain language:
+   > "Right now I'm **silently dropping** secrets — API keys, passwords (3 today). I'm **keeping personal things out and telling you** — a doctor's appointment, your personal banking. And you've drawn **2 lines yourself**: nothing about the Acorn account, and the #comp channel stays out."
+
+   This makes the otherwise-invisible model (Actions 1+2 are automatic) *legible* without a dashboard — the chat is the transparency surface.
+
+2. **It turns a wish into a rule (action).** The user describes what they want filtered in natural language; the assistant **authors the Action-3 rule** and confirms:
+   > User: "Don't keep anything about the Falcon acquisition."
+   > Brief: "Done — I'll exclude anything mentioning *Falcon acquisition* from your work context, across all sources. You can see or undo this in Privacy settings." → a rule is created.
+
+   The user never picks a category, drags a toggle, or writes a regex. They describe the boundary; the system encodes it. (This is the natural-language-rule pattern the model flagged as emerging/differentiating — here it's the *default* authoring path.)
+
+The chat can also explain *why* something is the way it is ("why didn't you filter X?") — which doubles as teaching the silent / visible / user-control distinction in context, exactly when the user cares.
+
+### Path B — Manual settings (the fallback)
+
+For users who *do* want to drive by hand, a conventional **Privacy settings** screen exposes the same model manually: active rules (Action 3) with edit/delete, visible-filter categories with per-category on/off, retention/pause controls, app-exclusion. Progressive disclosure still applies — default view ~3 controls, advanced policy buried.
+
+**Both paths edit the same underlying rule set.** A rule authored by conversation appears in the manual list; a toggle flipped manually is reflected in the next conversational brief. The chat is a faster, friendlier front-end onto the same state — not a separate system.
+
+### Why this split is the right bet
+
+- **Casual users never open settings** — they live entirely in Path A (and mostly in the automatic Actions 1+2). The conversation *is* their control surface, and it's zero-config.
+- **Power users get Path B** to audit / bulk-edit — but even they author most rules by talking, because describing a boundary is faster than building one.
+- **It collapses the overload problem.** A panel that could expose dozens of toggles instead opens as a sentence: "here's what I'm protecting; tell me what else." Complexity lives in the model, not the UI.
+
+> **Micro-interaction candidate (assignment requirement):** authoring an Action-3 rule *from a surfaced item* — the brief shows a line, the user says "keep this kind of thing private," the rule materializes and the item retreats. The "wish → rule → confirmation" moment is the demonstrable craft beat.
+
+---
+
 ## How this answers the assignment
 
 - **"Edit and curate / delete sensitive / annotate / flag"** → curation = drawing privacy boundaries (Action 3) + confirming auto-protections (Action 2). Reframed as *teaching what to remember*, not data hygiene.

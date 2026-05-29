@@ -14,6 +14,10 @@ enum BriefDuration {
     static let slow:    Double = 0.25
     /// 0.40s — emphasized motion (modal in/out)
     static let emphatic: Double = 0.40
+    /// 0.40s — panel slide-IN; a full-height slide-over wants a touch of mass.
+    static let panelIn:  Double = 0.40
+    /// 0.20s — panel slide-OUT; dismissal is quicker (asymmetric-motion rule).
+    static let panelOut: Double = 0.20
 }
 
 // MARK: - Interaction delays
