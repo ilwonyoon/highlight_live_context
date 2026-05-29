@@ -424,10 +424,10 @@ struct ProvenanceLine: View {
                         .briefStyle(bodyToken)
                         .foregroundStyle(Color.briefInkPrimary)
                 case .label(let s):
-                    // Bold lead-in label (e.g. "Status:"). Halbfett weight at
-                    // body size so it reads as a label without breaking line rhythm.
+                    // Lead-in label (e.g. "Status:"). Medium (Kraftig 500) at
+                    // body size — present but calm; doesn't shout like Halbfett.
                     Text(s)
-                        .briefStyle(small ? .headline : .headline)
+                        .briefStyle(.bodyMedium)
                         .foregroundStyle(Color.briefInkPrimary)
                 case .source(let src, let phrase):
                     ProvenanceInline(source: src, phrase: phrase, small: small)

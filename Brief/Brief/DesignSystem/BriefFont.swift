@@ -39,6 +39,7 @@ extension Font {
     static let briefTitle3    = soehne(.halbfett, size: 17, relativeTo: .title3)
     static let briefHeadline       = soehne(.halbfett, size: 14, relativeTo: .headline)
     static let briefBody           = soehne(.buch, size: 14, relativeTo: .body)
+    static let briefBodyMedium     = soehne(.kraftig, size: 14, relativeTo: .body) // 500 — inline lead-in labels
     static let briefBodySmall      = soehne(.buch, size: 13, relativeTo: .body)
     // Provenance fonts — slightly heavier than body (Kraftig 500 vs Buch 400)
     // for referenceable presence. Combined with hairline underline for citation
@@ -123,6 +124,9 @@ struct BriefTypeToken {
     static let title3     = BriefTypeToken(font: .briefTitle3,     size: 17, lineHeight: 1.25, tracking:  0)
     static let headline   = BriefTypeToken(font: .briefHeadline,   size: 14, lineHeight: 1.40, tracking:  0)
     static let body       = BriefTypeToken(font: .briefBody,       size: 14, lineHeight: 1.45, tracking:  0)
+    // Medium (Kraftig 500) at body size — for inline lead-in labels ("Status:")
+    // and light emphasis. Calmer than headline (Halbfett 600).
+    static let bodyMedium = BriefTypeToken(font: .briefBodyMedium, size: 14, lineHeight: 1.45, tracking:  0)
     static let bodySmall  = BriefTypeToken(font: .briefBodySmall,  size: 13, lineHeight: 1.40, tracking:  0)
     static let label      = BriefTypeToken(font: .briefLabel,      size: 12, lineHeight: 1.30, tracking:  1)
     static let meta       = BriefTypeToken(font: .briefMeta,       size: 11, lineHeight: 1.30, tracking:  2)

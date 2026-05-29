@@ -109,7 +109,7 @@ struct LiveContextView: View {
     // MARK: Latest-update card
 
     private var latestUpdateCard: some View {
-        VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+        VStack(alignment: .leading, spacing: BriefSpacing.md) {
             HStack(spacing: BriefSpacing.sm) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11, weight: .medium))
@@ -121,68 +121,83 @@ struct LiveContextView: View {
                     .briefStyle(.monoMeta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
-            Text("Dani locked the OAuth ship decision and the launch one-liner this morning. The Slack-Connection blocker is cleared for Jun 9, and the founding-PMM hire (Naomi) is moving to an onsite. Launch is on track at D-12.")
-                .briefStyle(.bodySmall)
-                .foregroundStyle(Color.briefInkPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+            // TL;DR — bullets, not prose.
+            VStack(alignment: .leading, spacing: BriefSpacing.xs) {
+                tldrItem("Launch on track — D-12 (Tue Jun 9).")
+                tldrItem("OAuth blocker cleared; ship decision made.")
+                tldrItem("Founding PMM (Naomi) moving to an onsite.")
+            }
         }
         .padding(BriefSpacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
-                .fill(Color.briefHighlightWash.opacity(0.55))
+                .fill(Color.briefPaperRaised)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                        .stroke(Color.briefHairline, lineWidth: 1)
+                )
         )
+    }
+
+    private func tldrItem(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
+            Text("•")
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkTertiary)
+                .frame(width: 8, alignment: .center)
+            Text(text)
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     // MARK: The Live Context document — Dani's data as hierarchical prose
 
     private var document: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // (Title lives in the header now — body opens straight into sections.)
+            // Title lives in the header; body opens at section 1.
+            // Provenance is used sparingly — only the load-bearing fact in a
+            // line carries a source. Plain facts stay plain so the eye rests.
 
-            // 1. PRIMARY GOAL
-            BriefH2(text: "1. PRIMARY GOAL: PUBLIC LAUNCH (Top Priority)")
+            // ── 1. PRIMARY GOAL ───────────────────────────────
+            BriefH2(text: "1. Primary goal — public launch")
             bullets {
-                bullet("g-target", "Target: Ship Highlight's public launch on Tuesday, June 9 (D-12).") {
+                bullet("g-target", "Target: ship Highlight's public launch on Tuesday, June 9 — D-12.") {
                     label("Target:")
-                    " ship Highlight's "
-                    src(.gmail, "public launch")
-                    " on Tuesday, June 9 (D-12)."
+                    " ship Highlight's public launch on "
+                    src(.gmail, "Tuesday, June 9")
+                    " — D-12."
                 }
-                bullet("g-prop", "Core value prop: the AI that already knows your work — brief, then act.") {
-                    label("Core value prop:")
-                    " the AI that already "
-                    src(.voice, "knows your work")
-                    " — brief, then act, not just recall."
+                bullet("g-prop", "Value prop: the AI that already knows your work — brief, then act.") {
+                    label("Value prop:")
+                    " the AI that already knows your work — brief, then act, not just recall."
                 }
                 bullet("g-role", "Role: Head of Product, ex-Discord; recruited by Sergei on the ambient-coordination vision.") {
                     label("Role:")
-                    " Head of Product, ex-Discord — recruited by "
-                    src(.voice, "Sergei on the ambient-coordination vision")
-                    "."
+                    " Head of Product, ex-Discord — recruited on the ambient-coordination vision."
                 }
             }
 
-            // 2. TOP TIER PRIORITIES
-            BriefH2(text: "2. TOP TIER PRIORITIES (Ranked)")
+            // ── 2. TOP TIER PRIORITIES ────────────────────────
+            BriefH2(text: "2. Top priorities")
 
-            BriefH3(text: "1. Launch readiness")
+            BriefH3(text: "Launch readiness")
             bullets {
-                bullet("p1-status", "Status: on track. The Slack-Connection OAuth blocker (HL-1042) is cleared.") {
+                bullet("p1-status", "Status: on track. The Slack-Connection OAuth blocker (HL-1042) is cleared after Adrian's patch.") {
                     label("Status:")
-                    " on track. The "
-                    stacked([.linear, .github], "Slack-Connection OAuth blocker (HL-1042)")
-                    " is cleared after Adrian's patch."
+                    " on track — the "
+                    src(.linear, "Slack-Connection blocker (HL-1042)")
+                    " is cleared."
                 }
-                bullet("p1-decision", "Decision: shipped the fix with a visible reconnect state; edge case noted in release notes.") {
+                bullet("p1-decision", "Decision: shipped the patch (0 failures in 200 runs); the remaining edge case surfaces an honest reconnect prompt.") {
                     label("Decision:")
-                    " shipped the patch — "
-                    src(.voice, "0 failures in 200 runs")
-                    ", remaining edge case surfaces an honest reconnect prompt."
+                    " shipped the patch — 0 failures in 200 runs; the edge case now shows an honest reconnect prompt."
                 }
             }
 
-            BriefH3(text: "2. External launch messaging")
+            BriefH3(text: "External launch messaging")
             bullets {
                 bullet("p2-line", "One-liner: locked — Highlight briefs you, then moves your work forward.") {
                     label("One-liner:")
@@ -190,58 +205,98 @@ struct LiveContextView: View {
                     src(.cursor, "Highlight briefs you, then moves your work forward")
                     "."
                 }
-                bullet("p2-wedge", "Wedge: lead with the proactive brief, not capture — capture is table stakes now.") {
+                bullet("p2-wedge", "Wedge: lead with the proactive brief, not capture — Littlebird and Granola made capture table stakes.") {
                     label("Wedge:")
-                    " lead with the proactive brief, not "
-                    src(.slack, "capture")
-                    " — Littlebird/Granola made capture table stakes."
+                    " lead with the proactive brief, not capture — rivals made capture table stakes."
                 }
             }
 
-            BriefH3(text: "3. Recruiting")
+            // ── 3. ACTIVE PIPELINE ────────────────────────────
+            BriefH2(text: "3. Active pipeline")
+
+            BriefH3(text: "Founding Product Marketer")
             bullets {
-                bullet("p3-pmm", "Founding PMM: Naomi Feldman moving to onsite; strong narrative instincts.") {
-                    label("Founding PMM:")
-                    " "
-                    src(.voice, "Naomi Feldman")
-                    " moving to an onsite — reframed our problem as category creation."
+                bullet("pl-pmm", "Naomi Feldman moving to an onsite — reframed our problem as category creation.") {
+                    label("Naomi Feldman:")
+                    " moving to an "
+                    src(.voice, "onsite")
+                    " — reframed our problem as category creation."
                 }
-                bullet("p3-next", "Next: confirm the band with Sergei after the onsite, not before.") {
+                bullet("pl-pmm-next", "Next: confirm the comp band with Sergei after the onsite, not before.") {
                     label("Next:")
-                    " confirm comp with Sergei "
-                    src(.slack, "after the onsite, not before")
-                    "."
+                    " confirm comp with Sergei after the onsite, not before."
                 }
             }
 
-            BriefH3(text: "4. Competitive analysis")
+            BriefH3(text: "Competitive analysis")
             bullets {
-                bullet("p4-litt", "Littlebird is the closest rival — ambient on-screen context, $11M raised.") {
+                bullet("pl-comp", "Littlebird is the closest rival (ambient on-screen context, $11M) — stops at recall; we go to action.") {
                     label("Littlebird:")
-                    " closest rival — "
-                    src(.slack, "ambient on-screen context, $11M")
-                    ". Stops at recall; we go to action."
+                    " closest rival — ambient on-screen context. Stops at recall; we go to action."
                 }
             }
 
-            // 3. PATTERNS — from the compressed history
-            BriefH2(text: "3. HOW DANI WORKS (observed over ~9 weeks)")
+            // ── 4. CONCLUDED ──────────────────────────────────
+            BriefH2(text: "4. Concluded this week")
             bullets {
-                bullet("pat-1", "Decides with evidence, not vibes — defers binary calls until a number lands.") {
-                    label("Evidence over vibes:")
-                    " defers binary calls until there's a number or a landed artifact."
+                bullet("c-oauth", "OAuth ship decision — made the call with real numbers; cleared for launch.") {
+                    label("OAuth ship call:")
+                    " made with real numbers — cleared for launch."
                 }
-                bullet("pat-2", "Leads with the artifact, not the adjective — distrusts abstract claims.") {
-                    label("Artifact over adjective:")
-                    " shows the concrete thing; resists overpromising verbs."
-                }
-                bullet("pat-3", "Treats transparency as a feature — prefers visible failure states.") {
-                    label("Transparency as a feature:")
-                    " prefers visible failure states over hidden polish."
+                bullet("c-line", "Launch one-liner — locked after the wedge debate with Samantha.") {
+                    label("Launch one-liner:")
+                    " locked after the positioning debate."
                 }
             }
+
+            // ── 5. USER CONTEXT (permanent) ───────────────────
+            BriefH2(text: "5. User context (permanent)")
+            bullets {
+                bullet("u-bg", "Background: ex-Discord product lead on coordination & community; years synchronizing many people's effort.") {
+                    label("Background:")
+                    " ex-Discord product lead on coordination & community."
+                }
+                bullet("u-phil", "Philosophy: decides with evidence not vibes; leads with the artifact, not the adjective; treats transparency as a feature.") {
+                    label("Philosophy:")
+                    " evidence over vibes; artifact over adjective; transparency as a feature."
+                }
+            }
+
+            // ── Information map ────────────────────────────────
+            BriefH2(text: "Information map")
+            infoMap
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: Information map — people & resources index
+
+    private var infoMap: some View {
+        VStack(alignment: .leading, spacing: BriefMarkdown.bulletTop) {
+            mapRow("Highlight leadership", "Sergei Sorokin (CEO)", "manager; ambient-coordination vision")
+            mapRow("Product engineering", "Parris Khachi (Head of Product Eng)", "launch-blocker partner")
+            mapRow("Design", "Sam Eckert (Head of Design)", "launch-surface partner")
+            mapRow("Operations", "Sarah Wu (Ops)", "recruiting + launch logistics")
+            mapRow("Founding PMM", "Naomi Feldman (candidate)", "moving to onsite")
+            mapRow("Launch plan", "Notion · Public Launch Plan", "checklist + go/no-go")
+            mapRow("Launch blockers", "Linear · Public Launch cycle", "P0/P1 gating Jun 9")
+        }
+        .padding(.top, BriefSpacing.sm)
+    }
+
+    private func mapRow(_ category: String, _ contact: String, _ note: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
+            Text(category)
+                .briefStyle(.bodyMedium)
+                .foregroundStyle(Color.briefInkPrimary)
+                .frame(width: 170, alignment: .leading)
+            Text(contact)
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkPrimary)
+            Text("· \(note)")
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkTertiary)
+        }
     }
 
     // MARK: Bullet helpers (scoped copies of the DS pattern)
