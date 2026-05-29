@@ -19,6 +19,9 @@ struct BriefApp: App {
             DesignSystemView()
                 .environmentObject(selection)
                 .frame(minWidth: 1000, minHeight: 720)
+                // App accent (sidebar selection, controls) comes from the
+                // Asset Catalog AccentColor — SwiftUI sidebar selection ignores
+                // .tint() and follows the global accent. See Assets.xcassets.
         }
         .windowResizability(.contentSize)
     }

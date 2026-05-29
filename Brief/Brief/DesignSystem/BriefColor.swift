@@ -42,6 +42,12 @@ extension Color {
     /// identity without being too bright on warm paper.
     static let briefHighlightDeep   = Color(red: 0.439, green: 0.859, blue: 0.016) // #70DB04 chartreuse
 
+    /// App accent — drives system selection (sidebar rows, controls). The deep
+    /// chartreuse reads as our brand while still giving white-text contrast as
+    /// a selection fill. (The bright E7FE0B highlight stays reserved for
+    /// AI-marked-as-mattering content; accent is the toned-down cousin.)
+    static let briefAccent          = Color(red: 0.439, green: 0.859, blue: 0.016) // == highlightDeep
+
     // Borders / dividers
     static let briefDivider  = Color(red: 0.890, green: 0.875, blue: 0.847)
     static let briefHairline = Color(red: 0.831, green: 0.812, blue: 0.776)

@@ -23,7 +23,6 @@ struct DesignSystemView: View {
             .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 220, ideal: 248, max: 300)
             .scrollIndicators(.hidden)
-            .tint(Color.briefHighlightDeep)   // nudge selection toward our family
         } detail: {
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
