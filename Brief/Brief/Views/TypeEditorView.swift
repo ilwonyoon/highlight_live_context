@@ -131,9 +131,13 @@ struct TypeEditorView: View {
         VStack(alignment: .leading, spacing: BriefSpacing.lg) {
             Text("Spacing & marker").font(.briefTitle3).foregroundStyle(Color.briefInkPrimary)
             sliderRow("Bullet gap (within group)", value: $style.bulletGap, in: 0...20, step: 1, fmt: "%.0f")
-            sliderRow("Heading → body", value: $style.headingToBody, in: 0...28, step: 1, fmt: "%.0f")
-            sliderRow("Group gap", value: $style.groupGap, in: 0...56, step: 1, fmt: "%.0f")
-            sliderRow("Heading top", value: $style.headingTop, in: 8...64, step: 1, fmt: "%.0f")
+            sliderRow("Section heading top", value: $style.headingTop, in: 8...64, step: 1, fmt: "%.0f")
+            sliderRow("Section → first body", value: $style.headingToBody, in: 0...28, step: 1, fmt: "%.0f")
+            Divider().padding(.vertical, BriefSpacing.xxs)
+            sliderRow("Sub-heading: space above", value: $style.groupGapAbove, in: 0...56, step: 1, fmt: "%.0f")
+            sliderRow("Sub-heading: space below", value: $style.groupGapBelow, in: 0...28, step: 1, fmt: "%.0f")
+            Divider().padding(.vertical, BriefSpacing.xxs)
+            sliderRow("Indent step (per level)", value: $style.indentStep, in: 0...40, step: 1, fmt: "%.0f")
             sliderRow("Marker inset", value: $style.markerInset, in: 2...20, step: 1, fmt: "%.0f")
         }
     }

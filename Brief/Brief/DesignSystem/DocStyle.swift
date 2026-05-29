@@ -61,26 +61,32 @@ final class DocStyle: ObservableObject {
     @Published var provenance: DocTextStyle
 
     // Vertical rhythm (Ilwon's chosen defaults).
-    @Published var bulletGap: CGFloat = 7        // within a group
-    @Published var headingToBody: CGFloat = 12   // sub-heading → its bullets
-    @Published var groupGap: CGFloat = 12        // group → next heading
-    @Published var headingTop: CGFloat = 24      // above an H2 section
+    @Published var bulletGap: CGFloat = 8        // within a group
+    @Published var headingToBody: CGFloat = 8    // section heading → its body
+    @Published var groupGap: CGFloat = 12        // (legacy single gap; superseded by above/below)
+    @Published var groupGapAbove: CGFloat = 4    // space above a sub-heading (from prior group)
+    @Published var groupGapBelow: CGFloat = 4    // space below a sub-heading, before its bullets
+    @Published var headingTop: CGFloat = 36      // above an H2 section
 
     // Bullet marker.
-    @Published var markerInset: CGFloat = 8       // gap marker → text
+    @Published var markerInset: CGFloat = 12      // gap marker → text
     @Published var markerSize: CGFloat = 4.5      // dot diameter (0 = use glyph)
+
+    // Indent per hierarchy level (H2 = 0, H3 = 1 step, bullets one deeper).
+    @Published var indentStep: CGFloat = 8
 
     init() {
         h2 = DocTextStyle(id: "h2", label: "Section heading (H2)",
                           face: .soehneKraftig, size: 17, lineHeight: 1.25, tracking: -0.2, color: .briefInkPrimary)
         h3 = DocTextStyle(id: "h3", label: "Sub-heading (H3)",
-                          face: .soehneKraftig, size: 14, lineHeight: 1.40, tracking: 0, color: .briefInkPrimary)
+                          face: .soehneKraftig, size: 14, lineHeight: 1.40, tracking: 0.1, color: .briefInkPrimary)
         label = DocTextStyle(id: "label", label: "Lead-in label",
                              face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkPrimary)
         value = DocTextStyle(id: "value", label: "Body / value",
-                             face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkSecondary)
+                             face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0,
+                             color: Color(white: 0.25))   // grayscale 25% — Ilwon's pick
         provenance = DocTextStyle(id: "provenance", label: "Provenance phrase",
-                                  face: .soehneKraftig, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkPrimary)
+                                  face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkPrimary)
     }
 
     /// All text styles, for the editor's target list.
@@ -89,7 +95,7 @@ final class DocStyle: ObservableObject {
     /// Values dump for copying back into permanent tokens.
     var valuesDump: String {
         func line(_ s: DocTextStyle) -> String {
-            "\(s.id): \(s.face.rawValue) \(Int(s.size))pt  lh \(String(format: "%.2f", s.lineHeight))  track \(String(format: "%.1f", s.tracking))"
+            "\(s.id): \(s.face.rawValue) \(Int(s.size))pt  lh \(String(format: "%.2f", s.lineHeight))  track \(String(format: "%.1f", s.tracking))  \(hex(s.color))"
         }
         return """
         — Text —
@@ -100,11 +106,21 @@ final class DocStyle: ObservableObject {
         \(line(provenance))
         — Spacing —
         bulletGap: \(Int(bulletGap))
-        headingToBody: \(Int(headingToBody))
-        groupGap: \(Int(groupGap))
         headingTop: \(Int(headingTop))
+        headingToBody: \(Int(headingToBody))
+        groupGapAbove: \(Int(groupGapAbove))
+        groupGapBelow: \(Int(groupGapBelow))
+        indentStep: \(Int(indentStep))
         markerInset: \(Int(markerInset))
-        markerSize: \(String(format: "%.1f", markerSize))
         """
+    }
+
+    /// Hex string for a Color (via NSColor) — so tuned colors are copyable.
+    private func hex(_ color: Color) -> String {
+        let ns = NSColor(color).usingColorSpace(.sRGB) ?? .black
+        let r = Int((ns.redComponent * 255).rounded())
+        let g = Int((ns.greenComponent * 255).rounded())
+        let b = Int((ns.blueComponent * 255).rounded())
+        return String(format: "#%02X%02X%02X", r, g, b)
     }
 }

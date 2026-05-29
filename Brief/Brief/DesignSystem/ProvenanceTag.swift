@@ -55,6 +55,9 @@ struct ProvenanceInline: View {
     let phrase: String
     var color: ProvenanceColorMode = .inkPrimary
     var small: Bool = false
+    /// When set, overrides the phrase font (so the editor's provenance type
+    /// style drives weight/size). Falls back to the provenance token.
+    var fontOverride: Font? = nil
 
     @State private var hovering = false
     @State private var phraseTriggered = false
@@ -83,8 +86,16 @@ struct ProvenanceInline: View {
             HStack(spacing: BriefSpacing.xs) {
                 hoverAwareIcon(source: source, size: iconSize, restMode: color, hovering: hovering)
                     .offset(y: BriefLayout.InlineCitation.baselineNudge)
-                Text(phrase)
-                    .briefStyle(token)
+                // When an override font is supplied, set it directly (briefStyle
+                // pins the font on the Text internally, so an outer .font() can't
+                // win — the override must replace, not wrap, the style).
+                Group {
+                    if let f = fontOverride {
+                        Text(phrase).font(f)
+                    } else {
+                        Text(phrase).briefStyle(token)
+                    }
+                }
                     .foregroundStyle(color.textColor)
                     .overlay(alignment: .bottom) {
                         Rectangle()
