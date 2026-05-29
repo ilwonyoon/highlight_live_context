@@ -13,6 +13,10 @@ struct SelectableLine<Content: View>: View {
     let id: String
     let kind: SelectionContext.SelectionKind
     let text: String
+    /// Vertical padding of the selection shell. Defaults to `xs` for legacy
+    /// callers; document prose passes 0 so the *container* owns the line gap
+    /// (otherwise this fixed padding dominates and spacing tokens don't bite).
+    var verticalPadding: CGFloat = BriefSpacing.xs
     @ViewBuilder var content: () -> Content
 
     @EnvironmentObject private var selection: SelectionContext
@@ -22,7 +26,7 @@ struct SelectableLine<Content: View>: View {
     var body: some View {
         content()
             .padding(.horizontal, BriefSpacing.md)
-            .padding(.vertical,   BriefSpacing.xs)
+            .padding(.vertical,   verticalPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)

@@ -15,7 +15,11 @@ struct DesignSystemView: View {
         // sidebar for free (when compiled with the 26 SDK). We don't hand-roll
         // the glass anymore — the system layers the sidebar above content.
         NavigationSplitView {
-            List(selection: $selection) {
+            // No `selection:` binding — we handle selection via tap so macOS
+            // never overlays the global accent on our custom row background.
+            // (Matches LiveContextView; a selection binding paints the system
+            // accent regardless of .listRowBackground/.tint.)
+            List {
                 sidebarSection("Foundations", pages: DSPage.foundations)
                 sidebarSection("Components",  pages: DSPage.components)
                 sidebarSection("Patterns",    pages: DSPage.patterns)
@@ -37,9 +41,10 @@ struct DesignSystemView: View {
     private func sidebarSection(_ title: String, pages: [DSPage]) -> some View {
         Section {
             ForEach(pages) { page in
-                SidebarRow(page: page, isSelected: selection == page)
-                    .tag(page)
-                    .listRowBackground(Color.clear)   // we draw selection/hover ourselves
+                SidebarRow(page: page, isSelected: selection == page) {
+                    selection = page
+                }
+                .listRowBackground(Color.clear)   // we draw selection/hover ourselves
             }
         } header: {
             Text(title.uppercased())
@@ -79,6 +84,7 @@ struct DesignSystemView: View {
 private struct SidebarRow: View {
     let page: DSPage
     let isSelected: Bool
+    let onTap: () -> Void
     @State private var hovering = false
 
     var body: some View {
@@ -102,6 +108,7 @@ private struct SidebarRow: View {
         )
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
+        .onTapGesture(perform: onTap)
         .animation(.briefHover, value: hovering)
     }
 
@@ -832,7 +839,11 @@ struct DSPageScaffold<Content: View>: View {
             }
             .padding(.horizontal, BriefSpacing.huge)
             .padding(.vertical, BriefSpacing.xxxl)
-            .frame(maxWidth: 920, alignment: .topLeading)
+            // Two frames: inner caps the reading column; outer fills the full
+            // width so the scrollbar sits at the WINDOW edge, not the content
+            // edge. (Same pattern as LiveContextView.)
+            .frame(maxWidth: BriefLayout.readingWidth + BriefSpacing.huge * 2, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollIndicators(.hidden)
     }

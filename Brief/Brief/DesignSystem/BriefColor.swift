@@ -51,6 +51,10 @@ extension Color {
     // Borders / dividers
     static let briefDivider  = Color(red: 0.890, green: 0.875, blue: 0.847)
     static let briefHairline = Color(red: 0.831, green: 0.812, blue: 0.776)
+    // Whisper border for card/callout edges — only a few % off the paper, so
+    // the surface reads by its fill, not a drawn line (Notion/Stripe do this;
+    // a higher-contrast border reads as a "form box," not a premium surface).
+    static let briefHairlineSoft = Color(red: 0.925, green: 0.914, blue: 0.890) // ~ECE9E3
 
     // Selection background — warm gray tuned to the paper foundation.
     // Used for selected rows and macOS-style multi-select highlighting,

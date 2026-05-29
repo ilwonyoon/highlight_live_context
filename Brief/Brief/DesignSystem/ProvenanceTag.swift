@@ -97,9 +97,8 @@ struct ProvenanceInline: View {
             }
             .padding(.horizontal, BriefLayout.InlineCitation.paddingH)
             .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
-            .background(
-                HighlighterSwipe(visible: hovering)
-            )
+            // Hover signal is the underline alone — no background wash. One
+            // signal, not two (the doubled bg+underline read as noisy).
             .contentShape(Rectangle())
         }
         .buttonStyle(ProvenancePressedStyle())
@@ -399,17 +398,23 @@ typealias ProvenanceTag = ProvenanceInline
 struct ProvenanceLine: View {
     let segments: [ProvenanceSegment]
     let small: Bool
+    /// Color for plain `.text` segments. Defaults to inkPrimary. Set to
+    /// inkSecondary to recede the value behind a `.label` lead-in — color
+    /// carries the hierarchy so the label stays medium-weight (not bold).
+    var textColor: Color = .briefInkPrimary
 
-    init(small: Bool = false, @ProvenanceLineBuilder _ build: () -> [ProvenanceSegment]) {
+    init(small: Bool = false, textColor: Color = .briefInkPrimary, @ProvenanceLineBuilder _ build: () -> [ProvenanceSegment]) {
         self.segments = build()
         self.small = small
+        self.textColor = textColor
     }
 
     /// Direct-array init for callers that pre-compose segments (e.g. helper
     /// functions that need to forward a result-builder closure).
-    init(segments: [ProvenanceSegment], small: Bool = false) {
+    init(segments: [ProvenanceSegment], small: Bool = false, textColor: Color = .briefInkPrimary) {
         self.segments = segments
         self.small = small
+        self.textColor = textColor
     }
 
     var body: some View {
@@ -422,13 +427,60 @@ struct ProvenanceLine: View {
                 case .text(let s):
                     Text(s)
                         .briefStyle(bodyToken)
-                        .foregroundStyle(Color.briefInkPrimary)
+                        .foregroundStyle(textColor)
                 case .label(let s):
                     // Lead-in label (e.g. "Status:"). Medium (Kraftig 500) at
                     // body size — present but calm; doesn't shout like Halbfett.
                     Text(s)
                         .briefStyle(.bodyMedium)
                         .foregroundStyle(Color.briefInkPrimary)
+                case .source(let src, let phrase):
+                    ProvenanceInline(source: src, phrase: phrase, small: small)
+                case .stacked(let srcs, let phrase):
+                    ProvenanceStacked(sources: srcs, phrase: phrase, small: small)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - ProvenanceProse — prose renderer (width-aware, wraps natively)
+// Same segment model as ProvenanceLine, but laid out by BriefProseLayout
+// instead of FlowLayout, so text runs wrap mid-segment and the line leading is
+// the single token source. Use this for body prose; keep ProvenanceLine/
+// FlowLayout for atomic chip rows. See MARKDOWN_RENDERING_ARCHITECTURE.md.
+
+struct ProvenanceProse: View {
+    let segments: [ProvenanceSegment]
+    var small: Bool = false
+    var textColor: Color = .briefInkPrimary
+    /// Weight for `.label` lead-ins. Defaults to medium; pass `.body` to let
+    /// color (not weight) carry the label hierarchy for a lighter page.
+    var labelToken: BriefTypeToken = .bodyMedium
+
+    init(small: Bool = false, textColor: Color = .briefInkPrimary, labelToken: BriefTypeToken = .bodyMedium, @ProvenanceLineBuilder _ build: () -> [ProvenanceSegment]) {
+        self.segments = build()
+        self.small = small
+        self.textColor = textColor
+        self.labelToken = labelToken
+    }
+    init(segments: [ProvenanceSegment], small: Bool = false, textColor: Color = .briefInkPrimary, labelToken: BriefTypeToken = .bodyMedium) {
+        self.segments = segments
+        self.small = small
+        self.textColor = textColor
+        self.labelToken = labelToken
+    }
+
+    var body: some View {
+        let token: BriefTypeToken = small ? .bodySmall : .body
+        let leading = (token.lineHeight - 1) * token.size   // single leading source
+        BriefProseLayout(lineGap: leading) {
+            ForEach(segments.indices, id: \.self) { i in
+                switch segments[i] {
+                case .text(let s):
+                    Text(s).briefStyle(token).foregroundStyle(textColor)
+                case .label(let s):
+                    Text(s).briefStyle(labelToken).foregroundStyle(Color.briefInkPrimary)
                 case .source(let src, let phrase):
                     ProvenanceInline(source: src, phrase: phrase, small: small)
                 case .stacked(let srcs, let phrase):

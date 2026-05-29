@@ -37,7 +37,9 @@ extension Font {
     static let briefTitle1    = soehne(.kraftig, size: 28, relativeTo: .title)
     static let briefTitle2    = soehne(.kraftig, size: 22, relativeTo: .title2)
     static let briefTitle3    = soehne(.halbfett, size: 17, relativeTo: .title3)
+    static let briefTitle3Medium   = soehne(.kraftig, size: 17, relativeTo: .title3) // 500 — lighter section heading
     static let briefHeadline       = soehne(.halbfett, size: 14, relativeTo: .headline)
+    static let briefHeadlineMedium = soehne(.kraftig, size: 14, relativeTo: .headline) // 500 — lighter sub-heading
     static let briefBody           = soehne(.buch, size: 14, relativeTo: .body)
     static let briefBodyMedium     = soehne(.kraftig, size: 14, relativeTo: .body) // 500 — inline lead-in labels
     static let briefBodySmall      = soehne(.buch, size: 13, relativeTo: .body)
@@ -122,11 +124,15 @@ struct BriefTypeToken {
     static let title1     = BriefTypeToken(font: .briefTitle1,     size: 28, lineHeight: 1.15, tracking: -1)
     static let title2     = BriefTypeToken(font: .briefTitle2,     size: 22, lineHeight: 1.20, tracking: -1)
     static let title3     = BriefTypeToken(font: .briefTitle3,     size: 17, lineHeight: 1.25, tracking:  0)
+    static let title3Medium   = BriefTypeToken(font: .briefTitle3Medium,   size: 17, lineHeight: 1.25, tracking: -0.2)
     static let headline   = BriefTypeToken(font: .briefHeadline,   size: 14, lineHeight: 1.40, tracking:  0)
-    static let body       = BriefTypeToken(font: .briefBody,       size: 14, lineHeight: 1.45, tracking:  0)
+    static let headlineMedium = BriefTypeToken(font: .briefHeadlineMedium, size: 14, lineHeight: 1.40, tracking:  0)
+    // Line-height 1.55: WCAG 1.4.12 floor (1.5) bumped for a wide reading
+    // measure. See TYPOGRAPHY_READABILITY.md.
+    static let body       = BriefTypeToken(font: .briefBody,       size: 14, lineHeight: 1.55, tracking:  0)
     // Medium (Kraftig 500) at body size — for inline lead-in labels ("Status:")
     // and light emphasis. Calmer than headline (Halbfett 600).
-    static let bodyMedium = BriefTypeToken(font: .briefBodyMedium, size: 14, lineHeight: 1.45, tracking:  0)
+    static let bodyMedium = BriefTypeToken(font: .briefBodyMedium, size: 14, lineHeight: 1.55, tracking:  0)
     static let bodySmall  = BriefTypeToken(font: .briefBodySmall,  size: 13, lineHeight: 1.40, tracking:  0)
     static let label      = BriefTypeToken(font: .briefLabel,      size: 12, lineHeight: 1.30, tracking:  1)
     static let meta       = BriefTypeToken(font: .briefMeta,       size: 11, lineHeight: 1.30, tracking:  2)

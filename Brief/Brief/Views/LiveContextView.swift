@@ -13,31 +13,58 @@ import SwiftUI
 // wrapped in SelectableLine so it can be layered on later.
 
 struct LiveContextView: View {
-    @State private var selectedView: ContextView = .liveContext
+    // Sidebar selection unifies the Context views and the Variations.
+    @State private var selection: SidebarItem = .variation(.brief)
+    // Shared live design tokens — the editor tunes this; the document reads it.
+    @StateObject private var docStyle = DocStyle()
+
+    private var selectedVariation: Variation? {
+        if case let .variation(v) = selection { return v }
+        return nil
+    }
 
     var body: some View {
         NavigationSplitView {
             sidebar
                 .navigationSplitViewColumnWidth(min: 220, ideal: 248, max: 300)
         } detail: {
-            SelectionSurface {
-                content
-            }
-            .background(Color.briefPaper)
+            detail
+                .background(Color.briefPaper)
         }
     }
 
     // MARK: Sidebar
 
     private var sidebar: some View {
-        List(selection: $selectedView) {
+        // No `selection:` binding — we handle selection ourselves via tap, so
+        // the system never paints its accent highlight over our custom row
+        // background. (With a selection binding, macOS overlays the global
+        // accent on the focused window regardless of .listRowBackground/.tint.)
+        List {
             Section {
                 ForEach(ContextView.allCases) { view in
-                    Label(view.label, systemImage: view.icon)
-                        .tag(view)
+                    SidebarRow(label: view.label, icon: view.icon,
+                               isSelected: selection == .context(view)) {
+                        selection = .context(view)
+                    }
+                    .listRowBackground(Color.clear)
                 }
             } header: {
                 Text("Context")
+                    .briefStyle(.meta)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+
+            Section {
+                ForEach(Variation.allCases) { v in
+                    SidebarRow(label: v.label, icon: v.icon,
+                               isSelected: selection == .variation(v)) {
+                        selection = .variation(v)
+                    }
+                    .listRowBackground(Color.clear)
+                }
+            } header: {
+                Text("Variations")
                     .briefStyle(.meta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
@@ -45,65 +72,59 @@ struct LiveContextView: View {
         .listStyle(.sidebar)
     }
 
-    // MARK: Content (the document)
+    // MARK: Detail — switches by selection
 
-    private var content: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                header
-                latestUpdateCard
-                    .padding(.top, BriefSpacing.xl)
-                document
-                    .padding(.top, BriefSpacing.xxxl)
-                Spacer(minLength: BriefSpacing.mega)
-            }
-            // The readability lever: cap body width and center it.
-            .frame(maxWidth: BriefLayout.readingWidth, alignment: .topLeading)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.horizontal, BriefSpacing.huge)
-            .padding(.top, BriefSpacing.xxl)
+    @ViewBuilder
+    private var detail: some View {
+        switch selectedVariation {
+        case .brief, .none:
+            briefVariation            // A
+        case .readAct:
+            VariationReadAct(privacyChip: AnyView(PrivacyChip()))   // C
+        case .conversational:
+            VariationConversational(privacyChip: AnyView(PrivacyChip())) // D
+        case .spacingLab:
+            TypeEditorView(style: docStyle)
         }
-        .scrollIndicators(.visible)
+    }
+
+    // MARK: Variation A — the reading document (default)
+
+    private var briefVariation: some View {
+        SelectionSurface {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    header
+                    latestUpdateCard
+                        .padding(.top, BriefSpacing.xl)
+                    LiveContextDocument(style: docStyle)
+                        .padding(.top, BriefSpacing.xxxl)
+                    Spacer(minLength: BriefSpacing.mega)
+                }
+                // The readability lever: cap body width and center it.
+                .frame(maxWidth: BriefLayout.readingWidth, alignment: .topLeading)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, BriefSpacing.huge)
+                .padding(.top, BriefSpacing.xxl)
+            }
+            .scrollIndicators(.visible)
+        }
     }
 
     // MARK: Header — cleaned up + always-visible privacy chip
 
     private var header: some View {
-        HStack(alignment: .center, spacing: BriefSpacing.lg) {
-            // Workspace identity — H1 title, no icon chrome.
+        // H1 title, with the trust chip sitting directly beneath it (not in
+        // the corner) so the privacy signal reads as part of the identity.
+        VStack(alignment: .leading, spacing: BriefSpacing.md) {
             VStack(alignment: .leading, spacing: 1) {
                 BriefH1(text: "Live Context")
                 Text("Dani Reyes · 24 highlights")
                     .briefStyle(.monoMeta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
-
-            Spacer()
-
-            // Always-visible privacy/trust signal (P0 hero). Casual users
-            // read it for peace of mind; power users tap into detail.
-            privacyChip
+            PrivacyChip()
         }
-    }
-
-    // The trust chip: a calm, recurring "here's what I protected" signal.
-    // Aggregate counts only — never the content (the secret/medical detail).
-    private var privacyChip: some View {
-        HStack(spacing: BriefSpacing.sm) {
-            Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Color.briefHighlightDeep)
-            Text("2 secrets kept out · 4 personal · 2 rules")
-                .briefStyle(.monoLabel)
-                .foregroundStyle(Color.briefInkSecondary)
-        }
-        .padding(.horizontal, BriefSpacing.lg)
-        .padding(.vertical, BriefSpacing.sm)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color.briefHighlightWash.opacity(0.5))
-                .overlay(Capsule(style: .continuous).stroke(Color.briefHairline, lineWidth: 1))
-        )
     }
 
     // MARK: Latest-update card
@@ -111,9 +132,6 @@ struct LiveContextView: View {
     private var latestUpdateCard: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
             HStack(spacing: BriefSpacing.sm) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color.briefHighlightDeep)
                 Text("Latest update")
                     .briefStyle(.label)
                     .foregroundStyle(Color.briefInkPrimary)
@@ -121,21 +139,27 @@ struct LiveContextView: View {
                     .briefStyle(.monoMeta)
                     .foregroundStyle(Color.briefInkTertiary)
             }
-            // TL;DR — bullets, not prose.
+            // TL;DR — bullets, no oversized lede line.
             VStack(alignment: .leading, spacing: BriefSpacing.xs) {
-                tldrItem("Launch on track — D-12 (Tue Jun 9).")
-                tldrItem("OAuth blocker cleared; ship decision made.")
+                tldrItem("Launch on track for Jun 9 — nothing needs you right now.")
+                tldrItem("OAuth blocker cleared; ship decision made this morning.")
+                tldrItem("Launch one-liner locked.")
                 tldrItem("Founding PMM (Naomi) moving to an onsite.")
             }
+            .padding(.top, BriefSpacing.xs)
         }
-        .padding(BriefSpacing.lg)
+        // Card inset, Notion-style: generous, with vertical > horizontal.
+        .padding(.horizontal, BriefSpacing.xxl)   // 20
+        .padding(.vertical, BriefSpacing.xxxl)     // 28
         .frame(maxWidth: .infinity, alignment: .leading)
+        // White/raised surface with a whisper border (Ilwon: this card is
+        // white). Border is near-paper so it reads as a soft edge, not a box.
         .background(
             RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
                 .fill(Color.briefPaperRaised)
                 .overlay(
                     RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
-                        .stroke(Color.briefHairline, lineWidth: 1)
+                        .stroke(Color.briefHairlineSoft, lineWidth: 1)
                 )
         )
     }
@@ -153,182 +177,86 @@ struct LiveContextView: View {
         }
     }
 
-    // MARK: The Live Context document — Dani's data as hierarchical prose
+}
 
-    private var document: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Title lives in the header; body opens at section 1.
-            // Provenance is used sparingly — only the load-bearing fact in a
-            // line carries a source. Plain facts stay plain so the eye rests.
+// MARK: - Sidebar row
+// Draws its own warm-gray selection capsule (NOT the brand accent — yellow is
+// reserved for positive action). `.listRowBackground(.clear)` on the caller
+// suppresses the system's accent highlight, since SwiftUI sidebar selection
+// otherwise follows the global AccentColor and ignores `.tint()`.
 
-            // ── 1. PRIMARY GOAL ───────────────────────────────
-            BriefH2(text: "1. Primary goal — public launch")
-            bullets {
-                bullet("g-target", "Target: ship Highlight's public launch on Tuesday, June 9 — D-12.") {
-                    label("Target:")
-                    " ship Highlight's public launch on "
-                    src(.gmail, "Tuesday, June 9")
-                    " — D-12."
-                }
-                bullet("g-prop", "Value prop: the AI that already knows your work — brief, then act.") {
-                    label("Value prop:")
-                    " the AI that already knows your work — brief, then act, not just recall."
-                }
-                bullet("g-role", "Role: Head of Product, ex-Discord; recruited by Sergei on the ambient-coordination vision.") {
-                    label("Role:")
-                    " Head of Product, ex-Discord — recruited on the ambient-coordination vision."
-                }
-            }
+private struct SidebarRow: View {
+    let label: String
+    let icon: String
+    let isSelected: Bool
+    let onTap: () -> Void
+    @State private var hovering = false
 
-            // ── 2. TOP TIER PRIORITIES ────────────────────────
-            BriefH2(text: "2. Top priorities")
-
-            BriefH3(text: "Launch readiness")
-            bullets {
-                bullet("p1-status", "Status: on track. The Slack-Connection OAuth blocker (HL-1042) is cleared after Adrian's patch.") {
-                    label("Status:")
-                    " on track — the "
-                    src(.linear, "Slack-Connection blocker (HL-1042)")
-                    " is cleared."
-                }
-                bullet("p1-decision", "Decision: shipped the patch (0 failures in 200 runs); the remaining edge case surfaces an honest reconnect prompt.") {
-                    label("Decision:")
-                    " shipped the patch — 0 failures in 200 runs; the edge case now shows an honest reconnect prompt."
-                }
-            }
-
-            BriefH3(text: "External launch messaging")
-            bullets {
-                bullet("p2-line", "One-liner: locked — Highlight briefs you, then moves your work forward.") {
-                    label("One-liner:")
-                    " locked — "
-                    src(.cursor, "Highlight briefs you, then moves your work forward")
-                    "."
-                }
-                bullet("p2-wedge", "Wedge: lead with the proactive brief, not capture — Littlebird and Granola made capture table stakes.") {
-                    label("Wedge:")
-                    " lead with the proactive brief, not capture — rivals made capture table stakes."
-                }
-            }
-
-            // ── 3. ACTIVE PIPELINE ────────────────────────────
-            BriefH2(text: "3. Active pipeline")
-
-            BriefH3(text: "Founding Product Marketer")
-            bullets {
-                bullet("pl-pmm", "Naomi Feldman moving to an onsite — reframed our problem as category creation.") {
-                    label("Naomi Feldman:")
-                    " moving to an "
-                    src(.voice, "onsite")
-                    " — reframed our problem as category creation."
-                }
-                bullet("pl-pmm-next", "Next: confirm the comp band with Sergei after the onsite, not before.") {
-                    label("Next:")
-                    " confirm comp with Sergei after the onsite, not before."
-                }
-            }
-
-            BriefH3(text: "Competitive analysis")
-            bullets {
-                bullet("pl-comp", "Littlebird is the closest rival (ambient on-screen context, $11M) — stops at recall; we go to action.") {
-                    label("Littlebird:")
-                    " closest rival — ambient on-screen context. Stops at recall; we go to action."
-                }
-            }
-
-            // ── 4. CONCLUDED ──────────────────────────────────
-            BriefH2(text: "4. Concluded this week")
-            bullets {
-                bullet("c-oauth", "OAuth ship decision — made the call with real numbers; cleared for launch.") {
-                    label("OAuth ship call:")
-                    " made with real numbers — cleared for launch."
-                }
-                bullet("c-line", "Launch one-liner — locked after the wedge debate with Samantha.") {
-                    label("Launch one-liner:")
-                    " locked after the positioning debate."
-                }
-            }
-
-            // ── 5. USER CONTEXT (permanent) ───────────────────
-            BriefH2(text: "5. User context (permanent)")
-            bullets {
-                bullet("u-bg", "Background: ex-Discord product lead on coordination & community; years synchronizing many people's effort.") {
-                    label("Background:")
-                    " ex-Discord product lead on coordination & community."
-                }
-                bullet("u-phil", "Philosophy: decides with evidence not vibes; leads with the artifact, not the adjective; treats transparency as a feature.") {
-                    label("Philosophy:")
-                    " evidence over vibes; artifact over adjective; transparency as a feature."
-                }
-            }
-
-            // ── Information map ────────────────────────────────
-            BriefH2(text: "Information map")
-            infoMap
+    var body: some View {
+        let emphasized = isSelected || hovering
+        HStack(spacing: BriefSpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(emphasized ? Color.briefInkPrimary : Color.briefInkSecondary)
+                .frame(width: 18)
+            Text(label)
+                .briefStyle(.body)
+                .foregroundStyle(emphasized ? Color.briefInkPrimary : Color.briefInkSecondary)
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, BriefSpacing.sm)
+        .padding(.vertical, BriefSpacing.xs + 1)
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: Information map — people & resources index
-
-    private var infoMap: some View {
-        VStack(alignment: .leading, spacing: BriefMarkdown.bulletTop) {
-            mapRow("Highlight leadership", "Sergei Sorokin (CEO)", "manager; ambient-coordination vision")
-            mapRow("Product engineering", "Parris Khachi (Head of Product Eng)", "launch-blocker partner")
-            mapRow("Design", "Sam Eckert (Head of Design)", "launch-surface partner")
-            mapRow("Operations", "Sarah Wu (Ops)", "recruiting + launch logistics")
-            mapRow("Founding PMM", "Naomi Feldman (candidate)", "moving to onsite")
-            mapRow("Launch plan", "Notion · Public Launch Plan", "checklist + go/no-go")
-            mapRow("Launch blockers", "Linear · Public Launch cycle", "P0/P1 gating Jun 9")
-        }
-        .padding(.top, BriefSpacing.sm)
-    }
-
-    private func mapRow(_ category: String, _ contact: String, _ note: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
-            Text(category)
-                .briefStyle(.bodyMedium)
-                .foregroundStyle(Color.briefInkPrimary)
-                .frame(width: 170, alignment: .leading)
-            Text(contact)
-                .briefStyle(.body)
-                .foregroundStyle(Color.briefInkPrimary)
-            Text("· \(note)")
-                .briefStyle(.body)
-                .foregroundStyle(Color.briefInkTertiary)
-        }
-    }
-
-    // MARK: Bullet helpers (scoped copies of the DS pattern)
-
-    private func bullets<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: BriefMarkdown.bulletTop) {
-            content()
-        }
-        .padding(.top, BriefSpacing.sm)
-    }
-
-    private func bullet(
-        _ id: String,
-        _ text: String,
-        @ProvenanceLineBuilder _ segments: () -> [ProvenanceSegment]
-    ) -> some View {
-        let segs = segments()
-        return SelectableLine(id: id, kind: .line, text: text) {
-            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
-                Text("•")
-                    .briefStyle(.body)
-                    .foregroundStyle(Color.briefInkTertiary)
-                    .frame(width: 8, alignment: .center)
-                ProvenanceLine(segments: segs)
-            }
-        }
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                .fill(isSelected ? Color.briefSelectionActive
+                      : hovering ? Color.briefSelectionRest : .clear)
+        )
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .onTapGesture(perform: onTap)
+        .animation(.briefHover, value: hovering)
     }
 }
 
 // MARK: - Sidebar model
 
-private enum ContextView: String, CaseIterable, Identifiable, Hashable {
+/// One selectable thing in the sidebar — either a Context view or a Variation.
+enum SidebarItem: Hashable {
+    case context(ContextView)
+    case variation(Variation)
+}
+
+/// The priority-presentation variations being compared (see research:
+/// PRIORITIES / read-vs-act methodology).
+enum Variation: String, CaseIterable, Identifiable, Hashable {
+    case brief          // A — BLUF reading document
+    case readAct        // C — read | act split
+    case conversational // D — doc + AI chat rail
+    case spacingLab     // tuning surface for document rhythm
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .brief:          return "A · The Brief"
+        case .readAct:        return "C · Read | Act"
+        case .conversational: return "D · Conversational"
+        case .spacingLab:     return "⚙ Type Editor"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .brief:          return "doc.text"
+        case .readAct:        return "rectangle.split.2x1"
+        case .conversational: return "bubble.left.and.text.bubble.right"
+        case .spacingLab:     return "slider.horizontal.3"
+        }
+    }
+}
+
+enum ContextView: String, CaseIterable, Identifiable, Hashable {
     case liveContext, screenInsights, groupedInsights, connections, privacy
 
     var id: String { rawValue }

@@ -24,6 +24,12 @@ export default defineConfig({
     sidebar: {
       '/brief/': [
         {
+          text: 'Prototype',
+          items: [
+            { text: 'Screen gallery', link: '/brief/gallery' },
+          ],
+        },
+        {
           text: 'Design & scope',
           items: [
             { text: 'Assignment (original brief)', link: '/brief/ASSIGNMENT' },

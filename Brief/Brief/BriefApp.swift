@@ -25,6 +25,7 @@ struct BriefApp: App {
                 .frame(minWidth: 1000, minHeight: 720)
         }
         .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)   // no title text in the bar; keep traffic lights
 
         // 2) Design System — the token / component reference.
         WindowGroup("Design System", id: "design-system") {
