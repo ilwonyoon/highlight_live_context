@@ -84,6 +84,52 @@ Actions 1+2 are both "automatic," but the dividing line is **risk vs. privacy**:
 
 ---
 
+## Filter catalog — what actually lands in each bucket
+
+A plain-language list of *what gets filtered where*, grounded in the 9 sensitive items planted across our mock sources (chrome, clipboard, gmail, meetings, screenshot, slack). The point isn't a per-connector spec — it's a glanceable answer to "so what does silent / visible / user-control actually catch?"
+
+### 🔒 Silent filter — dropped before storage, never mentioned
+
+Universal secrets. Pure pattern-match, no judgment call, no user rule needed. **Detection: auto.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| API keys | `sk-ant-api03-Rj4mZ2…` pasted into the Cursor terminal | clipboard |
+| DB connection strings (with password) | `postgresql://highlight_app:Hk9$wRn2…@db-prod-1…` copied | clipboard |
+| OAuth / bot tokens | a live Slack `xoxb-…` token pasted while debugging | slack |
+| (same class) passwords, private keys (`-----BEGIN … PRIVATE KEY-----`), JWTs (`eyJ…`), 2FA seeds, `.env` / `.pem` / `.aws/credentials` contents | — | any |
+
+Rule of thumb: **if storing it is itself a breach, it's silent.** Never echo the value back — "I removed your key AKIA…" re-leaks it.
+
+### 🟡 Visible filter — auto-excluded, *and the user is told* (calmly)
+
+Personal-but-legitimate. The user isn't hiding these; they just aren't the work context's business. The reassurance line *is* the feature. **Detection: auto.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| Medical / health portals | "Lab Results — MyChart", "Message your care team — MyChart" tabs open mid-workday | chrome |
+| Medical notifications in the work inbox | "Your recent lab results have been posted…" (MyChart email) | gmail |
+| Personal finance behind a work capture | a personal banking tab visible behind an interview-scheduling screenshot | screenshot |
+| (same class) personal banking/investments/taxes, family & personal messages, GDPR Art. 9 special-category data (religion, politics, sexual orientation, home location) | — | any |
+
+Rule of thumb: **legitimate to exist on a work device, none of the work context's business** → exclude *and say so* ("I kept your therapy appointment private"), never the details. Proves it can tell **personal finance (out) from company finance (in)**.
+
+### ✋ User control — only the user/org knows it crosses a line
+
+Looks like ordinary work content; a classifier can't tell. The user draws the line via a **rule**. **Detection: user.**
+
+| Caught | Real example in our data | Source |
+|---|---|---|
+| Candidate compensation in a hiring context | "if she clears the onsite, what's the band? Sergei floated $215k base + 0.4%…" | slack |
+| A colleague's private disclosure shared in confidence | a teammate's family/health situation mentioned in a 1:1 | meetings |
+| (same class) customer PII under DPAs, contract/pricing terms, source-code/IP, internal financials, unreleased roadmap, comp/HR, legal/privilege, M&A, layoffs | — | any |
+
+Rule of thumb: **sensitivity is contextual, not pattern-detectable** ("order #75337" benign vs. "wallet #75337" sensitive — same digits). One *rule* covers infinite future items ("never keep anything about the Acorn account").
+
+> The three buckets map cleanly onto the three actions above: Silent = Action 1, Visible = Action 2, User control = Action 3. This catalog is the "what"; the next section is the "how you steer it."
+
+---
+
 ## Two paths to control: conversational (primary) + manual (fallback)
 
 The three actions define *what* the system does. This section defines *how the user steers it* — and the opinionated bet is that **steering happens through conversation, not a settings panel.**
