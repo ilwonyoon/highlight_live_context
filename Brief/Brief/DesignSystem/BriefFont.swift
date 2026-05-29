@@ -18,6 +18,7 @@ enum SoehneWeight: String {
 
 enum FamilyWeight: String {
     case regular = "Regular"
+    case medium = "Medium"
     case bold = "Bold"
     case heavy = "Heavy"
     case black = "Black"

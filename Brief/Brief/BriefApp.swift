@@ -15,13 +15,12 @@ struct BriefApp: App {
     @StateObject private var selection = SelectionContext()
 
     var body: some Scene {
-        WindowGroup {
-            DesignSystemView()
+        // Live Context panel — primary window on the live-context-panel branch.
+        // (DesignSystemView remains available; swap the view below to see it.)
+        WindowGroup("Live Context") {
+            LiveContextView()
                 .environmentObject(selection)
                 .frame(minWidth: 1000, minHeight: 720)
-                // App accent (sidebar selection, controls) comes from the
-                // Asset Catalog AccentColor — SwiftUI sidebar selection ignores
-                // .tint() and follows the global accent. See Assets.xcassets.
         }
         .windowResizability(.contentSize)
     }

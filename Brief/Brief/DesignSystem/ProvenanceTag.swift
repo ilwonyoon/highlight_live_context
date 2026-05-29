@@ -423,6 +423,12 @@ struct ProvenanceLine: View {
                     Text(s)
                         .briefStyle(bodyToken)
                         .foregroundStyle(Color.briefInkPrimary)
+                case .label(let s):
+                    // Bold lead-in label (e.g. "Status:"). Halbfett weight at
+                    // body size so it reads as a label without breaking line rhythm.
+                    Text(s)
+                        .briefStyle(small ? .headline : .headline)
+                        .foregroundStyle(Color.briefInkPrimary)
                 case .source(let src, let phrase):
                     ProvenanceInline(source: src, phrase: phrase, small: small)
                 case .stacked(let srcs, let phrase):
@@ -435,6 +441,7 @@ struct ProvenanceLine: View {
 
 enum ProvenanceSegment {
     case text(String)
+    case label(String)   // bold lead-in label (e.g. "Status:")
     case source(BriefSource, String)
     case stacked([BriefSource], String)
 }
@@ -444,6 +451,10 @@ enum ProvenanceLineBuilder {
     static func buildBlock(_ components: ProvenanceSegment...) -> [ProvenanceSegment] { components }
     static func buildExpression(_ s: String) -> ProvenanceSegment { .text(s) }
     static func buildExpression(_ s: ProvenanceSegment) -> ProvenanceSegment { s }
+}
+
+func label(_ text: String) -> ProvenanceSegment {
+    .label(text)
 }
 
 func src(_ source: BriefSource, _ phrase: String) -> ProvenanceSegment {

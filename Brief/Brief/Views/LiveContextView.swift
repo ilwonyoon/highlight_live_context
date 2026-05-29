@@ -156,7 +156,7 @@ struct LiveContextView: View {
             .padding(.horizontal, BriefSpacing.md)
             .padding(.vertical, BriefSpacing.xs)
             .background(
-                RoundedRectangle(cornerRadius: BriefRadius.pill, style: .continuous)
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
                     .fill(isSelected ? Color.briefPaperRaised : Color.clear)
             )
             .onTapGesture { selectedHistory = label }
@@ -200,20 +200,20 @@ struct LiveContextView: View {
             BriefH2(text: "1. PRIMARY GOAL: PUBLIC LAUNCH (Top Priority)")
             bullets {
                 bullet("g-target", "Target: Ship Highlight's public launch on Tuesday, June 9 (D-12).") {
-                    boldLabel("Target")
-                    ": Ship Highlight's "
+                    label("Target:")
+                    " ship Highlight's "
                     src(.gmail, "public launch")
-                    " on Tuesday, June 9 — D-12."
+                    " on Tuesday, June 9 (D-12)."
                 }
                 bullet("g-prop", "Core value prop: the AI that already knows your work — brief, then act.") {
-                    boldLabel("Core value prop")
-                    ": the AI that already "
+                    label("Core value prop:")
+                    " the AI that already "
                     src(.voice, "knows your work")
                     " — brief, then act, not just recall."
                 }
                 bullet("g-role", "Role: Head of Product, ex-Discord; recruited by Sergei on the ambient-coordination vision.") {
-                    boldLabel("Role")
-                    ": Head of Product, ex-Discord — recruited by "
+                    label("Role:")
+                    " Head of Product, ex-Discord — recruited by "
                     src(.voice, "Sergei on the ambient-coordination vision")
                     "."
                 }
@@ -225,14 +225,14 @@ struct LiveContextView: View {
             BriefH3(text: "1. Launch readiness")
             bullets {
                 bullet("p1-status", "Status: on track. The Slack-Connection OAuth blocker (HL-1042) is cleared.") {
-                    boldLabel("Status")
-                    ": on track. The "
+                    label("Status:")
+                    " on track. The "
                     stacked([.linear, .github], "Slack-Connection OAuth blocker (HL-1042)")
                     " is cleared after Adrian's patch."
                 }
                 bullet("p1-decision", "Decision: shipped the fix with a visible reconnect state; edge case noted in release notes.") {
-                    boldLabel("Decision")
-                    ": shipped the patch — "
+                    label("Decision:")
+                    " shipped the patch — "
                     src(.voice, "0 failures in 200 runs")
                     ", remaining edge case surfaces an honest reconnect prompt."
                 }
@@ -241,14 +241,14 @@ struct LiveContextView: View {
             BriefH3(text: "2. External launch messaging")
             bullets {
                 bullet("p2-line", "One-liner: locked — Highlight briefs you, then moves your work forward.") {
-                    boldLabel("One-liner")
-                    ": locked — "
+                    label("One-liner:")
+                    " locked — "
                     src(.cursor, "Highlight briefs you, then moves your work forward")
                     "."
                 }
                 bullet("p2-wedge", "Wedge: lead with the proactive brief, not capture — capture is table stakes now.") {
-                    boldLabel("Wedge")
-                    ": lead with the proactive brief, not "
+                    label("Wedge:")
+                    " lead with the proactive brief, not "
                     src(.slack, "capture")
                     " — Littlebird/Granola made capture table stakes."
                 }
@@ -257,14 +257,14 @@ struct LiveContextView: View {
             BriefH3(text: "3. Recruiting")
             bullets {
                 bullet("p3-pmm", "Founding PMM: Naomi Feldman moving to onsite; strong narrative instincts.") {
-                    boldLabel("Founding PMM")
-                    ": "
+                    label("Founding PMM:")
+                    " "
                     src(.voice, "Naomi Feldman")
                     " moving to an onsite — reframed our problem as category creation."
                 }
                 bullet("p3-next", "Next: confirm the band with Sergei after the onsite, not before.") {
-                    boldLabel("Next")
-                    ": confirm comp with Sergei "
+                    label("Next:")
+                    " confirm comp with Sergei "
                     src(.slack, "after the onsite, not before")
                     "."
                 }
@@ -273,9 +273,9 @@ struct LiveContextView: View {
             BriefH3(text: "4. Competitive analysis")
             bullets {
                 bullet("p4-litt", "Littlebird is the closest rival — ambient on-screen context, $11M raised.") {
-                    boldLabel("Littlebird")
-                    ": closest rival — "
-                    src(.chrome, "ambient on-screen context, $11M")
+                    label("Littlebird:")
+                    " closest rival — "
+                    src(.slack, "ambient on-screen context, $11M")
                     ". Stops at recall; we go to action."
                 }
             }
@@ -284,16 +284,16 @@ struct LiveContextView: View {
             BriefH2(text: "3. HOW DANI WORKS (observed over ~9 weeks)")
             bullets {
                 bullet("pat-1", "Decides with evidence, not vibes — defers binary calls until a number lands.") {
-                    boldLabel("Evidence over vibes")
-                    ": defers binary calls until there's a number or a landed artifact."
+                    label("Evidence over vibes:")
+                    " defers binary calls until there's a number or a landed artifact."
                 }
                 bullet("pat-2", "Leads with the artifact, not the adjective — distrusts abstract claims.") {
-                    boldLabel("Artifact over adjective")
-                    ": shows the concrete thing; resists overpromising verbs."
+                    label("Artifact over adjective:")
+                    " shows the concrete thing; resists overpromising verbs."
                 }
                 bullet("pat-3", "Treats transparency as a feature — prefers visible failure states.") {
-                    boldLabel("Transparency as a feature")
-                    ": prefers visible failure states over hidden polish."
+                    label("Transparency as a feature:")
+                    " prefers visible failure states over hidden polish."
                 }
             }
         }

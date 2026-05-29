@@ -12,7 +12,7 @@ enum BriefMarkdown {
 
     /// H1 — the ONE Family-serif moment per screen. Each page's top title
     /// (e.g. "Color", "Today's Brief") is the single brand-typography hit;
-    /// everything else is Söhne. (Family heroMedium = 28pt Bold.)
+    /// everything else is Söhne. (Family heroMedium = 28pt Medium.)
     static let h1Token: BriefTypeToken = .heroMedium
     /// H2 — top-level section ("1. PRIMARY GOAL"). Söhne Halbfett 17pt.
     static let h2Token: BriefTypeToken = .title3
