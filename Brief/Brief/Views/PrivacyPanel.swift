@@ -78,26 +78,30 @@ struct PrivacyPanel: View {
     /// rounds all four corners; an in-window slide-over could pass 0.
     var cornerRadius: CGFloat = BriefRadius.panel
 
+    /// The privacy state this panel reads and edits. Mock for now; the wish→rule
+    /// interaction appends to `state.rules` (step 5).
+    @State private var state = PrivacyState.mock
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             Divider()
                 .overlay(Color.briefHairlineSoft)
 
-            // Placeholder body — replaced in step 3 (proactive state brief),
-            // step 4 (composer), step 5 (conversation + wish→rule).
-            VStack(alignment: .leading, spacing: BriefSpacing.md) {
-                Text("Privacy panel — slide-over shell")
-                    .briefStyle(.body)
-                    .foregroundStyle(Color.briefInkSecondary)
-                Text("Proactive state brief, conversation, and the privacy-scoped composer arrive in the next steps.")
-                    .briefStyle(.bodySmall)
-                    .foregroundStyle(Color.briefInkTertiary)
-                    .fixedSize(horizontal: false, vertical: true)
+            // The proactive brief — on entry the assistant has ALREADY laid out
+            // how protection is working right now (not a passive settings list).
+            ScrollView {
+                VStack(alignment: .leading, spacing: BriefSpacing.xl) {
+                    assistantOpening
+                    PrivacyBucketCard(kind: .automatic, state: state)
+                    PrivacyBucketCard(kind: .yourRules, state: state)
+                    Spacer(minLength: BriefSpacing.lg)
+                }
+                .padding(.horizontal, BriefSpacing.xxl)
+                .padding(.top, BriefSpacing.xl)
+                .padding(.bottom, BriefSpacing.xxl)
             }
-            .padding(BriefSpacing.xxl)
-
-            Spacer(minLength: 0)
+            .scrollIndicators(.visible)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         // Same warm reading-paper as the Live Context document body (Ilwon: the
@@ -130,6 +134,24 @@ struct PrivacyPanel: View {
         }
         .padding(.horizontal, BriefSpacing.xxl)
         .padding(.vertical, BriefSpacing.xl)
+    }
+
+    // MARK: Assistant opening — the proactive, conversational lede
+
+    /// The first "turn": a plain-language summary so the otherwise-invisible
+    /// model (Automatic protections) is legible the moment you arrive — and a
+    /// nudge that you can change any of it just by saying so.
+    private var assistantOpening: some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+            Text("Here's how I'm protecting you right now.")
+                .briefStyle(.title3)
+                .foregroundStyle(Color.briefInkPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Two things I handle automatically, and the lines you've drawn yourself. Tell me what to change — you don't have to touch a setting.")
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 
