@@ -1,0 +1,369 @@
+import SwiftUI
+
+// MARK: - Live Context panel
+// Recreates Highlight's "Live Context" screen in the Brief design system,
+// rendered from Dani Reyes' mock data. Architecture: sidebar (context views)
+// + a reading-first document body. The body is the hero — a single living
+// document, not a feed of panes. Max-width is fixed (~700pt) so prose stays
+// readable on any window width (Notion-style). Section separation is by
+// spacing only — no background bands. Inline provenance marks which facts
+// came from which Connection.
+//
+// Action model (line-select → chat) is intentionally deferred; lines are
+// wrapped in SelectableLine so it can be layered on later.
+
+struct LiveContextView: View {
+    @State private var selectedView: ContextView = .liveContext
+    @State private var selectedHistory: String = "Latest"
+
+    var body: some View {
+        NavigationSplitView {
+            sidebar
+                .navigationSplitViewColumnWidth(min: 220, ideal: 248, max: 300)
+        } detail: {
+            SelectionSurface {
+                content
+            }
+            .background(Color.briefPaper)
+        }
+    }
+
+    // MARK: Sidebar
+
+    private var sidebar: some View {
+        List(selection: $selectedView) {
+            Section {
+                ForEach(ContextView.allCases) { view in
+                    Label(view.label, systemImage: view.icon)
+                        .tag(view)
+                }
+            } header: {
+                Text("Context")
+                    .briefStyle(.meta)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+        }
+        .listStyle(.sidebar)
+    }
+
+    // MARK: Content (the document)
+
+    private var content: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                header
+                historyBar
+                    .padding(.top, BriefSpacing.xl)
+                latestUpdateCard
+                    .padding(.top, BriefSpacing.xl)
+                document
+                    .padding(.top, BriefSpacing.xxxl)
+                Spacer(minLength: BriefSpacing.mega)
+            }
+            // The readability lever: cap body width and center it.
+            .frame(maxWidth: BriefLayout.readingWidth, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, BriefSpacing.huge)
+            .padding(.top, BriefSpacing.xxl)
+        }
+        .scrollIndicators(.visible)
+    }
+
+    // MARK: Header — cleaned up + always-visible privacy chip
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: BriefSpacing.lg) {
+            // Workspace identity
+            HStack(alignment: .center, spacing: BriefSpacing.md) {
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(Color.briefPaperSunken)
+                    .frame(width: 36, height: 36)
+                    .overlay(
+                        Image(systemName: "folder")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundStyle(Color.briefInkSecondary)
+                    )
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Live Context")
+                        .briefStyle(.title2)
+                        .foregroundStyle(Color.briefInkPrimary)
+                    Text("Dani Reyes · 24 highlights")
+                        .briefStyle(.monoMeta)
+                        .foregroundStyle(Color.briefInkTertiary)
+                }
+            }
+
+            Spacer()
+
+            // Always-visible privacy/trust signal (P0 hero). Casual users
+            // read it for peace of mind; power users tap into detail.
+            privacyChip
+        }
+    }
+
+    // The trust chip: a calm, recurring "here's what I protected" signal.
+    // Aggregate counts only — never the content (the secret/medical detail).
+    private var privacyChip: some View {
+        HStack(spacing: BriefSpacing.sm) {
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.briefHighlightDeep)
+            Text("2 secrets kept out · 4 personal · 2 rules")
+                .briefStyle(.monoLabel)
+                .foregroundStyle(Color.briefInkSecondary)
+        }
+        .padding(.horizontal, BriefSpacing.lg)
+        .padding(.vertical, BriefSpacing.sm)
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color.briefHighlightWash.opacity(0.5))
+                .overlay(Capsule(style: .continuous).stroke(Color.briefHairline, lineWidth: 1))
+        )
+    }
+
+    // MARK: History timeline
+
+    private var historyBar: some View {
+        HStack(spacing: BriefSpacing.sm) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(Color.briefInkTertiary)
+            Text("History")
+                .briefStyle(.label)
+                .foregroundStyle(Color.briefInkSecondary)
+                .padding(.trailing, BriefSpacing.xs)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: BriefSpacing.sm) {
+                    ForEach(historyPoints, id: \.self) { point in
+                        historyChip(point)
+                    }
+                }
+            }
+        }
+        .padding(BriefSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                .fill(Color.briefPaperSunken.opacity(0.6))
+        )
+    }
+
+    private func historyChip(_ label: String) -> some View {
+        let isSelected = label == selectedHistory
+        return Text(label)
+            .briefStyle(.monoMeta)
+            .foregroundStyle(isSelected ? Color.briefInkPrimary : Color.briefInkTertiary)
+            .padding(.horizontal, BriefSpacing.md)
+            .padding(.vertical, BriefSpacing.xs)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.pill, style: .continuous)
+                    .fill(isSelected ? Color.briefPaperRaised : Color.clear)
+            )
+            .onTapGesture { selectedHistory = label }
+    }
+
+    // MARK: Latest-update card
+
+    private var latestUpdateCard: some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+            HStack(spacing: BriefSpacing.sm) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.briefHighlightDeep)
+                Text("Latest update")
+                    .briefStyle(.label)
+                    .foregroundStyle(Color.briefInkPrimary)
+                Text("5/28/2026, 9:42 AM")
+                    .briefStyle(.monoMeta)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+            Text("Dani locked the OAuth ship decision and the launch one-liner this morning. The Slack-Connection blocker is cleared for Jun 9, and the founding-PMM hire (Naomi) is moving to an onsite. Launch is on track at D-12.")
+                .briefStyle(.bodySmall)
+                .foregroundStyle(Color.briefInkPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(BriefSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                .fill(Color.briefHighlightWash.opacity(0.55))
+        )
+    }
+
+    // MARK: The Live Context document — Dani's data as hierarchical prose
+
+    private var document: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            BriefH1(text: "Live Context: Dani Reyes")
+
+            // 1. PRIMARY GOAL
+            BriefH2(text: "1. PRIMARY GOAL: PUBLIC LAUNCH (Top Priority)")
+            bullets {
+                bullet("g-target", "Target: Ship Highlight's public launch on Tuesday, June 9 (D-12).") {
+                    boldLabel("Target")
+                    ": Ship Highlight's "
+                    src(.gmail, "public launch")
+                    " on Tuesday, June 9 — D-12."
+                }
+                bullet("g-prop", "Core value prop: the AI that already knows your work — brief, then act.") {
+                    boldLabel("Core value prop")
+                    ": the AI that already "
+                    src(.voice, "knows your work")
+                    " — brief, then act, not just recall."
+                }
+                bullet("g-role", "Role: Head of Product, ex-Discord; recruited by Sergei on the ambient-coordination vision.") {
+                    boldLabel("Role")
+                    ": Head of Product, ex-Discord — recruited by "
+                    src(.voice, "Sergei on the ambient-coordination vision")
+                    "."
+                }
+            }
+
+            // 2. TOP TIER PRIORITIES
+            BriefH2(text: "2. TOP TIER PRIORITIES (Ranked)")
+
+            BriefH3(text: "1. Launch readiness")
+            bullets {
+                bullet("p1-status", "Status: on track. The Slack-Connection OAuth blocker (HL-1042) is cleared.") {
+                    boldLabel("Status")
+                    ": on track. The "
+                    stacked([.linear, .github], "Slack-Connection OAuth blocker (HL-1042)")
+                    " is cleared after Adrian's patch."
+                }
+                bullet("p1-decision", "Decision: shipped the fix with a visible reconnect state; edge case noted in release notes.") {
+                    boldLabel("Decision")
+                    ": shipped the patch — "
+                    src(.voice, "0 failures in 200 runs")
+                    ", remaining edge case surfaces an honest reconnect prompt."
+                }
+            }
+
+            BriefH3(text: "2. External launch messaging")
+            bullets {
+                bullet("p2-line", "One-liner: locked — Highlight briefs you, then moves your work forward.") {
+                    boldLabel("One-liner")
+                    ": locked — "
+                    src(.cursor, "Highlight briefs you, then moves your work forward")
+                    "."
+                }
+                bullet("p2-wedge", "Wedge: lead with the proactive brief, not capture — capture is table stakes now.") {
+                    boldLabel("Wedge")
+                    ": lead with the proactive brief, not "
+                    src(.slack, "capture")
+                    " — Littlebird/Granola made capture table stakes."
+                }
+            }
+
+            BriefH3(text: "3. Recruiting")
+            bullets {
+                bullet("p3-pmm", "Founding PMM: Naomi Feldman moving to onsite; strong narrative instincts.") {
+                    boldLabel("Founding PMM")
+                    ": "
+                    src(.voice, "Naomi Feldman")
+                    " moving to an onsite — reframed our problem as category creation."
+                }
+                bullet("p3-next", "Next: confirm the band with Sergei after the onsite, not before.") {
+                    boldLabel("Next")
+                    ": confirm comp with Sergei "
+                    src(.slack, "after the onsite, not before")
+                    "."
+                }
+            }
+
+            BriefH3(text: "4. Competitive analysis")
+            bullets {
+                bullet("p4-litt", "Littlebird is the closest rival — ambient on-screen context, $11M raised.") {
+                    boldLabel("Littlebird")
+                    ": closest rival — "
+                    src(.chrome, "ambient on-screen context, $11M")
+                    ". Stops at recall; we go to action."
+                }
+            }
+
+            // 3. PATTERNS — from the compressed history
+            BriefH2(text: "3. HOW DANI WORKS (observed over ~9 weeks)")
+            bullets {
+                bullet("pat-1", "Decides with evidence, not vibes — defers binary calls until a number lands.") {
+                    boldLabel("Evidence over vibes")
+                    ": defers binary calls until there's a number or a landed artifact."
+                }
+                bullet("pat-2", "Leads with the artifact, not the adjective — distrusts abstract claims.") {
+                    boldLabel("Artifact over adjective")
+                    ": shows the concrete thing; resists overpromising verbs."
+                }
+                bullet("pat-3", "Treats transparency as a feature — prefers visible failure states.") {
+                    boldLabel("Transparency as a feature")
+                    ": prefers visible failure states over hidden polish."
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: Bullet helpers (scoped copies of the DS pattern)
+
+    private func bullets<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: BriefMarkdown.bulletTop) {
+            content()
+        }
+        .padding(.top, BriefSpacing.sm)
+    }
+
+    private func bullet(
+        _ id: String,
+        _ text: String,
+        @ProvenanceLineBuilder _ segments: () -> [ProvenanceSegment]
+    ) -> some View {
+        let segs = segments()
+        return SelectableLine(id: id, kind: .line, text: text) {
+            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.sm) {
+                Text("•")
+                    .briefStyle(.body)
+                    .foregroundStyle(Color.briefInkTertiary)
+                    .frame(width: 8, alignment: .center)
+                ProvenanceLine(segments: segs)
+            }
+        }
+    }
+}
+
+// MARK: - Sidebar model
+
+private enum ContextView: String, CaseIterable, Identifiable, Hashable {
+    case liveContext, screenInsights, groupedInsights, connections, privacy
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .liveContext:     return "Live Context"
+        case .screenInsights:  return "Screen Insights"
+        case .groupedInsights: return "Grouped Insights"
+        case .connections:     return "Connections"
+        case .privacy:         return "Privacy"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .liveContext:     return "waveform.path.ecg"
+        case .screenInsights:  return "display"
+        case .groupedInsights: return "rectangle.3.group"
+        case .connections:     return "link"
+        case .privacy:         return "checkmark.shield"
+        }
+    }
+}
+
+// MARK: - History points (mock)
+
+private let historyPoints = [
+    "Latest", "Today 9:42 AM", "Yesterday 6:18 PM", "May 27 5:05 PM",
+    "May 27 12:46 PM", "May 27 9:03 AM",
+]
+
+#Preview {
+    LiveContextView()
+        .environmentObject(SelectionContext())
+        .frame(width: 1100, height: 820)
+}

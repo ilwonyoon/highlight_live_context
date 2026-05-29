@@ -42,11 +42,11 @@ extension Color {
     /// identity without being too bright on warm paper.
     static let briefHighlightDeep   = Color(red: 0.439, green: 0.859, blue: 0.016) // #70DB04 chartreuse
 
-    /// App accent — drives system selection (sidebar rows, controls). The deep
-    /// chartreuse reads as our brand while still giving white-text contrast as
-    /// a selection fill. (The bright E7FE0B highlight stays reserved for
-    /// AI-marked-as-mattering content; accent is the toned-down cousin.)
-    static let briefAccent          = Color(red: 0.439, green: 0.859, blue: 0.016) // == highlightDeep
+    /// App accent — the brand highlight E7FE0B. Drives system selection
+    /// (sidebar rows, controls). NOTE: as a selection fill this needs DARK
+    /// text on top (highlightInk), since white on fluorescent yellow is
+    /// unreadable — handle at the row level if macOS forces white.
+    static let briefAccent          = Color(red: 0.906, green: 0.996, blue: 0.043) // == highlight E7FE0B
 
     // Borders / dividers
     static let briefDivider  = Color(red: 0.890, green: 0.875, blue: 0.847)

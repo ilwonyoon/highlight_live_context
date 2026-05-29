@@ -6,6 +6,11 @@ import CoreGraphics
 
 enum BriefLayout {
 
+    /// Max width for the reading column (the Brief document body). Caps line
+    /// length so prose stays readable on wide windows — the single biggest
+    /// readability lever (Notion/Stripe-docs style). ~78–88 chars at 14pt.
+    static let readingWidth: CGFloat = 700
+
     /// Inline icon sizes used inside body prose / provenance tags.
     enum InlineIcon {
         static let small:   CGFloat = 11

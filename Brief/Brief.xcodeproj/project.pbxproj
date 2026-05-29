@@ -14,8 +14,6 @@
 		083FE712247AABA0F79D41EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACBF80FC85DD2581E35A5F73 /* Assets.xcassets */; };
 		0F7FCE7D1B5405FA34E2F12C /* ChatComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2351246BBE0224CBF23E370D /* ChatComposer.swift */; };
 		0FF001A575F9BC515E6F9BAB /* BriefIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 239BA6C11B9F3029C3E756EA /* BriefIcon.swift */; };
-		141F86FA1F89E392958CCA49 /* session-end.json in Resources */ = {isa = PBXBuildFile; fileRef = C226BFF4695B343B5830B26F /* session-end.json */; };
-		1C4363096AC61DFCAC00FAF6 /* session-end.json in Resources */ = {isa = PBXBuildFile; fileRef = 26AB736EF37006D4AFC4A3EF /* session-end.json */; };
 		265FDB92F53A475CB416EE84 /* ProvenancePopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */; };
 		2C031C886B22F7271BF7E6B7 /* BriefApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45DD47D3327320C5CC93B85 /* BriefApp.swift */; };
 		44FA6F684489E41C4CEF05A1 /* Mocks in Resources */ = {isa = PBXBuildFile; fileRef = 148B8D29124CE99F14142CFD /* Mocks */; };
@@ -58,7 +56,6 @@
 		2351246BBE0224CBF23E370D /* ChatComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatComposer.swift; sourceTree = "<group>"; };
 		239BA6C11B9F3029C3E756EA /* BriefIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefIcon.swift; sourceTree = "<group>"; };
 		240320E3F565DBB9F2D34F16 /* SelectionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionContext.swift; sourceTree = "<group>"; };
-		26AB736EF37006D4AFC4A3EF /* session-end.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "session-end.json"; sourceTree = "<group>"; };
 		29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContextStore+Verify.swift"; sourceTree = "<group>"; };
 		2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenancePopover.swift; sourceTree = "<group>"; };
 		410302074F14E65F26427829 /* LiveContextStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextStore.swift; sourceTree = "<group>"; };
@@ -77,7 +74,6 @@
 		AD99B54395E7ECC596D7F78B /* LiveContextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextEvent.swift; sourceTree = "<group>"; };
 		B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefLayout.swift; sourceTree = "<group>"; };
 		B94690AA4C412EEBDD0DEC68 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fonts; path = Brief/Resources/Fonts; sourceTree = SOURCE_ROOT; };
-		C226BFF4695B343B5830B26F /* session-end.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "session-end.json"; sourceTree = "<group>"; };
 		C7CEEC45D8216AFCD9F08011 /* CaptureModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureModels.swift; sourceTree = "<group>"; };
 		CD2A54ECE203BF2422314CFB /* BriefColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefColor.swift; sourceTree = "<group>"; };
 		D711534F2CB90256C209C64A /* ProvenanceTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenanceTag.swift; sourceTree = "<group>"; };
@@ -90,14 +86,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		2915DB6EF5CDB1C7FA97FEFA /* .claude */ = {
-			isa = PBXGroup;
-			children = (
-				76B4647A525994E05319D026 /* memory */,
-			);
-			path = .claude;
-			sourceTree = "<group>";
-		};
 		33DC5F19E12BBB1AB45C0BF1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -135,14 +123,6 @@
 			path = DesignSystem;
 			sourceTree = "<group>";
 		};
-		632B9AE242EEA99BF45E23F0 /* .claude */ = {
-			isa = PBXGroup;
-			children = (
-				ABCBBE439902A8C286D80AB8 /* memory */,
-			);
-			path = .claude;
-			sourceTree = "<group>";
-		};
 		6D121E9BF25EC1F5647A8F6A /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
@@ -166,20 +146,11 @@
 			);
 			sourceTree = "<group>";
 		};
-		76B4647A525994E05319D026 /* memory */ = {
-			isa = PBXGroup;
-			children = (
-				26AB736EF37006D4AFC4A3EF /* session-end.json */,
-			);
-			path = memory;
-			sourceTree = "<group>";
-		};
 		78053B9C7D6B016AAE9F8B29 /* Brief */ = {
 			isa = PBXGroup;
 			children = (
 				ACBF80FC85DD2581E35A5F73 /* Assets.xcassets */,
 				F45DD47D3327320C5CC93B85 /* BriefApp.swift */,
-				632B9AE242EEA99BF45E23F0 /* .claude */,
 				4C2F30CD198000D9EC8C50D1 /* DesignSystem */,
 				6D121E9BF25EC1F5647A8F6A /* Mocks */,
 				33DC5F19E12BBB1AB45C0BF1 /* Resources */,
@@ -188,21 +159,12 @@
 			path = Brief;
 			sourceTree = "<group>";
 		};
-		ABCBBE439902A8C286D80AB8 /* memory */ = {
-			isa = PBXGroup;
-			children = (
-				C226BFF4695B343B5830B26F /* session-end.json */,
-			);
-			path = memory;
-			sourceTree = "<group>";
-		};
 		B52AED8AB0A9B78AADA0F9FB /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				A18A1010220C9121DFAD767A /* DesignSystemView.swift */,
 				F8E79284697F81273A384FE9 /* DSComponents.swift */,
 				A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */,
-				2915DB6EF5CDB1C7FA97FEFA /* .claude */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -278,8 +240,6 @@
 				7F469B37931CD2146F53CC56 /* Fonts in Resources */,
 				8397289E122FF6486BC3837A /* Icons in Resources */,
 				44FA6F684489E41C4CEF05A1 /* Mocks in Resources */,
-				141F86FA1F89E392958CCA49 /* session-end.json in Resources */,
-				1C4363096AC61DFCAC00FAF6 /* session-end.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

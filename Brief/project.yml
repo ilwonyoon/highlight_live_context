@@ -29,12 +29,16 @@ targets:
           - "Resources/Icons/**"
           - "Resources/Mocks/**"
           - "Info.plist"
+          - "**/.claude/**"
+          - "**/.claude"
       - path: Brief/Resources/Fonts
         type: folder
       - path: Brief/Resources/Icons
         type: folder
+        excludes: [".claude", ".claude/**"]
       - path: Brief/Resources/Mocks
         type: folder
+        excludes: [".claude", ".claude/**"]
     info:
       path: Brief/Info.plist
       properties:
