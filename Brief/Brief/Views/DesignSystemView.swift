@@ -26,11 +26,16 @@ struct DesignSystemView: View {
         .background(Color.briefPaper)
     }
 
-    // MARK: Sidebar background — pure macOS liquid glass (the .sidebar material
-    // that samples behind the window). No tint overlay; this is the native
-    // glass look. Requires the window to be non-opaque (see BriefApp).
+    // MARK: Sidebar background — real macOS 26 Liquid Glass (NSGlassEffectView).
+    // Falls back to the legacy .sidebar vibrancy material on older systems.
+    // Requires the host window to be non-opaque (see BriefApp).
+    @ViewBuilder
     private var sidebarBackground: some View {
-        VisualEffectView(material: .sidebar, blending: .behindWindow)
+        if #available(macOS 26.0, *) {
+            LiquidGlassView(cornerRadius: 0, tint: nil)
+        } else {
+            VisualEffectView(material: .sidebar, blending: .behindWindow)
+        }
     }
 
     // MARK: Sidebar (custom — design-system controlled, no native List chrome)

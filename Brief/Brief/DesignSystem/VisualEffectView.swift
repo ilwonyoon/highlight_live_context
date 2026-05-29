@@ -29,3 +29,33 @@ struct VisualEffectView: NSViewRepresentable {
         view.isEmphasized = emphasized
     }
 }
+
+// MARK: - LiquidGlassView
+// The REAL macOS 26 Liquid Glass material (AppKit's NSGlassEffectView).
+// SwiftUI's `.glassEffect()` modifier is absent from this SDK, but the
+// AppKit class is present — so we bridge it. Used as a background layer
+// (no contentView), optionally tinted to keep it in our warm family.
+//
+// `available(macOS 26.0)` — caller gates with #available and falls back to
+// VisualEffectView on older systems.
+
+@available(macOS 26.0, *)
+struct LiquidGlassView: NSViewRepresentable {
+    var cornerRadius: CGFloat = 0
+    var tint: NSColor? = nil
+    var clear: Bool = false
+
+    func makeNSView(context: Context) -> NSGlassEffectView {
+        let view = NSGlassEffectView()
+        view.cornerRadius = cornerRadius
+        view.tintColor = tint
+        view.style = clear ? .clear : .regular
+        return view
+    }
+
+    func updateNSView(_ view: NSGlassEffectView, context: Context) {
+        view.cornerRadius = cornerRadius
+        view.tintColor = tint
+        view.style = clear ? .clear : .regular
+    }
+}
