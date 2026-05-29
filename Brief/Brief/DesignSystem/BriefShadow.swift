@@ -20,6 +20,13 @@ enum BriefShadow {
         color: .black.opacity(0.20),
         radius: 32, x: 0, y: 14
     )
+    /// Slide-over panel — cast along the *leading* edge so the panel reads as
+    /// lifted off the window it covers. (Caller applies x manually for a
+    /// trailing-anchored panel: a negative x throws the shadow left.)
+    static let panel = ShadowSpec(
+        color: .black.opacity(0.18),
+        radius: 24, x: 0, y: 0
+    )
 }
 
 struct ShadowSpec {

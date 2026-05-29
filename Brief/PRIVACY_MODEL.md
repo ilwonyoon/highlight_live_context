@@ -2,19 +2,46 @@
 
 > The privacy model for the P0 hero (see `PRIORITIES.md`). Grounded in research (3 parallel passes, 2026-05-28) into what enterprises/individuals refuse to have captured, what's legally off-limits, and how real products handle it. Sources cited inline.
 >
-> **Core principle (Ilwon's):** it's not about whether data is *objectively* sensitive — it's whether the *user feels* it is, and therefore **the control belongs to the user.** The system's job is to make that control effortless. This also resolves the assignment's tension: privacy is the P0 hero, but expressed as *teaching the assistant what to remember* — not a control-panel dashboard (which is the "cognitive overload" the assignment warns against).
+> **Core principle (Ilwon's):** it's not about whether data is *objectively* sensitive — it's whether the *user feels* it is, so **control belongs to the user, and the system's whole job is to make that control effortless.** This resolves the assignment's tension: privacy is the P0 hero, expressed as *teaching the assistant what to remember* — not a control-panel dashboard (the "cognitive overload" the brief warns against).
+>
+> **The overriding design mandate (don't lose this):** every privacy decision is judged by one question — *is it dead-simple for the user to understand and to set?* That's not a nicety; it's the mechanism of the whole product. The flywheel is **earn trust → give control → unlock more permission → make Brief more useful.** If understanding "what's protected" takes a manual, or changing it takes hunting through settings, trust never compounds and permissions never expand. So: as few user-facing concepts as possible, plain language, and steering by conversation. Complexity lives in the model; the UI stays a sentence.
 
-## The frame: three actions, not three categories
+## The frame: two axes, and only two things the user sees
 
-The model is defined by **what Brief does**, not by data taxonomy. Every captured signal resolves into one of three actions. The split is validated by Apple's own model — passwords are protected *silently* ("never revealed… not even to Apple") while blocked trackers are *shown* in a Privacy Report ([Apple Privacy](https://www.apple.com/privacy/features/)): **protect-silently for the toxic, show-the-receipts for the legitimate-but-private.**
+Earlier drafts split this into three "actions" (silent / visible / user-control). That's still useful *inside the system*, but it over-exposes the user. Cleaner model: privacy is **two independent questions**, and the user only ever sees **two buckets**.
 
-| Action | What it covers | Detection | UX | Serves |
-|---|---|---|---|---|
-| **1. Silent filter** | Universal secrets — never store, never mention | Auto (high-precision) | Invisible. Dropped before storage. | Everyone (safety) |
-| **2. Visible filter** | Personal-but-legitimate — auto-exclude *and say so* | Auto (categorical) | "Kept this private for you" — calm, in the brief | Casual / peace of mind |
-| **3. User control** | Context-sensitive — only the user/org knows | Can't auto-detect | User draws the line via *rules* | Power / granular control |
+**Axis 1 — WHAT gets filtered (who knows the boundary):**
+- **Automatic** — the system can recognize it (universal secrets + categorical personal info). The user does nothing.
+- **Your rules** — only the user/org knows it's sensitive (context-dependent). The user draws the line, by conversation.
 
-Actions 1+2 are both "automatic," but the dividing line is **risk vs. privacy**: a credential is an *active breach* if stored, so it's dropped silently (even saying "I removed your AWS key AKIA…" re-exposes it); medical info is *legitimate and private*, so the user wants to *know* it was protected. Action 3 is the residue auto-detection structurally cannot reach.
+**Axis 2 — HOW LONG it's kept (retention):**
+- **Never** — not even stored (secrets; storing *is* the breach).
+- **Forever** — normal work context, kept until the user says otherwise.
+- **Until N days** — useful now, noise later; auto-expires. (Not sensitive — just has a shelf life.)
+
+These axes are independent: an "Automatic" item can be Never-kept (a secret) or Forever-kept-then-protected (a medical note); a "Your rules" item can be excluded outright *or* set to auto-expire.
+
+### What the user actually sees — exactly two buckets
+
+| User sees | = | Means |
+|---|---|---|
+| **🛡 Automatic** | Axis-1 Automatic | "I handle this for you." Secrets and personal info are kept out without you lifting a finger. |
+| **✋ Your rules** | Axis-1 Your rules | "You drew these lines." Each rule says *what* and *for how long* (exclude, or forget after N days). |
+
+That's the entire user-facing taxonomy. Two words. Casual users live in **Automatic** (and rarely look); power users add **Your rules**. Retention isn't a third bucket — it's just an option *on* a rule ("forget after 14 days").
+
+### The silent/visible distinction — an internal attribution detail, not a user concept
+
+Inside **Automatic**, two things differ only in *attribution*, not mechanism (one filter engine, per-category policy flags):
+
+| | echo the value back? | tell the user it happened? | store any metadata? |
+|---|---|---|---|
+| **secrets** (API keys, passwords) | ❌ never (re-leaks it) | ❌ silent (a non-identifying aggregate at most) | ❌ nothing stored |
+| **personal info** (health, personal finance, family) | ❌ never the details | ✅ calm reassurance ("kept your appointment private") | ✅ enough to say *that* it was protected |
+
+So "silent vs. visible" = two policy flags (`echoSafe`, `notify`) on the same engine, driven by detection category. **Not two separate systems, and never surfaced to the user as a choice.** Validated by Apple's own split — passwords protected *silently* ("never revealed… not even to Apple"), trackers *shown* in a Privacy Report ([Apple Privacy](https://www.apple.com/privacy/features/)): protect-silently for the toxic, show-the-receipts for the legitimate-but-private. It's a correctness detail, not a taxonomy the user navigates.
+
+> **Note on the sections below.** The detailed write-ups still use the original "Action 1 / 2 / 3" headings — read them as: Action 1 = Automatic/secrets/Never, Action 2 = Automatic/personal-info, Action 3 = Your rules. The two-axis frame above is the canonical user model; the action sections are the implementation detail.
 
 ---
 
@@ -126,7 +153,29 @@ Looks like ordinary work content; a classifier can't tell. The user draws the li
 
 Rule of thumb: **sensitivity is contextual, not pattern-detectable** ("order #75337" benign vs. "wallet #75337" sensitive — same digits). One *rule* covers infinite future items ("never keep anything about the Acorn account").
 
-> The three buckets map cleanly onto the three actions above: Silent = Action 1, Visible = Action 2, User control = Action 3. This catalog is the "what"; the next section is the "how you steer it."
+> This catalog is the WHAT axis. The HOW-LONG axis (below) is orthogonal — it applies to anything that *is* kept.
+
+---
+
+## Retention — the HOW-LONG axis (auto-expire)
+
+Filtering answers "is this kept at all?" Retention answers "for how long?" — a separate question that applies to everything that survives the filter. Three settings:
+
+| Retention | For | Example |
+|---|---|---|
+| **Never** | secrets — storing *is* the breach | API key, password |
+| **Forever** (default) | durable work context | your role, ongoing projects, key decisions |
+| **Until N days** | useful now, noise later — *not sensitive, just perishable* | this sprint's debug notes, a one-off research tab, a temporary log |
+
+**Why this matters to trust (and the flywheel).** "Auto-expire" isn't a safety control like secret-dropping — it answers a *different* anxiety: **"is everything I let you see piling up forever?"** Telling the user "I keep what's useful and let the rest fade" removes the fear of infinite accumulation, which is one more reason to connect the next source. Trust comes from *both* "you protect me" **and** "you don't hoard me."
+
+**Where it lives in the user model:** retention is **not a third bucket** — it's an *option on a rule*. The user expresses it the same way they express anything else — by talking:
+> User: "Keep the Falcon migration notes for two weeks, then forget them."
+> Brief: "Done — anything about the Falcon migration auto-expires 14 days after it's captured."
+
+So a **rule = { what, how-long }**: exclude outright, or keep-then-expire. The default for everything uncovered is Forever; the user only sets expiry where a shelf life makes sense. (This keeps the simplicity mandate intact — no retention dial to learn; you just say it.)
+
+> **In our data — candidates for auto-expire:** transient working context like sprint scratch notes or a one-off research tab. None are *sensitive*; they just shouldn't accumulate. (Distinct from the secrets/personal/confidential items, which are about *filtering*, not *expiry*.)
 
 ---
 
@@ -174,7 +223,7 @@ For users who *do* want to drive by hand, a conventional **Privacy settings** sc
 ## How this answers the assignment
 
 - **"Edit and curate / delete sensitive / annotate / flag"** → curation = drawing privacy boundaries (Action 3) + confirming auto-protections (Action 2). Reframed as *teaching what to remember*, not data hygiene.
-- **"Both power users AND casual users"** → the three actions ARE the split: casual lives on Actions 1+2 (automatic safety + reassurance = peace of mind, hands-off); power adds Action 3 (rules = granular control). Same privacy model, two depths.
+- **"Both power users AND casual users"** → the two user-facing buckets ARE the split: casual lives entirely in **Automatic** (safety + reassurance = peace of mind, hands-off); power adds **Your rules** (what to filter + how long to keep). Same model, two depths — and they're the same person early vs. late on the trust ladder, not two personas.
 - **"Complexity without complexity"** → rules-not-items + progressive disclosure + sensible defaults; Action 1 is invisible, Action 2 is one calm line, Action 3 is ~3 default controls.
 - **"Scales to thousands"** → rules scale (one rule = infinite items); compression handles volume; auto-actions mean the user rarely touches individual items.
 - **The honesty principle** (the Recall lesson) → never promise blanket filtering; surface specific, falsifiable protections with frictionless override. This is itself a "thoughtful trade-off" to articulate.

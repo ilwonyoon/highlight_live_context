@@ -15,4 +15,9 @@ extension Animation {
     static let briefSlow: Animation = .easeInOut(duration: BriefDuration.slow)
     /// Snappy spring for tactile interactions (popover present, card lift).
     static let briefSpring: Animation = .spring(response: 0.30, dampingFraction: 0.80)
+    /// Panel slide-IN — a slide-over entering from the window edge (gentle
+    /// spring with mass). Pair with `.briefPanelOut` for dismissal.
+    static let briefPanel: Animation = .spring(response: BriefDuration.panelIn, dampingFraction: 0.88)
+    /// Panel slide-OUT — quicker ease so dismissal never reads as lag.
+    static let briefPanelOut: Animation = .easeIn(duration: BriefDuration.panelOut)
 }

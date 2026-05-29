@@ -67,4 +67,8 @@ extension Color {
     static let briefSelectionHover = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.10)
     /// Stronger warm-gray fill for a *committed* nav selection (sidebar row).
     static let briefSelectionActive = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.13)
+
+    // Scrim — dims the window behind a slide-in panel so the panel reads as
+    // floating *over* the surface, not part of it. Warm ink, not pure black.
+    static let briefScrim = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.18)
 }

@@ -10,7 +10,11 @@ settings:
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     GENERATE_INFOPLIST_FILE: NO
     INFOPLIST_FILE: Brief/Info.plist
-    PRODUCT_BUNDLE_IDENTIFIER: ing.highlight.brief
+    # NOTE (privacy-control worktree only): renamed to BriefPrivacy / .brief.privacy
+    # so this build is a DISTINCT app from the Live Context build in the other
+    # worktree — killing/launching it never touches the other one. Revert these
+    # two lines (PRODUCT_BUNDLE_IDENTIFIER + PRODUCT_NAME below) at merge time.
+    PRODUCT_BUNDLE_IDENTIFIER: ing.highlight.brief.privacy
     CODE_SIGN_STYLE: Automatic
     CODE_SIGN_IDENTITY: "-"
     DEAD_CODE_STRIPPING: YES
@@ -50,6 +54,6 @@ targets:
     settings:
       base:
         INFOPLIST_FILE: Brief/Info.plist
-        PRODUCT_NAME: Brief
+        PRODUCT_NAME: BriefPrivacy   # privacy-control worktree only — see note above
         MARKETING_VERSION: "0.1"
         CURRENT_PROJECT_VERSION: "1"

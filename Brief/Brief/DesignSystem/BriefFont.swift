@@ -63,6 +63,9 @@ extension Font {
     static let briefHeroDisplay  = family(.black, size: 56, relativeTo: .largeTitle)
     static let briefHeroHeadline = family(.heavy, size: 36, relativeTo: .largeTitle)
     static let briefHeroMedium   = family(.bold, size: 28, relativeTo: .title)
+    /// The one Family (serif) title for a panel header — smaller than the 28pt
+    /// document hero, sized to sit in a slide-over's top row.
+    static let briefPanelTitle   = family(.bold, size: 20, relativeTo: .title2)
 
     // MARK: - Builders
 
@@ -158,4 +161,5 @@ struct BriefTypeToken {
     static let heroDisplay  = BriefTypeToken(font: .briefHeroDisplay,  size: 56, lineHeight: 1.00, tracking: -3)
     static let heroHeadline = BriefTypeToken(font: .briefHeroHeadline, size: 36, lineHeight: 1.10, tracking: -2)
     static let heroMedium   = BriefTypeToken(font: .briefHeroMedium,   size: 28, lineHeight: 1.15, tracking: -2)
+    static let panelTitle   = BriefTypeToken(font: .briefPanelTitle,   size: 20, lineHeight: 1.15, tracking: -1)
 }
