@@ -37,7 +37,9 @@ struct DesignSystemView: View {
     private func sidebarSection(_ title: String, pages: [DSPage]) -> some View {
         Section {
             ForEach(pages) { page in
-                sidebarRow(page).tag(page)
+                SidebarRow(page: page, isSelected: selection == page)
+                    .tag(page)
+                    .listRowBackground(Color.clear)   // we draw selection/hover ourselves
             }
         } header: {
             Text(title.uppercased())
@@ -45,18 +47,6 @@ struct DesignSystemView: View {
                 .foregroundStyle(Color.briefInkTertiary)
                 .tracking(0.8)
         }
-    }
-
-    private func sidebarRow(_ page: DSPage) -> some View {
-        HStack(spacing: BriefSpacing.md) {
-            Image(systemName: page.symbol)
-                .font(.system(size: 13, weight: .regular))
-                .frame(width: 18)
-            Text(page.title)
-                .briefStyle(.body)
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, 1)
     }
 
     // MARK: Detail
@@ -77,6 +67,48 @@ struct DesignSystemView: View {
         case .playground:    DSPlaygroundPage()
         case .none:          DSPlaceholderPage(title: "Pick a topic")
         }
+    }
+}
+
+// MARK: - SidebarRow
+// Native List row (keeps keyboard nav + a11y via .tag), but we draw the
+// selection + hover background ourselves — a warm-gray capsule, NOT the brand
+// highlight (selection should be quiet; brand yellow is reserved for content).
+// Priority: selected > hover > rest.
+
+private struct SidebarRow: View {
+    let page: DSPage
+    let isSelected: Bool
+    @State private var hovering = false
+
+    var body: some View {
+        let emphasized = isSelected || hovering
+        HStack(spacing: BriefSpacing.md) {
+            Image(systemName: page.symbol)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(emphasized ? Color.briefInkPrimary : Color.briefInkSecondary)
+                .frame(width: 18)
+            Text(page.title)
+                .briefStyle(.body)
+                .foregroundStyle(emphasized ? Color.briefInkPrimary : Color.briefInkSecondary)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, BriefSpacing.sm)
+        .padding(.vertical, BriefSpacing.xs + 1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                .fill(rowFill)
+        )
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .animation(.briefHover, value: hovering)
+    }
+
+    private var rowFill: Color {
+        if isSelected { return .briefSelectionActive }   // warm gray, committed
+        if hovering   { return .briefSelectionRest }      // warm gray, lighter
+        return .clear
     }
 }
 
