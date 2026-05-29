@@ -71,4 +71,12 @@ extension Color {
     // Scrim — dims the window behind a slide-in panel so the panel reads as
     // floating *over* the surface, not part of it. Warm ink, not pure black.
     static let briefScrim = Color(red: 0.137, green: 0.118, blue: 0.090).opacity(0.18)
+
+    // Inverted surface — for a solid dark CTA (black-bg / light-text), the
+    // primary-action button convention in chat. `briefSurfaceDark` is the fill
+    // (warm near-black = briefInkPrimary, named for intent); `briefInkInverse`
+    // is the paper-white text that sits on it. Formalizes the ad-hoc
+    // inkPrimary + raw `.white` pairing used by PrivacyChip.
+    static let briefSurfaceDark = Color(red: 0.137, green: 0.118, blue: 0.090) // == inkPrimary, as a fill
+    static let briefInkInverse  = Color(red: 0.992, green: 0.988, blue: 0.976) // warm paper-white on dark
 }
