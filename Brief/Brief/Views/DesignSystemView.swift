@@ -11,99 +11,53 @@ struct DesignSystemView: View {
     @State private var selection: DSPage? = .colors
 
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-                .frame(width: 248)
-                .background(sidebarBackground)         // real Liquid Glass — no divider, glass UI separates by tone
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(Color.briefPaper)          // content = brightest opaque reading surface
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea()
-    }
-
-    // MARK: Sidebar background — real macOS 26 Liquid Glass (NSGlassEffectView).
-    // Falls back to the legacy .sidebar vibrancy material on older systems.
-    // Requires the host window to be non-opaque (see BriefApp).
-    @ViewBuilder
-    private var sidebarBackground: some View {
-        if #available(macOS 26.0, *) {
-            LiquidGlassView(cornerRadius: 0, tint: nil)
-        } else {
-            VisualEffectView(material: .sidebar, blending: .behindWindow)
-        }
-    }
-
-    // MARK: Sidebar (custom — design-system controlled, no native List chrome)
-
-    private var sidebar: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BriefSpacing.xl) {
+        // NavigationSplitView gives the standard macOS 26 floating Liquid Glass
+        // sidebar for free (when compiled with the 26 SDK). We don't hand-roll
+        // the glass anymore — the system layers the sidebar above content.
+        NavigationSplitView {
+            List(selection: $selection) {
                 sidebarSection("Foundations", pages: DSPage.foundations)
                 sidebarSection("Components",  pages: DSPage.components)
                 sidebarSection("Patterns",    pages: DSPage.patterns)
             }
-            .padding(.horizontal, BriefSpacing.md)
-            .padding(.vertical, BriefSpacing.xl)
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 220, ideal: 248, max: 300)
+            .scrollIndicators(.hidden)
+            .tint(Color.briefHighlightDeep)   // nudge selection toward our family
+        } detail: {
+            detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .background(Color.briefPaper)
         }
-        .scrollIndicators(.hidden)
     }
 
+    // MARK: Sidebar sections + rows
+    // Native List rows (so we keep the system's floating-glass selection),
+    // styled with our type + ink tokens.
+
     private func sidebarSection(_ title: String, pages: [DSPage]) -> some View {
-        VStack(alignment: .leading, spacing: BriefSpacing.xxs) {
+        Section {
+            ForEach(pages) { page in
+                sidebarRow(page).tag(page)
+            }
+        } header: {
             Text(title.uppercased())
                 .briefStyle(.monoMeta)
                 .foregroundStyle(Color.briefInkTertiary)
                 .tracking(0.8)
-                .padding(.horizontal, BriefSpacing.md)
-                .padding(.bottom, BriefSpacing.xs)
-            ForEach(pages) { page in
-                sidebarRow(page)
-            }
         }
     }
 
     private func sidebarRow(_ page: DSPage) -> some View {
-        let isSelected = selection == page
-        return Button {
-            selection = page
-        } label: {
-            HStack(spacing: BriefSpacing.md) {
-                Image(systemName: page.symbol)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(isSelected ? Color.briefInkPrimary : Color.briefInkSecondary)
-                    .frame(width: 16)
-                // Fixed weight/size so selection never reflows the row.
-                // Selection is communicated by background + ink color only.
-                Text(page.title)
-                    .briefStyle(.body)
-                    .foregroundStyle(isSelected ? Color.briefInkPrimary : Color.briefInkSecondary)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, BriefSpacing.md)
-            .padding(.vertical, BriefSpacing.sm)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(selectedRowBackground(isSelected))
-            .contentShape(Rectangle())
+        HStack(spacing: BriefSpacing.md) {
+            Image(systemName: page.symbol)
+                .font(.system(size: 13, weight: .regular))
+                .frame(width: 18)
+            Text(page.title)
+                .briefStyle(.body)
+            Spacer(minLength: 0)
         }
-        .buttonStyle(.plain)
-    }
-
-    // Selected nav row floats on a Liquid Glass capsule (macOS 26+), with a
-    // warm-gray fill fallback below. Unselected rows are clear.
-    @ViewBuilder
-    private func selectedRowBackground(_ isSelected: Bool) -> some View {
-        if isSelected {
-            if #available(macOS 26.0, *) {
-                LiquidGlassView(cornerRadius: BriefRadius.chip, tint: nil)
-            } else {
-                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
-                    .fill(Color.briefSelectionActive)
-            }
-        } else {
-            Color.clear
-        }
+        .padding(.vertical, 1)
     }
 
     // MARK: Detail
