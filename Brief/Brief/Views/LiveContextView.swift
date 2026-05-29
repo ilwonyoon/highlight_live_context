@@ -138,7 +138,7 @@ struct LiveContextView: View {
 
     private var document: some View {
         VStack(alignment: .leading, spacing: 0) {
-            BriefH1(text: "Live Context: Dani Reyes")
+            // (Title lives in the header now — body opens straight into sections.)
 
             // 1. PRIMARY GOAL
             BriefH2(text: "1. PRIMARY GOAL: PUBLIC LAUNCH (Top Priority)")
