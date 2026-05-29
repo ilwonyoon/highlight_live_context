@@ -10,8 +10,10 @@ enum BriefMarkdown {
 
     // MARK: Type tokens per level
 
-    /// H1 — workspace title ("Default", "Today's Brief"). Söhne Kraftig 22pt.
-    static let h1Token: BriefTypeToken = .title2
+    /// H1 — the ONE Family-serif moment per screen. Each page's top title
+    /// (e.g. "Color", "Today's Brief") is the single brand-typography hit;
+    /// everything else is Söhne. (Family heroMedium = 28pt Bold.)
+    static let h1Token: BriefTypeToken = .heroMedium
     /// H2 — top-level section ("1. PRIMARY GOAL"). Söhne Halbfett 17pt.
     static let h2Token: BriefTypeToken = .title3
     /// H3 — sub-group ("1. Highlight (Highlighter, Inc.)"). Söhne Halbfett 14pt.
