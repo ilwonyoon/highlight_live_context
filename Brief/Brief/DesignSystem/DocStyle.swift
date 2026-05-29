@@ -84,7 +84,7 @@ final class DocStyle: ObservableObject {
                              face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkPrimary)
         value = DocTextStyle(id: "value", label: "Body / value",
                              face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0,
-                             color: Color(white: 0.25))   // grayscale 25% — Ilwon's pick
+                             color: .briefInkBody)   // #404040 — promoted to a token
         provenance = DocTextStyle(id: "provenance", label: "Provenance phrase",
                                   face: .soehneBuch, size: 14, lineHeight: 1.20, tracking: 0, color: .briefInkPrimary)
     }

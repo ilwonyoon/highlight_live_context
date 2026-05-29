@@ -84,7 +84,7 @@ struct ProvenanceInline: View {
     var body: some View {
         Button(action: openSource) {
             HStack(spacing: BriefSpacing.xs) {
-                hoverAwareIcon(source: source, size: iconSize, restMode: color, hovering: hovering)
+                provenanceIcon(source, size: iconSize, hovering: hovering)
                     .offset(y: BriefLayout.InlineCitation.baselineNudge)
                 // When an override font is supplied, set it directly (briefStyle
                 // pins the font on the Text internally, so an outer .font() can't
@@ -97,14 +97,7 @@ struct ProvenanceInline: View {
                     }
                 }
                     .foregroundStyle(color.textColor)
-                    .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .fill(hovering
-                                  ? Color.briefInkSecondary.opacity(BriefOpacity.lineStrong)
-                                  : Color.briefInkTertiary.opacity(BriefOpacity.lineSoft))
-                            .frame(height: BriefLayout.InlineCitation.underlineThickness)
-                            .offset(y: BriefLayout.InlineCitation.underlineOffset)
-                    }
+                    .modifier(CitationUnderline(hovering: hovering))
             }
             .padding(.horizontal, BriefLayout.InlineCitation.paddingH)
             .padding(.vertical,   BriefLayout.InlineCitation.paddingV)
@@ -154,13 +147,14 @@ struct HighlighterSwipe: View {
     }
 }
 
-/// Icon rendering for inline provenance.
-/// Voice icon: uses `briefHighlightDeep` (darker chromatic yellow-green
-/// derived from E7FE0B) so the brand identity is carried into the icon
-/// without being too bright on warm paper.
-/// Connectors: rendered in their original brand color.
+/// The one provenance-icon rule, shared by the inline citation and the stacked
+/// cluster. Voice uses `briefHighlightDeep` (chromatic yellow-green from E7FE0B)
+/// so the brand identity rides the icon without being too bright on paper; every
+/// other connector renders in its original brand color. When `hovering` is set,
+/// non-voice connectors dim slightly at rest and brighten on hover (the inline
+/// citation uses this; the stacked cluster passes the default and stays full).
 @ViewBuilder
-private func hoverAwareIcon(source: BriefSource, size: CGFloat, restMode: ProvenanceColorMode, hovering: Bool) -> some View {
+private func provenanceIcon(_ source: BriefSource, size: CGFloat, hovering: Bool = true) -> some View {
     switch source {
     case .voice:
         BriefIcon(source, size: size, rendering: .template)
@@ -171,7 +165,22 @@ private func hoverAwareIcon(source: BriefSource, size: CGFloat, restMode: Proven
     }
 }
 
-// (source-specific hover tint removed — all sources share briefHighlightSoft background on hover)
+/// The hairline citation underline, shared by single- and multi-source marks so
+/// they can't drift. Rests as a soft tertiary line; brightens to secondary on
+/// hover. Geometry comes from BriefLayout.InlineCitation.
+struct CitationUnderline: ViewModifier {
+    let hovering: Bool
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(hovering
+                      ? Color.briefInkSecondary.opacity(BriefOpacity.lineStrong)
+                      : Color.briefInkTertiary.opacity(BriefOpacity.lineSoft))
+                .frame(height: BriefLayout.InlineCitation.underlineThickness)
+                .offset(y: BriefLayout.InlineCitation.underlineOffset)
+        }
+    }
+}
 
 // (Register 02 — Inline mention — removed.)
 
@@ -357,7 +366,11 @@ struct ProvenanceStacked: View {
     var color: ProvenanceColorMode = .inkPrimary
     var small: Bool = false
     var brandIcons: Bool = false   // true = render icons in brand color
+    /// When set, overrides the phrase font (so the editor's provenance type
+    /// style drives weight/size, matching ProvenanceInline).
+    var fontOverride: Font? = nil
 
+    @State private var hovering = false
     private var iconSize: CGFloat { small ? 12 : 14 }
     private var token: BriefTypeToken { small ? .provenanceSmall : .provenance }
 
@@ -365,23 +378,28 @@ struct ProvenanceStacked: View {
         HStack(spacing: BriefSpacing.sm) {
             HStack(spacing: -BriefSpacing.xs) {
                 ForEach(Array(sources.enumerated()), id: \.offset) { idx, src in
-                    let mode: ProvenanceColorMode = brandIcons ? .brand : color
-                    tintedIcon(source: src, size: iconSize, mode: mode)
+                    // Same rule as the single-source inline icon: connectors in
+                    // their original brand color; voice in the brand-derived deep
+                    // tint. Multi-source must read in color too, not monochrome.
+                    provenanceIcon(src, size: iconSize)
                         .frame(width: iconSize + 2, height: iconSize + 2)
-                        .background(
-                            Circle().fill(Color.briefPaper)
-                        )
-                        .overlay(
-                            Circle().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
-                        )
+                        .background(Circle().fill(Color.briefPaper))
+                        .overlay(Circle().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth))
                         .zIndex(Double(sources.count - idx))
                 }
             }
-            Text(phrase)
-                .briefStyle(token)
+            Group {
+                if let f = fontOverride {
+                    Text(phrase).font(f)
+                } else {
+                    Text(phrase).briefStyle(token)
+                }
+            }
                 .foregroundStyle(color.textColor)
-                .underline(true, color: Color.briefInkSecondary.opacity(BriefOpacity.lineStandard - 0.1))
+                .modifier(CitationUnderline(hovering: hovering))
         }
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
         .help("Confirmed across: " + sources.map(\.label).joined(separator: ", "))
     }
 }

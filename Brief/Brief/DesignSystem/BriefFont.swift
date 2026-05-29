@@ -43,11 +43,12 @@ extension Font {
     static let briefBody           = soehne(.buch, size: 14, relativeTo: .body)
     static let briefBodyMedium     = soehne(.kraftig, size: 14, relativeTo: .body) // 500 — inline lead-in labels
     static let briefBodySmall      = soehne(.buch, size: 13, relativeTo: .body)
-    // Provenance fonts — slightly heavier than body (Kraftig 500 vs Buch 400)
-    // for referenceable presence. Combined with hairline underline for citation
-    // affordance. Söhne has no variable axis, so this is the one available step up.
-    static let briefProvenance      = soehne(.kraftig, size: 14, relativeTo: .body)
-    static let briefProvenanceSmall = soehne(.kraftig, size: 13, relativeTo: .body)
+    // Provenance fonts — Buch 400, matching body weight. The citation reads as
+    // part of the prose (the hairline underline carries the affordance, not a
+    // heavier weight). This is the Live Context standard: source phrases sit in
+    // the sentence, not above it. (Was Kraftig 500; reconciled to the doc.)
+    static let briefProvenance      = soehne(.buch, size: 14, relativeTo: .body)
+    static let briefProvenanceSmall = soehne(.buch, size: 13, relativeTo: .body)
     // Popover-specific snippet: smaller body for rich, dense excerpt.
     static let briefSnippet         = soehne(.buch, size: 12, relativeTo: .footnote)
     static let briefLabel     = soehne(.kraftig, size: 12, relativeTo: .callout)
@@ -124,15 +125,17 @@ struct BriefTypeToken {
     static let title1     = BriefTypeToken(font: .briefTitle1,     size: 28, lineHeight: 1.15, tracking: -1)
     static let title2     = BriefTypeToken(font: .briefTitle2,     size: 22, lineHeight: 1.20, tracking: -1)
     static let title3     = BriefTypeToken(font: .briefTitle3,     size: 17, lineHeight: 1.25, tracking:  0)
-    static let title3Medium   = BriefTypeToken(font: .briefTitle3Medium,   size: 17, lineHeight: 1.25, tracking: -0.2)
+    // Section heading (H2) — Live Context standard. tracking −1.2% == −0.2pt @17.
+    static let title3Medium   = BriefTypeToken(font: .briefTitle3Medium,   size: 17, lineHeight: 1.25, tracking: -1.2)
     static let headline   = BriefTypeToken(font: .briefHeadline,   size: 14, lineHeight: 1.40, tracking:  0)
-    static let headlineMedium = BriefTypeToken(font: .briefHeadlineMedium, size: 14, lineHeight: 1.40, tracking:  0)
-    // Line-height 1.55: WCAG 1.4.12 floor (1.5) bumped for a wide reading
-    // measure. See TYPOGRAPHY_READABILITY.md.
-    static let body       = BriefTypeToken(font: .briefBody,       size: 14, lineHeight: 1.55, tracking:  0)
-    // Medium (Kraftig 500) at body size — for inline lead-in labels ("Status:")
-    // and light emphasis. Calmer than headline (Halbfett 600).
-    static let bodyMedium = BriefTypeToken(font: .briefBodyMedium, size: 14, lineHeight: 1.55, tracking:  0)
+    // Sub-heading (H3) — Live Context standard. tracking +0.7% == +0.1pt @14.
+    static let headlineMedium = BriefTypeToken(font: .briefHeadlineMedium, size: 14, lineHeight: 1.40, tracking:  0.7)
+    // Body — Live Context standard line-height 1.20 (dense, scannable brief).
+    // (Was 1.55; the doc's dialed-in rhythm is now the standard.)
+    static let body       = BriefTypeToken(font: .briefBody,       size: 14, lineHeight: 1.20, tracking:  0)
+    // Medium (Kraftig 500) at body size — for emphasis where weight (not color)
+    // carries it. Lead-in labels in the doc use `body` (Buch) + ink color instead.
+    static let bodyMedium = BriefTypeToken(font: .briefBodyMedium, size: 14, lineHeight: 1.20, tracking:  0)
     static let bodySmall  = BriefTypeToken(font: .briefBodySmall,  size: 13, lineHeight: 1.40, tracking:  0)
     static let label      = BriefTypeToken(font: .briefLabel,      size: 12, lineHeight: 1.30, tracking:  1)
     static let meta       = BriefTypeToken(font: .briefMeta,       size: 11, lineHeight: 1.30, tracking:  2)
@@ -145,11 +148,11 @@ struct BriefTypeToken {
     // Popover snippet — compact, no extra tracking, very tight leading
     static let snippet    = BriefTypeToken(font: .briefSnippet,    size: 12, lineHeight: 1.15, tracking:  0)
 
-    // Provenance — inline source citation. Slightly heavier than body
-    // (Kraftig 500 vs body Buch 400) so it reads as a referenceable object
-    // without changing the line rhythm. Notion-style.
-    static let provenance      = BriefTypeToken(font: .briefProvenance,      size: 14, lineHeight: 1.45, tracking: 0)
-    static let provenanceSmall = BriefTypeToken(font: .briefProvenanceSmall, size: 13, lineHeight: 1.40, tracking: 0)
+    // Provenance — inline source citation. Live Context standard: Buch 400,
+    // same weight and line-height as body, so the cited phrase sits in the
+    // sentence (the hairline underline is the only affordance). Notion-style.
+    static let provenance      = BriefTypeToken(font: .briefProvenance,      size: 14, lineHeight: 1.20, tracking: 0)
+    static let provenanceSmall = BriefTypeToken(font: .briefProvenanceSmall, size: 13, lineHeight: 1.20, tracking: 0)
 
     // Family hero
     static let heroDisplay  = BriefTypeToken(font: .briefHeroDisplay,  size: 56, lineHeight: 1.00, tracking: -3)

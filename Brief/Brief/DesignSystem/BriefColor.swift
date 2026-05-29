@@ -25,6 +25,10 @@ extension Color {
     static let briefInkSecondary = Color(red: 0.420, green: 0.392, blue: 0.353) // mid-warm-gray
     static let briefInkTertiary  = Color(red: 0.620, green: 0.588, blue: 0.541) // light-warm-gray
     static let briefInkDisabled  = Color(red: 0.788, green: 0.761, blue: 0.722)
+    /// Body/value text in the Live Context document — neutral grayscale 25%
+    /// (#404040), Ilwon's dialed-in pick. Sits between primary and secondary;
+    /// the lead-in label uses inkPrimary so color (not weight) carries hierarchy.
+    static let briefInkBody      = Color(white: 0.25) // #404040 — the standard body ink
 
     // Highlighter trace — E7FE0B (brighter, true-highlighter chroma).
     // Per scope: leverage brand color on positive action / productive moments.

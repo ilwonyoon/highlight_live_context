@@ -31,7 +31,7 @@ enum BriefLayout {
         static let paddingV: CGFloat = BriefSpacing.xxs - 1 // 1pt
         static let cornerRadius: CGFloat = BriefRadius.chip
         static let baselineNudge: CGFloat = -1
-        static let underlineOffset: CGFloat = 2
+        static let underlineOffset: CGFloat = 0   // hug the text — was 2pt, too gappy
         static let underlineThickness: CGFloat = 0.5
     }
 
@@ -40,5 +40,20 @@ enum BriefLayout {
         static let inset: CGFloat = BriefSpacing.xxl
         static let cornerRadius: CGFloat = BriefRadius.card
         static let strokeWidth: CGFloat = 0.5
+    }
+
+    /// The minimal chat composer that appears beside a selected block.
+    enum Composer {
+        static let width: CGFloat = 280
+        static let inset: CGFloat = BriefSpacing.xxl     // 20pt — room to breathe
+        static let cornerRadius: CGFloat = BriefRadius.card
+    }
+
+    /// Selection-capsule rhythm for document lines. `linePad` is each capsule's
+    /// top/bottom padding (so the highlight isn't a thin band); `lineGap` is the
+    /// space between stacked lines — so two capsules sit exactly `lineGap` apart.
+    enum Selection {
+        static let linePad: CGFloat = BriefSpacing.xs    // 4pt
+        static let lineGap: CGFloat = BriefSpacing.xs    // 4pt
     }
 }
