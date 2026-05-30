@@ -29,8 +29,6 @@ struct PanelComposer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
-            Divider().overlay(Color.briefHairlineSoft)
-
             // Context row — scope chip + attach.
             HStack(spacing: BriefSpacing.sm) {
                 ScopeChip(label: contextLabel)
@@ -38,7 +36,7 @@ struct PanelComposer: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, BriefSpacing.xxl)
-            .padding(.top, BriefSpacing.sm)
+            .padding(.top, BriefSpacing.lg)
 
             // Input row — field + voice + (model | send).
             HStack(spacing: BriefSpacing.sm) {
@@ -77,6 +75,28 @@ struct PanelComposer: View {
         guard !text.isEmpty, !isThinking else { return }
         onSend(text)
         draft = ""
+    }
+}
+
+// MARK: - ComposerHost — the input window's content (composer on a panel surface)
+//
+// Drives PanelComposer from the shared session and wraps it in the same warm
+// rounded surface as the conversation panel, so the separate input window reads
+// as a sibling card below it.
+
+struct ComposerHost: View {
+    @Bindable var session: ChatPanelSession
+    var cornerRadius: CGFloat = BriefRadius.panel
+
+    var body: some View {
+        PanelComposer(draft: $session.draft,
+                      placeholder: session.scenario.composerPlaceholder,
+                      isThinking: session.isThinking,
+                      onSend: { session.send($0) },
+                      contextLabel: session.scenario.title)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background(Color.briefPaper)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
