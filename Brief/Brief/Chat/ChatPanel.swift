@@ -6,16 +6,16 @@ import SwiftUI
 // nothing about privacy (or memory, or connections) — it renders the scenario's
 // turns, drives its conversation loop, and pushes its detail destinations.
 //
-// This is the generic shell extracted from the old privacy-specific panel:
-//   • header — route-driven title + back (pop) + close (dismiss the panel)
-//   • body   — the conversation thread (step 3) or a pushed detail screen
-//   • composer — the pinned input (step 2)
+//   header   — route-driven title + back (pop) + close (dismiss the panel)
+//   thread   — the conversation: streamed assistant text, a "thinking" shimmer,
+//              hosted domain cards, right-aligned user turns
+//   composer — the pinned bottom input
 //
-// Step 1 establishes the shell + navigation. The thread and composer are stubbed
-// here and filled in steps 2-3. The slide-over HOST (scrim + edge slide) is
-// ChatPanelSlideOver below — the generic version of the old PrivacySlideOver.
+// The loop is deliberately indifferent: on send it appends the user's turn, asks
+// the scenario to respond, and renders whatever turns come back. It never
+// branches on what the text means or what a card is.
 //
-// See PRIVACY_EXECUTION.md §3.
+// See PRIVACY_EXECUTION.md §3-§4.
 
 struct ChatPanel: View {
     /// The domain plugged into this panel. The panel only ever talks to this.
@@ -26,6 +26,11 @@ struct ChatPanel: View {
     var cornerRadius: CGFloat = BriefRadius.panel
 
     @State private var nav = PanelNavStack()
+    @State private var turns: [IdentifiedTurn] = []
+    @State private var streamedIDs: Set<UUID> = []   // turns that have finished streaming once
+    @State private var draft = ""
+    @State private var isThinking = false
+    @State private var seeded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,49 +39,43 @@ struct ChatPanel: View {
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Same warm reading-paper as the Live Context document body.
         .background(Color.briefPaper)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .stroke(Color.briefHairlineSoft, lineWidth: 0.5)
         )
+        .task { seedOpeningOnce() }
     }
 
     // MARK: Header — back (pop) · title (current route) · close (dismiss)
 
     private var header: some View {
         HStack(spacing: BriefSpacing.md) {
-            // Back — shown only when the stack is deeper than its root. Pops one
-            // level. Distinct from close: this navigates WITHIN the panel.
             if nav.canGoBack {
                 HeaderIconButton(systemName: "chevron.left", help: "Back") {
                     withAnimation(.briefStandard) { nav.pop() }
                 }
             }
 
+            // Söhne, not the Family serif — a chat is a conversation surface, not
+            // a document hero. (title3 = Söhne halbfett 17pt.)
             Text(currentTitle)
-                .briefStyle(.panelTitle)
+                .briefStyle(.title3)
                 .foregroundStyle(Color.briefInkPrimary)
 
             Spacer(minLength: 0)
 
-            // Close — slides the whole panel out, at any depth. An xmark (not a
-            // chevron) so it never reads as "back".
             HeaderIconButton(systemName: "xmark", help: "Close", action: onClose)
         }
         .padding(.horizontal, BriefSpacing.xxl)
         .padding(.vertical, BriefSpacing.xl)
     }
 
-    /// Title of the current route: the scenario at the root, the destination's
-    /// own title when drilled in.
     private var currentTitle: String {
         switch nav.current {
-        case .conversation:
-            return scenario.title
-        case .detail(let id):
-            return destination(id)?.title ?? scenario.title
+        case .conversation:    return scenario.title
+        case .detail(let id):  return destination(id)?.title ?? scenario.title
         }
     }
 
@@ -85,50 +84,61 @@ struct ChatPanel: View {
     @ViewBuilder
     private var content: some View {
         switch nav.current {
-        case .conversation:
-            conversationBody
-        case .detail(let id):
-            detailBody(id)
+        case .conversation:    conversation
+        case .detail(let id):  detail(id)
         }
     }
 
-    /// The conversation thread + composer. Stubbed in step 1; the thread lands in
-    /// step 3 and the composer in step 2. For now it shows the opening turns as
-    /// plain text and a temporary way to exercise push navigation.
-    private var conversationBody: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BriefSpacing.xl) {
-                // TEMP (step 1): render opening turns as plain text so the shell
-                // is visible. Replaced by the real thread renderer in step 3.
-                ForEach(Array(scenario.openingTurns().enumerated()), id: \.offset) { _, turn in
-                    StubTurnView(turn: turn)
-                }
+    // MARK: Conversation — thread + pinned composer
 
-                // TEMP (step 1): a button per destination so back/pop can be
-                // exercised before the bucket cards' chevrons exist (step 4).
-                ForEach(scenario.detailDestinations()) { dest in
-                    Button {
-                        withAnimation(.briefStandard) { nav.push(.detail(destinationID: dest.id)) }
-                    } label: {
-                        HStack(spacing: BriefSpacing.sm) {
-                            Text(dest.title).briefStyle(.bodyMedium)
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 11, weight: .semibold))
-                        }
-                        .foregroundStyle(Color.briefInkSecondary)
+    private var conversation: some View {
+        VStack(spacing: 0) {
+            thread
+            PanelComposer(draft: $draft,
+                          placeholder: scenario.composerPlaceholder,
+                          isThinking: isThinking,
+                          onSend: send)
+        }
+    }
+
+    private var thread: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: BriefSpacing.xl) {
+                    ForEach(turns) { item in
+                        TurnView(turn: item.turn,
+                                 animate: !streamedIDs.contains(item.id),
+                                 onStreamed: { streamedIDs.insert(item.id) },
+                                 onAction: confirm)
+                            .id(item.id)
                     }
-                    .buttonStyle(.briefPress)
+
+                    // Drill-in destinations the scenario offers (e.g. "Automatic",
+                    // "Your rules"). Rendered once, after the opening, as pushable
+                    // rows — tapping pushes the detail route.
+                    ForEach(scenario.detailDestinations()) { dest in
+                        DestinationRow(title: dest.title) {
+                            withAnimation(.briefStandard) { nav.push(.detail(destinationID: dest.id)) }
+                        }
+                    }
+                }
+                .padding(.horizontal, BriefSpacing.xxl)
+                .padding(.top, BriefSpacing.xl)
+                .padding(.bottom, BriefSpacing.xxl)
+            }
+            .scrollIndicators(.visible)
+            // Keep the latest turn in view as the conversation grows.
+            .onChange(of: turns.count) {
+                if let last = turns.last {
+                    withAnimation(.briefStandard) { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
-            .padding(.horizontal, BriefSpacing.xxl)
-            .padding(.top, BriefSpacing.xl)
-            .padding(.bottom, BriefSpacing.xxl)
         }
-        .scrollIndicators(.visible)
     }
 
-    /// A pushed detail screen — hosts the destination's card.
-    private func detailBody(_ id: UUID) -> some View {
+    // MARK: Detail — a pushed screen hosting the destination's card
+
+    private func detail(_ id: UUID) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BriefSpacing.xl) {
                 if let dest = destination(id) {
@@ -142,8 +152,172 @@ struct ChatPanel: View {
         .scrollIndicators(.visible)
     }
 
+    // MARK: The loop
+
+    private func seedOpeningOnce() {
+        guard !seeded else { return }
+        seeded = true
+        append(scenario.openingTurns())
+    }
+
+    private func send(_ text: String) {
+        append([.userText(text)])
+        isThinking = true
+        Task {
+            let reply = await scenario.respond(to: text)
+            isThinking = false
+            append(reply)
+        }
+    }
+
+    private func confirm(_ action: any PanelAction) {
+        isThinking = true
+        Task {
+            let follow = await scenario.confirm(action)
+            isThinking = false
+            append(follow)
+        }
+    }
+
+    private func append(_ newTurns: [PanelTurn]) {
+        turns.append(contentsOf: newTurns.map(IdentifiedTurn.init))
+    }
+
+    // MARK: Lookups
+
     private func destination(_ id: UUID) -> PanelDestination? {
         scenario.detailDestinations().first { $0.id == id }
+    }
+}
+
+// MARK: - IdentifiedTurn — a stable id so ForEach + "stream once" work
+//
+// PanelTurn is a plain enum (no identity). Wrapping each appended turn with a
+// UUID lets the thread diff correctly and lets us record which turns have
+// already streamed (so they don't re-animate on scroll/re-render).
+
+private struct IdentifiedTurn: Identifiable {
+    let id = UUID()
+    let turn: PanelTurn
+}
+
+// MARK: - TurnView — renders one turn with the chat-kit primitives
+
+private struct TurnView: View {
+    let turn: PanelTurn
+    /// True until this turn has streamed once (assistant text only).
+    let animate: Bool
+    let onStreamed: () -> Void
+    let onAction: (any PanelAction) -> Void
+
+    var body: some View {
+        switch turn {
+        case .userText(let text):
+            userBubble(text)
+
+        case .assistantText(let text):
+            StreamingText(fullText: text,
+                          token: .body,
+                          color: .briefInkBody,
+                          animated: animate,
+                          onComplete: onStreamed)
+
+        case .assistantThinking(let label):
+            Text(label)
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkTertiary)
+                .briefShimmer()
+
+        case .assistantCard(let card):
+            CardHost(card: card, onAction: onAction)
+        }
+    }
+
+    private func userBubble(_ text: String) -> some View {
+        HStack {
+            Spacer(minLength: BriefSpacing.xxl)
+            Text(text)
+                .briefStyle(.body)
+                .foregroundStyle(Color.briefInkPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, BriefSpacing.lg)
+                .padding(.vertical, BriefSpacing.sm)
+                .background(
+                    RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                        .fill(Color.briefPaperSunken)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                                .stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
+                        )
+                )
+        }
+    }
+}
+
+// MARK: - CardHost — hosts an opaque PanelCard + exposes its action to the panel
+//
+// The panel can't see inside a card, so a card that wants a confirmable action
+// can't call back directly. The scenario sets `PanelCard.primaryAction` (default
+// nil); if present, the host renders a CTA row below the card that routes to the
+// panel's confirm(). Cards with no action just render.
+
+private struct CardHost: View {
+    let card: any PanelCard
+    let onAction: (any PanelAction) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.md) {
+            card.erasedBody()
+
+            if let action = card.primaryAction {
+                HStack {
+                    Spacer(minLength: 0)
+                    Button(action.label) { onAction(action.action) }
+                        .buttonStyle(.briefPress)
+                        .padding(.horizontal, BriefSpacing.lg)
+                        .padding(.vertical, BriefSpacing.sm)
+                        .background(Capsule().fill(Color.briefSurfaceDark))
+                        .foregroundStyle(Color.briefInkInverse)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - DestinationRow — a pushable drill-in row (chevron-right)
+
+private struct DestinationRow: View {
+    let title: String
+    let onTap: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: BriefSpacing.sm) {
+                Text(title)
+                    .briefStyle(.bodyMedium)
+                    .foregroundStyle(Color.briefInkPrimary)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+            .padding(.horizontal, BriefSpacing.lg)
+            .padding(.vertical, BriefSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                    .fill(hovering ? Color.briefSelectionRest : Color.briefPaperRaised)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                            .stroke(Color.briefHairlineSoft, lineWidth: 1)
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .animation(.briefHover, value: hovering)
     }
 }
 
@@ -171,32 +345,11 @@ private struct HeaderIconButton: View {
     }
 }
 
-// MARK: - StubTurnView (step 1 only) — replaced by the real thread in step 3
-
-private struct StubTurnView: View {
-    let turn: PanelTurn
-
-    var body: some View {
-        switch turn {
-        case .userText(let t):
-            Text(t).briefStyle(.body).foregroundStyle(Color.briefInkPrimary)
-        case .assistantText(let t):
-            Text(t).briefStyle(.body).foregroundStyle(Color.briefInkBody)
-                .fixedSize(horizontal: false, vertical: true)
-        case .assistantThinking(let t):
-            Text(t).briefStyle(.body).foregroundStyle(Color.briefInkTertiary)
-        case .assistantCard(let card):
-            card.erasedBody()
-        }
-    }
-}
-
 // MARK: - ChatPanelSlideOver — the generic slide-over host
 //
-// Generic version of the old PrivacySlideOver: a ZStack laid over the whole
-// window with a dimming scrim and a trailing move-transition. Built as
-// ZStack + .transition (NOT .overlay + .offset) so NavigationSplitView never
-// clips it — the hard-won lesson carried over from the privacy panel.
+// Generic version of the old PrivacySlideOver: a ZStack over the whole window
+// with a dimming scrim and a trailing move-transition. ZStack + .transition
+// (NOT .overlay + .offset) so NavigationSplitView never clips it.
 
 struct ChatPanelSlideOver: ViewModifier {
     @Binding var isPresented: Bool

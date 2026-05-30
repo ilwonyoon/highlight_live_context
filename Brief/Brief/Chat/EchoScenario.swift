@@ -65,30 +65,28 @@ private struct EchoCard: PanelCard {
 }
 
 /// A card with a confirmable action — exercises the panel's CTA → confirm path.
+/// The panel renders the CTA below the card from `primaryAction`.
 private struct EchoConfirmCard: PanelCard {
     let text: String
+
+    var primaryAction: PanelActionButton? {
+        PanelActionButton(label: "Confirm", action: EchoAction(label: "echo \u{201C}\(text)\u{201D}"))
+    }
+
     func makeBody() -> some View {
-        VStack(alignment: .leading, spacing: BriefSpacing.md) {
-            Text("Confirm echoing \u{201C}\(text)\u{201D}?")
-                .briefStyle(.body)
-                .foregroundStyle(Color.briefInkPrimary)
-                .fixedSize(horizontal: false, vertical: true)
-            // NOTE: the actual button wiring (tapping → scenario.confirm) is
-            // added in step 3 when the panel owns the confirm path; this card
-            // just shows the shape for now.
-            Text("[ Confirm ]")
-                .briefStyle(.monoLabel)
-                .foregroundStyle(Color.briefInkTertiary)
-        }
-        .padding(BriefSpacing.xl)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
-                .fill(Color.briefPaperRaised)
-                .overlay(
-                    RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
-                        .stroke(Color.briefHairlineSoft, lineWidth: 1)
-                )
-        )
+        Text("Confirm echoing \u{201C}\(text)\u{201D}?")
+            .briefStyle(.body)
+            .foregroundStyle(Color.briefInkPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(BriefSpacing.xl)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                    .fill(Color.briefPaperRaised)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                            .stroke(Color.briefHairlineSoft, lineWidth: 1)
+                    )
+            )
     }
 }

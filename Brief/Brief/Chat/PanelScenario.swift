@@ -22,13 +22,27 @@ import SwiftUI
 protocol PanelCard {
     associatedtype Body: View
     @ViewBuilder func makeBody() -> Body
+
+    /// An optional confirmable CTA the panel renders below the card (e.g.
+    /// "Keep it out"). The panel can't see inside a card, so a card exposes its
+    /// one primary action here; the host wires the button to `confirm(_:)`.
+    /// Default nil — cards with no action just render.
+    var primaryAction: PanelActionButton? { get }
 }
 
 extension PanelCard {
+    var primaryAction: PanelActionButton? { nil }
+
     /// The panel hosts every card through this — the one unavoidable erasure.
     /// `any View` can't satisfy a `some View` return, so we wrap once here and
     /// scenario authors still write `some View` in `makeBody()`.
     @MainActor func erasedBody() -> AnyView { AnyView(makeBody()) }
+}
+
+/// A primary CTA a card exposes to the panel: a label + the action it carries.
+struct PanelActionButton {
+    let label: String
+    let action: any PanelAction
 }
 
 // MARK: Action — a confirmable choice surfaced in a card, opaque to the panel
