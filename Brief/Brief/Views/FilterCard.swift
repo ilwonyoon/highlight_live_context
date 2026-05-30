@@ -2,23 +2,30 @@ import SwiftUI
 
 // MARK: - FilterCard — the atom of the privacy settings surface
 //
-// One component, both contexts (PRIVACY_USER_CONTROL.md §4, P7). Edit affordances
-// (chip ✕, ＋, duration menu, ⋯) appear only when the filter is `editable`; an
-// automatic filter renders identically minus those.
+// One component, both contexts (PRIVACY_USER_CONTROL.md §4, P7). Everything is
+// hand-editable here (no chat needed): rename the statement, add/remove tags,
+// change the duration, pause or delete. Automatic cards render identically minus
+// those affordances (editable = false).
 //
 //   ┌──────────────────────────────────────────────────┐
-//   │  Keep my family & personal life out  12 filtered  │  statement · count
-//   │  [family 5 ✕] [health 4 ✕] [home 3 ✕] [＋]         │  tag chips
-//   │  Never kept ▾                              ⋯       │  duration · overflow
+//   │  Keep my family & personal life out  12 filtered  │  statement (editable) · count
+//   │  [family 5 ✕] [health 4 ✕] [＋ type…]             │  tag chips
+//   │  Never kept ▾                              ⋯       │  duration menu · pause/delete
 //   └──────────────────────────────────────────────────┘
 
 struct FilterCard: View {
-    let filter: PrivacyFilter
-    /// Edit callbacks — only invoked for editable cards.
-    var onRemoveTag: (FilterTag) -> Void = { _ in }
-    var onAddTag: () -> Void = {}
-    var onChangeDuration: () -> Void = {}
-    var onOverflow: () -> Void = {}
+    @Binding var filter: PrivacyFilter
+    var onDelete: () -> Void = {}
+
+    init(filter: Binding<PrivacyFilter>, onDelete: @escaping () -> Void = {}) {
+        self._filter = filter
+        self.onDelete = onDelete
+    }
+    /// Read-only convenience for automatic cards (no binding needed).
+    init(readOnly filter: PrivacyFilter) {
+        self._filter = .constant(filter)
+        self.onDelete = {}
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
@@ -28,7 +35,7 @@ struct FilterCard: View {
         }
         .padding(BriefSpacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .opacity(filter.active ? 1 : 0.55)
+        .opacity(filter.active ? 1 : 0.5)
         .background(
             RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
                 .fill(Color.briefPaperRaised)
@@ -39,14 +46,21 @@ struct FilterCard: View {
         )
     }
 
-    // MARK: Statement + count
+    // MARK: Statement (editable inline) + count
 
     private var statementRow: some View {
         HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
-            Text(filter.statement)
-                .briefStyle(.bodyMedium)
-                .foregroundStyle(Color.briefInkPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+            if filter.editable {
+                TextField("Name this filter", text: $filter.statement)
+                    .textFieldStyle(.plain)
+                    .font(.briefBodyMedium)
+                    .foregroundStyle(Color.briefInkPrimary)
+            } else {
+                Text(filter.statement)
+                    .briefStyle(.bodyMedium)
+                    .foregroundStyle(Color.briefInkPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Spacer(minLength: BriefSpacing.sm)
             Text("\(filter.filteredCount) filtered")
                 .briefStyle(.monoMeta)
@@ -55,39 +69,33 @@ struct FilterCard: View {
         }
     }
 
-    // MARK: Tag chips (✕ + ＋ only when editable)
+    // MARK: Tag chips (✕ removes, ＋ adds — editable only)
 
     private var tagRow: some View {
         FlowLayout(spacing: BriefSpacing.xs) {
             ForEach(filter.tags) { tag in
                 TagChip(tag: tag,
                         removable: filter.editable,
-                        onRemove: { onRemoveTag(tag) })
+                        onRemove: { filter.tags.removeAll { $0.id == tag.id } })
             }
             if filter.editable {
-                AddTagChip(action: onAddTag)
+                AddTagField { label in
+                    let trimmed = label.trimmingCharacters(in: .whitespaces)
+                    guard !trimmed.isEmpty else { return }
+                    filter.tags.append(FilterTag(label: trimmed, count: 0))
+                }
             }
         }
     }
 
-    // MARK: Duration + overflow (or "managed by Highlight" when read-only)
+    // MARK: Duration menu + overflow (or read-only line)
 
     private var footerRow: some View {
         HStack(spacing: BriefSpacing.sm) {
             if filter.editable {
-                Button(action: onChangeDuration) {
-                    HStack(spacing: BriefSpacing.xs) {
-                        Text(filter.duration.label)
-                            .briefStyle(.monoMeta)
-                            .foregroundStyle(Color.briefInkSecondary)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 8, weight: .semibold))
-                            .foregroundStyle(Color.briefInkTertiary)
-                    }
-                }
-                .buttonStyle(.plain)
+                durationMenu
                 Spacer(minLength: 0)
-                OverflowButton(action: onOverflow)
+                overflowMenu
             } else {
                 Text("\(filter.duration.label) · managed by Highlight")
                     .briefStyle(.monoMeta)
@@ -95,6 +103,44 @@ struct FilterCard: View {
                 Spacer(minLength: 0)
             }
         }
+    }
+
+    private var durationMenu: some View {
+        Menu {
+            Button("Never kept") { filter.duration = .permanent }
+            Divider()
+            ForEach([7, 14, 30, 90], id: \.self) { n in
+                Button("Forgets after \(n) days") { filter.duration = .days(n) }
+            }
+        } label: {
+            HStack(spacing: BriefSpacing.xs) {
+                Text(filter.duration.label)
+                    .briefStyle(.monoMeta)
+                    .foregroundStyle(Color.briefInkTertiary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+        }
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
+    }
+
+    private var overflowMenu: some View {
+        Menu {
+            Button(filter.active ? "Pause" : "Resume") { filter.active.toggle() }
+            Divider()
+            Button("Delete", role: .destructive) { onDelete() }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.briefInkTertiary)
+                .frame(width: 24, height: 20)
+        }
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
     }
 }
 
@@ -136,54 +182,57 @@ private struct TagChip: View {
     }
 }
 
-// MARK: - Add-tag chip (＋)
+// MARK: - Add-tag field (＋ → inline text entry)
 
-private struct AddTagChip: View {
-    let action: () -> Void
-    @State private var hovering = false
+private struct AddTagField: View {
+    let onAdd: (String) -> Void
+    @State private var editing = false
+    @State private var draft = ""
+    @FocusState private var focused: Bool
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkTertiary)
+        if editing {
+            TextField("tag", text: $draft)
+                .textFieldStyle(.plain)
+                .font(.briefMonoLabel)
+                .foregroundStyle(Color.briefInkPrimary)
+                .frame(width: 64)
+                .focused($focused)
+                .onSubmit(commit)
+                .onExitCommand { editing = false; draft = "" }
                 .padding(.horizontal, BriefSpacing.sm)
                 .padding(.vertical, BriefSpacing.xs)
                 .background(
-                    Capsule().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
+                    Capsule().stroke(Color.briefHighlight.opacity(BriefOpacity.washHeavy),
+                                     lineWidth: 1.5)
                 )
+                .onAppear { focused = true }
+        } else {
+            Button { editing = true } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.briefInkTertiary)
+                    .padding(.horizontal, BriefSpacing.sm)
+                    .padding(.vertical, BriefSpacing.xs)
+                    .background(Capsule().stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth))
+            }
+            .buttonStyle(.plain)
+            .help("Add a tag")
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .help("Add a tag")
+    }
+
+    private func commit() {
+        onAdd(draft)
+        draft = ""
+        editing = false
     }
 }
-
-// MARK: - Overflow (⋯) — pause / delete
-
-private struct OverflowButton: View {
-    let action: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "ellipsis")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkTertiary)
-                .frame(width: 24, height: 20)
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .help("Pause or delete")
-    }
-}
-
-// (FlowLayout — the chip-wrapping layout — already lives in ProvenanceTag.swift.)
 
 #Preview("Filter cards") {
-    VStack(spacing: BriefSpacing.lg) {
-        FilterCard(filter: PrivacyFilter.userMock[0])
-        FilterCard(filter: PrivacyFilter.automaticMock[0])
+    @Previewable @State var user = PrivacyFilter.userMock[0]
+    return VStack(spacing: BriefSpacing.lg) {
+        FilterCard(filter: $user)
+        FilterCard(readOnly: PrivacyFilter.automaticMock[0])
     }
     .padding(BriefSpacing.xxl)
     .frame(width: 640)

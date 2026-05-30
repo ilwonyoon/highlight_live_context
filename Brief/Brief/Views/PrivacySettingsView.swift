@@ -2,14 +2,14 @@ import SwiftUI
 
 // MARK: - PrivacySettingsView — the manual privacy settings page
 //
-// A conventional settings surface: the user sees and hand-edits the filters that
-// keep things out of their context. Two sections (PRIVACY_USER_CONTROL.md §5):
-//   • YOUR FILTERS — editable; the boundaries the user declared
-//   • AUTOMATIC — read-only; what Highlight screens without being asked (P2)
-// Same FilterCard in both, edit affordances only when editable.
+// A conventional settings surface where the user hand-edits everything — no chat
+// needed: rename a filter, add/remove tags, change its duration, pause or delete,
+// and add brand-new filters. Two sections (PRIVACY_USER_CONTROL.md §5):
+//   • YOUR FILTERS — editable
+//   • AUTOMATIC — read-only (P2)
 //
-// This is Path B (manual). The chat panel is Path A (edit the SAME filters by
-// talking). Both touch one underlying set.
+// This is Path B (manual, complete on its own). The chat panel is Path A — it
+// drives this SAME state by talking.
 
 struct PrivacySettingsView: View {
     @State private var userFilters = PrivacyFilter.userMock
@@ -45,12 +45,12 @@ struct PrivacySettingsView: View {
         }
     }
 
-    // MARK: Your filters (editable) — with an add affordance
+    // MARK: Your filters (editable) — add / edit / delete
 
     private var yourFiltersSection: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
             sectionHeader(title: "YOUR FILTERS") {
-                Button(action: {}) {
+                Button(action: addFilter) {
                     HStack(spacing: BriefSpacing.xs) {
                         Image(systemName: "plus")
                             .font(.system(size: 10, weight: .semibold))
@@ -60,21 +60,21 @@ struct PrivacySettingsView: View {
                     .foregroundStyle(Color.briefHighlightInk)
                 }
                 .buttonStyle(.plain)
-                .help("Declare a new filter")
+                .help("Add a new filter")
+            }
+
+            if userFilters.isEmpty {
+                Text("No filters yet — add one, or just tell the assistant what to keep out.")
+                    .briefStyle(.bodySmall)
+                    .foregroundStyle(Color.briefInkTertiary)
+                    .padding(.vertical, BriefSpacing.sm)
             }
 
             ForEach($userFilters) { $filter in
-                FilterCard(
-                    filter: filter,
-                    onRemoveTag: { tag in
-                        filter.tags.removeAll { $0.id == tag.id }
-                    },
-                    onAddTag: {},
-                    onChangeDuration: {},
-                    onOverflow: {}
-                )
+                FilterCard(filter: $filter, onDelete: { delete(filter) })
             }
         }
+        .animation(.briefStandard, value: userFilters.count)
     }
 
     // MARK: Automatic (read-only)
@@ -87,9 +87,24 @@ struct PrivacySettingsView: View {
                     .foregroundStyle(Color.briefInkTertiary)
             }
             ForEach(automaticFilters) { filter in
-                FilterCard(filter: filter)
+                FilterCard(readOnly: filter)
             }
         }
+    }
+
+    // MARK: Mutations
+
+    private func addFilter() {
+        let new = PrivacyFilter(statement: "",
+                                tags: [],
+                                duration: .permanent,
+                                filteredCount: 0,
+                                editable: true)
+        userFilters.insert(new, at: 0)   // newest on top
+    }
+
+    private func delete(_ filter: PrivacyFilter) {
+        userFilters.removeAll { $0.id == filter.id }
     }
 
     // MARK: Section header — label + trailing accessory
