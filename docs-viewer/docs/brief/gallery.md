@@ -16,6 +16,24 @@ The data-governance block, as Notion-style property rows. **Connected** (top of 
 
 ---
 
+## Governance rows — redesign (work in progress)
+
+The data-governance block, reworked. The values are now **Söhne Mono** — they read as measured data, not prose — with the labels as small uppercase mono field-tags so they sit *under* the data in the hierarchy instead of competing with it. The inline row of source icons is gone (it said little); the `Add your filters` arrow is gone too (the brand colour already reads as actionable, and a mono arrow sat awkwardly).
+
+### At rest
+
+`CONTEXT 207 captured today` · `PRIVACY ● Auto-screening · Add your filters` — clean, the volume number carrying the weight.
+
+![Governance rows at rest](/shots/governance-1-rest.png)
+
+### Hover the capture count → per-source breakdown
+
+Instead of inline icons, hovering `207 captured today` opens a popover: a bar per source (where context is actually accruing, busiest first), plus a **NOT CONNECTED** section showing dormant connectors and a ＋ to connect more.
+
+![Capture breakdown popover](/shots/governance-2-popover.png)
+
+---
+
 ## AI Chat Panel — states (work in progress)
 
 The right-side **AI chat panel** is a *general* conversational control surface — header (topic + back), a streamed message thread, hosted domain cards, and a pinned composer. It knows nothing about any domain; a domain (privacy first, memory/connections later) plugs in through a `PanelScenario` bridge. See [Privacy execution](/brief/PRIVACY_EXECUTION) for the architecture.

@@ -56,6 +56,8 @@ extension Font {
     static let briefCaption   = soehne(.buch, size: 10, relativeTo: .caption)
 
     // Register 2: Söhne Mono
+    static let briefMonoBody       = soehneMono(.buch,    size: 13, relativeTo: .body)
+    static let briefMonoBodyMedium = soehneMono(.kraftig, size: 13, relativeTo: .body) // 500 — mono lead-ins / actions
     static let briefMonoLabel = soehneMono(.buch, size: 11, relativeTo: .footnote)
     static let briefMonoMeta  = soehneMono(.buch, size: 10, relativeTo: .caption)
 
@@ -145,6 +147,8 @@ struct BriefTypeToken {
     static let caption    = BriefTypeToken(font: .briefCaption,    size: 10, lineHeight: 1.30, tracking:  3)
 
     // Söhne Mono
+    static let monoBody       = BriefTypeToken(font: .briefMonoBody,       size: 13, lineHeight: 1.20, tracking: 0)
+    static let monoBodyMedium = BriefTypeToken(font: .briefMonoBodyMedium, size: 13, lineHeight: 1.20, tracking: 0)
     static let monoLabel  = BriefTypeToken(font: .briefMonoLabel,  size: 11, lineHeight: 1.30, tracking:  1)
     static let monoMeta   = BriefTypeToken(font: .briefMonoMeta,   size: 10, lineHeight: 1.30, tracking:  2)
 

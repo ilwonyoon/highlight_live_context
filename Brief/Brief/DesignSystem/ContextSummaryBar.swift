@@ -26,9 +26,9 @@ struct ContextSummaryBar: View {
 
     private var privacy: PrivacyState { .mock }
 
-    /// Width of the label column so both rows' values line up — just wide enough
-    /// for the longer label ("Privacy") so the value isn't stranded far away.
-    private let labelWidth: CGFloat = 62
+    /// Width of the label column so both rows' values line up. The labels are
+    /// small mono field-tags now, so this is narrower than the old body width.
+    private let labelWidth: CGFloat = 58
 
     var body: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
@@ -41,13 +41,14 @@ struct ContextSummaryBar: View {
         }
     }
 
-    /// One property row: left label column (text only), right value. The label
-    /// column is fixed-width so both rows' values left-align to the same x.
+    /// One property row: a small uppercase mono field-tag on the left, the value
+    /// on the right. The tag reads as a label (a measured field), letting the
+    /// value carry the data weight — no longer competing at the same size.
     private func propertyRow<Value: View>(label: String,
                                            @ViewBuilder value: () -> Value) -> some View {
         HStack(alignment: .center, spacing: BriefSpacing.md) {
-            Text(label)
-                .briefStyle(.body)
+            Text(label.uppercased())
+                .briefStyle(.monoLabel)
                 .foregroundStyle(Color.briefInkTertiary)
                 .frame(width: labelWidth, alignment: .leading)
 
@@ -56,72 +57,164 @@ struct ContextSummaryBar: View {
     }
 }
 
-// MARK: - Captured value (volume headline + hover-expanding source chips)
+// MARK: - Captured value (volume headline → hover reveals a per-source breakdown)
 
 private struct CapturedValue: View {
     var onManage: () -> Void = {}
-    @State private var expanded = false
+    @State private var showBreakdown = false
+    @State private var hovering = false
 
-    /// How many source chips show at rest before the "+N".
-    private let restCount = 3
-
-    private var allSources: [BriefSource] { BriefContent.connectedSources }
     private var total: Int { BriefContent.capturedTodayTotal }
 
     var body: some View {
-        let shown = expanded ? allSources : Array(allSources.prefix(restCount))
-        let overflow = allSources.count - restCount
-
-        HStack(spacing: BriefSpacing.sm) {
-            // Volume — the headline (plain text, not bold).
-            Text("\(total) captured today")
-                .briefStyle(.body)
-                .foregroundStyle(Color.briefInkSecondary)
-
-            Text("·")
-                .briefStyle(.body)
-                .foregroundStyle(Color.briefInkTertiary)
-
-            // Sources — supporting detail. Top few; the rest expand on hover.
+        // The volume headline, as Söhne Mono (a measured value). A small chevron
+        // is the affordance — it says "there's more here" without the old inline
+        // row of icons. Click (or tap) opens the per-source breakdown; the whole
+        // thing is one button so it works on touch too.
+        Button { showBreakdown.toggle() } label: {
             HStack(spacing: BriefSpacing.xs) {
-                ForEach(Array(shown.enumerated()), id: \.offset) { _, src in
-                    SourceChip(source: src)
-                }
-                if expanded {
-                    AddConnectionChip(action: onManage)
-                } else if overflow > 0 {
-                    Text("+\(overflow)")
-                        .briefStyle(.monoMeta)
-                        .foregroundStyle(Color.briefInkTertiary)
-                }
+                Text("\(total) captured today")
+                    .briefStyle(.monoBody)
+                    .foregroundStyle(Color.briefInkSecondary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(hovering || showBreakdown
+                                     ? Color.briefInkSecondary : Color.briefInkTertiary)
             }
+            .padding(.vertical, BriefSpacing.xs)
+            .padding(.horizontal, BriefSpacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
+                    .fill(hovering || showBreakdown ? Color.briefSelectionRest : Color.clear)
+            )
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
-        .onHover { expanded = $0 }
-        .animation(.briefHover, value: expanded)
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .animation(.briefHover, value: hovering)
+        .animation(.briefHover, value: showBreakdown)
+        .popover(isPresented: $showBreakdown, arrowEdge: .bottom) {
+            CaptureBreakdownPopover(onManage: onManage)
+        }
     }
 }
 
-// MARK: - Source chip (rounded white square, brand icon inset)
+// MARK: - Capture breakdown popover (per-source bars + connect more)
 
-private struct SourceChip: View {
-    let source: BriefSource
-    private let chip: CGFloat = 22
-    private let icon: CGFloat = 13   // inset — does not fill the chip
+private struct CaptureBreakdownPopover: View {
+    var onManage: () -> Void = {}
+
+    /// Connected sources with today's counts, busiest first.
+    private var connected: [(source: BriefSource, count: Int)] {
+        BriefContent.capturedToday.sorted { $0.count > $1.count }
+    }
+    /// Connectors not yet contributing today — the invitation to connect more.
+    private var unconnected: [BriefSource] {
+        let active = Set(BriefContent.capturedToday.map(\.source))
+        return BriefSource.allCases.filter { !active.contains($0) }
+    }
+    private var maxCount: Int { connected.map(\.count).max() ?? 1 }
 
     var body: some View {
-        BriefIcon(source, size: icon, rendering: source == .voice ? .template : .original)
-            .foregroundStyle(source == .voice ? Color.briefHighlightDeep : Color.briefInkSecondary)
-            .frame(width: chip, height: chip)
-            .background(
-                RoundedRectangle(cornerRadius: BriefRadius.chip - 2, style: .continuous)
-                    .fill(Color.briefPaperRaised)
-                    .overlay(
+        VStack(alignment: .leading, spacing: BriefSpacing.lg) {
+            // Header — total + what this is.
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Captured today")
+                    .briefStyle(.bodyMedium)
+                    .foregroundStyle(Color.briefInkPrimary)
+                Text("Where your context is accruing right now.")
+                    .briefStyle(.bodySmall)
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+
+            // Per-source bars.
+            VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+                ForEach(Array(connected.enumerated()), id: \.offset) { _, entry in
+                    SourceBar(source: entry.source, count: entry.count, maxCount: maxCount)
+                }
+            }
+
+            // Connect more — unconnected connectors + the manage action.
+            if !unconnected.isEmpty {
+                Divider().overlay(Color.briefHairlineSoft)
+                VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+                    Text("NOT CONNECTED")
+                        .briefStyle(.monoMeta)
+                        .foregroundStyle(Color.briefInkTertiary)
+                    // The dormant connectors, as muted chips, + a manage button.
+                    FlowChips(sources: unconnected, onManage: onManage)
+                }
+            }
+        }
+        .padding(BriefSpacing.xl)
+        .frame(width: 280)
+        .background(Color.briefPaper)
+    }
+}
+
+// MARK: - One source row: icon · name · bar · count
+
+private struct SourceBar: View {
+    let source: BriefSource
+    let count: Int
+    let maxCount: Int
+
+    private let track: CGFloat = 96
+
+    var body: some View {
+        HStack(spacing: BriefSpacing.sm) {
+            BriefIcon(source, size: 13, rendering: source == .voice ? .template : .original)
+                .foregroundStyle(source == .voice ? Color.briefHighlightDeep : Color.briefInkSecondary)
+                .frame(width: 16)
+
+            Text(source.label)
+                .briefStyle(.bodySmall)
+                .foregroundStyle(Color.briefInkPrimary)
+                .lineLimit(1)
+                .frame(width: 104, alignment: .leading)
+
+            // Proportional bar.
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.briefInkPrimary.opacity(0.06))
+                    .frame(width: track, height: 5)
+                Capsule().fill(Color.briefHighlightDeep.opacity(0.7))
+                    .frame(width: max(4, track * CGFloat(count) / CGFloat(maxCount)), height: 5)
+            }
+
+            Text("\(count)")
+                .briefStyle(.monoMeta)
+                .foregroundStyle(Color.briefInkSecondary)
+                .frame(minWidth: 20, alignment: .trailing)
+        }
+    }
+}
+
+// MARK: - Unconnected connectors as muted chips + a manage (+) button
+
+private struct FlowChips: View {
+    let sources: [BriefSource]
+    var onManage: () -> Void = {}
+
+    var body: some View {
+        // A simple wrapping row. The set is small (a few connectors), so an
+        // HStack with a trailing manage button reads cleanly.
+        HStack(spacing: BriefSpacing.xs) {
+            ForEach(Array(sources.enumerated()), id: \.offset) { _, src in
+                BriefIcon(src, size: 13, rendering: src == .voice ? .template : .original)
+                    .foregroundStyle(Color.briefInkTertiary)
+                    .frame(width: 22, height: 22)
+                    .background(
                         RoundedRectangle(cornerRadius: BriefRadius.chip - 2, style: .continuous)
-                            .stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
+                            .fill(Color.briefPaperSunken)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: BriefRadius.chip - 2, style: .continuous)
+                                    .stroke(Color.briefHairline, lineWidth: BriefLayout.Card.strokeWidth)
+                            )
                     )
-            )
-            .help(source.label)
+                    .help("Connect \(src.label)")
+            }
+            AddConnectionChip(action: onManage)
+        }
     }
 }
 
@@ -171,29 +264,33 @@ private struct PrivacyValue: View {
                         .fill(Color.briefHighlightDeep)
                         .frame(width: 6, height: 6)
                     Text("Auto-screening")
-                        .briefStyle(.body)
+                        .briefStyle(.monoBody)
                         .foregroundStyle(Color.briefInkSecondary)
                 }
 
                 Text("·")
-                    .briefStyle(.body)
+                    .briefStyle(.monoBody)
                     .foregroundStyle(Color.briefInkTertiary)
 
                 // Layer 2 — the user's own filters. Until set up, an active
-                // invitation (brand-inked, with an arrow) to take more control.
+                // invitation: brand-inked text that underlines on hover (no
+                // arrow — the colour already reads as "actionable", and a mono
+                // arrow sat awkwardly against the type).
                 if privacy.userFiltersConfigured {
                     Text("\(privacy.rules.count) filters")
-                        .briefStyle(.body)
+                        .briefStyle(.monoBody)
                         .foregroundStyle(Color.briefInkSecondary)
                 } else {
-                    HStack(spacing: BriefSpacing.xs) {
-                        Text("Add your filters")
-                            .briefStyle(.bodyMedium)
-                            .foregroundStyle(Color.briefHighlightInk)
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(Color.briefHighlightInk)
-                    }
+                    Text("Add your filters")
+                        .briefStyle(.monoBodyMedium)
+                        .foregroundStyle(Color.briefHighlightInk)
+                        .overlay(alignment: .bottom) {
+                            Rectangle()
+                                .fill(Color.briefHighlightInk)
+                                .frame(height: 1)
+                                .offset(y: 2)
+                                .opacity(hovering ? 1 : 0)
+                        }
                 }
             }
             // No leading inset → "Auto-screening" left-aligns with "207" above.

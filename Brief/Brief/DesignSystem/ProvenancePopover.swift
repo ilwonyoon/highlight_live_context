@@ -151,7 +151,9 @@ struct ProvenancePopoverView: View {
         .buttonStyle(.plain)
         .onHover { popoverHovered = $0 }
         .help(preview.openLabel)
-        // No custom background — system NSPopover panel provides chrome.
+        // Warm-paper surface — matches the capture-breakdown popover so all
+        // popovers share one background instead of the system grey chrome.
+        .background(Color.briefPaper)
     }
 }
 
