@@ -146,8 +146,9 @@ struct LiveContextView: View {
                 daySwitcher
             }
             // Data-governance: Connected (sources) + Privacy (protection), as
-            // Notion-style property rows.
-            ContextSummaryBar()
+            // Notion-style property rows. The Privacy row opens the same
+            // slide-over as the sidebar shield — one presentation, one trigger.
+            ContextSummaryBar(onOpenPrivacy: { showPrivacy = true })
                 .padding(.top, BriefSpacing.xs)
         }
     }

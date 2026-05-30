@@ -18,7 +18,10 @@ import SwiftUI
 // invitation to take more control).
 
 struct ContextSummaryBar: View {
-    var onOpenPrivacy: () -> Void = { PrivacyWindowController.shared.toggle() }
+    // The host wires this to its slide-over trigger (see LiveContextView). The
+    // default is a no-op so this view stays presentation-only — it neither knows
+    // nor owns how the panel is shown.
+    var onOpenPrivacy: () -> Void = {}
     var onManageConnections: () -> Void = {}
 
     private var privacy: PrivacyState { .mock }
