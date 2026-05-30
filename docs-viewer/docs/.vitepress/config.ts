@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'Brief — working docs',
   description: 'Highlight take-home — design docs',
   lang: 'en-US',
@@ -18,11 +19,17 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Brief', link: '/brief/ASSIGNMENT' },
+      { text: 'Brief', link: '/brief/ONSITE' },
     ],
 
     sidebar: {
       '/brief/': [
+        {
+          text: 'Start here',
+          items: [
+            { text: 'Ilwon Yoon · onsite', link: '/brief/ONSITE' },
+          ],
+        },
         {
           text: 'Prototype',
           items: [
@@ -81,4 +88,4 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/ilwonyoon/markdown-preview' },
     ],
   },
-})
+}))

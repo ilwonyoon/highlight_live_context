@@ -6,6 +6,68 @@
 >
 > **The overriding design mandate (don't lose this):** every privacy decision is judged by one question — *is it dead-simple for the user to understand and to set?* That's not a nicety; it's the mechanism of the whole product. The flywheel is **earn trust → give control → unlock more permission → make Brief more useful.** If understanding "what's protected" takes a manual, or changing it takes hunting through settings, trust never compounds and permissions never expand. So: as few user-facing concepts as possible, plain language, and steering by conversation. Complexity lives in the model; the UI stays a sentence.
 
+---
+
+## The defense-in-depth pipeline (the load-bearing frame)
+
+Privacy isn't one switch — it's a **layered set of defenses along the data-capture pipeline**, strongest at the source. The earlier you stop sensitive data, the stronger the protection: data blocked at the source never enters the system at all; data caught later was already captured and has to be scrubbed. Three defense lines, in descending strength:
+
+```mermaid
+flowchart TD
+    SRC(["Sources"])
+
+    subgraph L1["Layer 1 · Source — block before capture · strongest"]
+        direction LR
+        L1A["🛡 Automatic"]
+        L1M["✋ Manual"]
+    end
+
+    subgraph L2["Layer 2 · Content — screen during capture"]
+        direction LR
+        L2A["🛡 Automatic"]
+    end
+
+    subgraph L3["Layer 3 · Topic — scrub after capture · 2nd net"]
+        direction LR
+        L3M["💬 Via chat"]
+        L3R["⏲ Retention"]
+    end
+
+    CLEAN(["Clean Live Context"])
+
+    SRC ==> L1 == "what passes" ==> L2 == "what's stored" ==> L3 ==> CLEAN
+
+    classDef auto fill:#eef7e8,stroke:#bcd9a8,color:#2c3a1e;
+    classDef manual fill:#fdfbe8,stroke:#e6dfa0,color:#3a361a;
+    classDef neutral fill:#f0ece3,stroke:#d8d2c4,color:#3a352c;
+    class L1A,L2A auto;
+    class L1M,L3M,L3R manual;
+    class SRC,CLEAN neutral;
+    style L1 fill:#fcfbf7,stroke:#cbbf7a,stroke-width:1.5px;
+    style L2 fill:#fcfbf7,stroke:#cbbf7a,stroke-width:1.5px;
+    style L3 fill:#fcfbf7,stroke:#cbbf7a,stroke-width:1.5px;
+```
+
+*(What each layer's Automatic / Manual actually does — the apps, the content categories, the retention options — is in the table below. The diagram is the skeleton; the table is the detail.)*
+
+**Two things this frame makes clear:**
+
+1. **Strength = where you stop it.** Layer 1 (source) is the strongest — the data is never captured. Layer 2 (content) catches what slips through. Layer 3 (topic) is the *secondary* net: it acts on data **already captured**, so it can only *scrub* — remove what's there, and either stop future capture or auto-expire it. That's why "forget anything about X" lives at the bottom, not the top.
+
+2. **Automatic and manual run at every layer — they're not separate buckets.** The old split ("automatic vs. user filters") was wrong. The real split is **where in the pipeline** the block happens; *both* the service (automatic) and the user (manual) act at each defensible point:
+
+| Layer | Where it blocks | Automatic (the service) | Manual (the user) | Input method |
+|---|---|---|---|---|
+| **1 · Source** | before capture | pre-blocks known-risky sources (banking/health/auth domains, password apps), with categories (health / financial / auth) | excludes more apps/sites, or a sub-source | direct (a list — clear) |
+| **2 · Content** | during capture | drops obvious sensitive content that got through (secrets never stored; health/finance/personal/auth) | — | none (automatic) |
+| **3 · Topic** | after capture | — | declares "keep X out" by topic; sets how long | **chat** (it's abstract — the AI scans + extracts keywords) |
+
+**Why manual input differs by layer.** A source is *concrete* — you can name an app or site, so the user types it into a list (Layer 1). A topic is *abstract* — "what should I even block?" is hard to answer cold, and the right keywords are hard to recall, so the assistant does the work: you describe the boundary in words, it scans what's captured and proposes the matches (Layer 3, via chat). This is why **Layer 1 is a manual list and Layer 3 is conversational** — the input matches the unit.
+
+> The two-axis model below (WHAT × HOW-LONG) and the silent/visible distinction are the *detail inside* these layers — what each filter screens, and for how long. The pipeline is the skeleton; the axes are the muscle on it.
+
+---
+
 ## The frame: two axes, and only two things the user sees
 
 Earlier drafts split this into three "actions" (silent / visible / user-control). That's still useful *inside the system*, but it over-exposes the user. Cleaner model: privacy is **two independent questions**, and the user only ever sees **two buckets**.
