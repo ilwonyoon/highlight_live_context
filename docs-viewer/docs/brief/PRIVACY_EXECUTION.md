@@ -318,6 +318,13 @@ is the design.
 
 ## 5. The privacy scenario — the contract, fulfilled (other terminal's work)
 
+> **The full conversation design lives in `PRIVACY_CHAT_FLOW.md`** — the welcome,
+> the discovery chips, and the five-beat wish→scan→curate→duration→confirm flow,
+> with the Dani scenario data. This section is the *bridge-level* sketch (what the
+> scenario returns to the panel); read `PRIVACY_CHAT_FLOW.md` for what the
+> assistant actually says and does, and `PRIVACY_USER_CONTROL.md` for the filter
+> model + card content it produces.
+
 This section is **specification, not implementation** — it tells the privacy
 terminal exactly what to build so it drops into the panel. The privacy domain
 types (`PrivacyState`, `PrivacyRule`, scan, etc.) stay entirely on that side.
