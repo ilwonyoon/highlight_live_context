@@ -25,6 +25,7 @@
 		4D9F3437D95B76D0CC8DA658 /* BriefContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02EA31EC7A928A44243ACDD /* BriefContent.swift */; };
 		4EE103ECDB10A642D58C7ED2 /* BriefSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */; };
 		4FF142FCFA8E955D79DD278B /* LinearModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E341461981E57F45A0792F3 /* LinearModels.swift */; };
+		504C3770BFDAA16F9BDC2314 /* FilterCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B39A59B04915023BFED9331 /* FilterCard.swift */; };
 		53475C8A6AACC6925B3759B7 /* TypeSpecimenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */; };
 		5615A9BB38FDF5EBB5252EA5 /* SelectionSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581E2D8C918E275E19D2E4AA /* SelectionSurface.swift */; };
 		5849B2B978FB820A244EB10E /* BriefMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215FDB06CD6B2432EFAA419 /* BriefMotion.swift */; };
@@ -55,6 +56,7 @@
 		D7C9F3559EB410CA8E054C5B /* ChatPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 083910E53C940F2E947DC399 /* ChatPanel.swift */; };
 		DBF2B1E98C97F357FF0505AC /* EchoScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B41A1CE5ED4324B724FEF9B /* EchoScenario.swift */; };
 		DC3263079FA5BFC87EB3AE44 /* PanelRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D11EA82E6DFF97E4B43F74C /* PanelRoute.swift */; };
+		DFCCF4DC8F85CEB87DEE8635 /* PrivacyFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917627B3DA13615A8BC25C01 /* PrivacyFilter.swift */; };
 		E47A7DDAC3301CDE6B24526D /* LiveContextStore+Verify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */; };
 		E61DE40E7A435F50486D12A7 /* PrivacyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0A7C24339862BBAFB91429 /* PrivacyState.swift */; };
 		E8ED5107ECEEEF026B16D51A /* BriefMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66012BDC3DA03A3C02A82D2 /* BriefMarkdown.swift */; };
@@ -94,6 +96,7 @@
 		4FC0624F98A3D54E4CE1D39F /* SelectableLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableLine.swift; sourceTree = "<group>"; };
 		5343EC698754B834158A9A47 /* PrivacyPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPanel.swift; sourceTree = "<group>"; };
 		581E2D8C918E275E19D2E4AA /* SelectionSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionSurface.swift; sourceTree = "<group>"; };
+		5B39A59B04915023BFED9331 /* FilterCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterCard.swift; sourceTree = "<group>"; };
 		63024516F875C046AD3EC37B /* MeetingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModels.swift; sourceTree = "<group>"; };
 		63EB33BCB06F81F173C7270A /* PrivacyWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyWindowController.swift; sourceTree = "<group>"; };
 		6B41A1CE5ED4324B724FEF9B /* EchoScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoScenario.swift; sourceTree = "<group>"; };
@@ -109,6 +112,7 @@
 		83703D1711E5E8A535AA6D67 /* ChatPanelSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPanelSession.swift; sourceTree = "<group>"; };
 		83AF7A462938AB5835F27B15 /* BriefShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefShadow.swift; sourceTree = "<group>"; };
 		8E341461981E57F45A0792F3 /* LinearModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearModels.swift; sourceTree = "<group>"; };
+		917627B3DA13615A8BC25C01 /* PrivacyFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyFilter.swift; sourceTree = "<group>"; };
 		9D13C3032E0D6E58AB6E70FD /* ContextSummaryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextSummaryBar.swift; sourceTree = "<group>"; };
 		A02EA31EC7A928A44243ACDD /* BriefContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefContent.swift; sourceTree = "<group>"; };
 		A18A1010220C9121DFAD767A /* DesignSystemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemView.swift; sourceTree = "<group>"; };
@@ -220,9 +224,11 @@
 			children = (
 				A18A1010220C9121DFAD767A /* DesignSystemView.swift */,
 				F8E79284697F81273A384FE9 /* DSComponents.swift */,
+				5B39A59B04915023BFED9331 /* FilterCard.swift */,
 				18FA0A6AFF7F0A58CC5CA1AE /* LiveContextDocument.swift */,
 				0FDE3BC4C72D3705A3DD3795 /* LiveContextView.swift */,
 				6F12E8302DA3BCA03D893370 /* PrivacyBucketCard.swift */,
+				917627B3DA13615A8BC25C01 /* PrivacyFilter.swift */,
 				5343EC698754B834158A9A47 /* PrivacyPanel.swift */,
 				C0B9B48C51DEB159690DD23B /* PrivacySettingsView.swift */,
 				7C0A7C24339862BBAFB91429 /* PrivacyState.swift */,
@@ -355,6 +361,7 @@
 				8F571438B320B58CE063513E /* DesignSystemView.swift in Sources */,
 				FB890F851979BF1983093DC3 /* DocStyle.swift in Sources */,
 				DBF2B1E98C97F357FF0505AC /* EchoScenario.swift in Sources */,
+				504C3770BFDAA16F9BDC2314 /* FilterCard.swift in Sources */,
 				D191F961A186CA9486499C52 /* InteractionState.swift in Sources */,
 				4FF142FCFA8E955D79DD278B /* LinearModels.swift in Sources */,
 				7353A610C182E2779B0567CD /* LiveContextDocument.swift in Sources */,
@@ -370,6 +377,7 @@
 				6BDCD50FA980EE81440BB2CF /* PanelScenario.swift in Sources */,
 				CEF0E1BB6F49A2EB9CBFABD1 /* PrivacyBucketCard.swift in Sources */,
 				EB8700F26D36A17B7ABD0E73 /* PrivacyChip.swift in Sources */,
+				DFCCF4DC8F85CEB87DEE8635 /* PrivacyFilter.swift in Sources */,
 				EF8131ED064F154C2489319A /* PrivacyPanel.swift in Sources */,
 				F19ECB5C3FDF8861CD6C3278 /* PrivacyScenario.swift in Sources */,
 				3FAB808587E089A642BE5311 /* PrivacySettingsView.swift in Sources */,

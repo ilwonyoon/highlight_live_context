@@ -8,6 +8,12 @@ An action-oriented document, generated from a Track/MeaningUnit model: the goal 
 
 ![The Brief — full view](/shots/live-context-full.png)
 
+## Privacy settings — the manual control surface
+
+Sidebar **Privacy** opens a conventional settings page (Path B; the chat panel is Path A — same filters, edited by talking). Two sections, one card component (`PRIVACY_USER_CONTROL.md`): **Your filters** (editable — tag chips with ✕/＋, a duration menu, overflow ⋯) and **Automatic** (read-only — what Highlight screens without being asked, shown for transparency). Each filter shows a *filtered count* — the proof it's working, never the blocked content.
+
+![Privacy settings — manual control surface](/shots/privacy-settings.png)
+
 ## Header — Connected & Privacy
 
 The data-governance block, as Notion-style property rows. **Connected** (top of the funnel — where the data comes from) sits above **Privacy** (control over it). Source apps are white rounded chips; the trailing **＋** manages connections. Privacy says two things at once: automatic screening is always on (the calm default), and the user's own filters aren't set up yet — an active invitation to take more control.
