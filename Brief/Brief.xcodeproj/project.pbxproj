@@ -36,6 +36,7 @@
 		8F571438B320B58CE063513E /* DesignSystemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18A1010220C9121DFAD767A /* DesignSystemView.swift */; };
 		920091F157EE93D97E36564F /* MeetingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63024516F875C046AD3EC37B /* MeetingModels.swift */; };
 		939D2DCE502EC4065D298644 /* BriefShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF7A462938AB5835F27B15 /* BriefShadow.swift */; };
+		94179AE080ED10D56A20A42A /* ContextSummaryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D13C3032E0D6E58AB6E70FD /* ContextSummaryBar.swift */; };
 		9D2DD1A2A8D938DF3C9B08F8 /* ReferenceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17950B2DE2CB3060D9D59C7B /* ReferenceModels.swift */; };
 		A880F0E63639DA2FB2FFD921 /* BriefOpacity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB109916AFE0C1B0343A324E /* BriefOpacity.swift */; };
 		A8ED8D114218670619B9700D /* MessageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DBB424D3D7FA38B10BAA317 /* MessageModels.swift */; };
@@ -94,6 +95,7 @@
 		831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		83AF7A462938AB5835F27B15 /* BriefShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefShadow.swift; sourceTree = "<group>"; };
 		8E341461981E57F45A0792F3 /* LinearModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearModels.swift; sourceTree = "<group>"; };
+		9D13C3032E0D6E58AB6E70FD /* ContextSummaryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextSummaryBar.swift; sourceTree = "<group>"; };
 		A02EA31EC7A928A44243ACDD /* BriefContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefContent.swift; sourceTree = "<group>"; };
 		A18A1010220C9121DFAD767A /* DesignSystemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemView.swift; sourceTree = "<group>"; };
 		A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeSpecimenView.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */,
 				7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */,
 				2351246BBE0224CBF23E370D /* ChatComposer.swift */,
+				9D13C3032E0D6E58AB6E70FD /* ContextSummaryBar.swift */,
 				F4E72C1D2E829038F21F4009 /* DocStyle.swift */,
 				106854B888494669D7792517 /* InteractionState.swift */,
 				E2B51F39E361DA9CDA55A31D /* PrivacyChip.swift */,
@@ -313,6 +316,7 @@
 				EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */,
 				D18359F6E006B9F6CD2808B6 /* CaptureModels.swift in Sources */,
 				0F7FCE7D1B5405FA34E2F12C /* ChatComposer.swift in Sources */,
+				94179AE080ED10D56A20A42A /* ContextSummaryBar.swift in Sources */,
 				CD23DB14163891E4173CCA84 /* DSComponents.swift in Sources */,
 				8F571438B320B58CE063513E /* DesignSystemView.swift in Sources */,
 				FB890F851979BF1983093DC3 /* DocStyle.swift in Sources */,

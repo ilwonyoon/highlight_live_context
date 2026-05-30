@@ -187,4 +187,59 @@ enum BriefContent {
     static func tracks(in state: TrackState) -> [Track] {
         tracks.filter { $0.state == state }
     }
+
+    // MARK: Source aggregation (for the header's connected-apps summary)
+
+    /// Distinct sources woven across the whole brief, in first-appearance order,
+    /// each with how many strands cite it. This is the "connected apps" funnel
+    /// at the top of the header — computed from real strands, not hardcoded.
+    static var sourceUsage: [(source: BriefSource, count: Int)] {
+        var order: [BriefSource] = []
+        var counts: [BriefSource: Int] = [:]
+        func tally(_ s: BriefSource) {
+            if counts[s] == nil { order.append(s) }
+            counts[s, default: 0] += 1
+        }
+        for t in tracks {
+            for u in t.recap {
+                for c in u.clauses { for st in c.strands { tally(st.source) } }
+            }
+            if let e = t.next?.entry { tally(e.source) }
+        }
+        for u in aboutUnits { for c in u.clauses { for st in c.strands { tally(st.source) } } }
+        return order.map { ($0, counts[$0] ?? 0) }
+    }
+
+    /// Total highlights (sourced citations) across the brief.
+    static var highlightCount: Int { sourceUsage.reduce(0) { $0 + $1.count } }
+
+    /// Every connector currently connected — the full set shown in the header's
+    /// Context row (more than what any one brief happens to cite). Order is the
+    /// ones this brief draws on first (most-used → least), then the rest.
+    static var connectedSources: [BriefSource] {
+        let used = sourceUsage.sorted { $0.count > $1.count }.map(\.source)
+        let rest: [BriefSource] = [.gmail, .docs, .notion, .gcal, .outlook]
+            .filter { !used.contains($0) }
+        return used + rest
+    }
+
+    // MARK: Captured-today volume (the header's headline — how much context
+    // Highlight gathered today, not how many apps are connected). Per-source so
+    // the hover breakdown can show "where it came from." These are hot-tier
+    // capture counts (screen frames, messages, transcript segments…), far larger
+    // than the handful the brief actually cites.
+    static let capturedToday: [(source: BriefSource, count: Int)] = [
+        (.voice,  38),   // meeting transcript segments
+        (.slack,  72),   // messages across channels
+        (.gmail,  21),
+        (.linear, 14),
+        (.cursor, 19),
+        (.github,  9),
+        (.docs,    11),
+        (.notion,  17),
+        (.gcal,     6),
+    ]
+
+    /// Total context captured today across all sources.
+    static var capturedTodayTotal: Int { capturedToday.reduce(0) { $0 + $1.count } }
 }

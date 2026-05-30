@@ -78,6 +78,15 @@ struct ProvenancePreview {
                 snippet: "Drafted a Postgres migration adding a sources column with an enum constraint. Backfill estimated at 2 minutes. Reviewed with Maya.",
                 openLabel: "Open Cursor session"
             )
+        case .gcal, .outlook:
+            // Calendar connectors — not yet a body source; generic placeholder.
+            return .init(
+                source: source,
+                timeLabel: "today",
+                title: "\(source.label)",
+                snippet: "Connected calendar. Meetings and events from \(source.label) feed your context.",
+                openLabel: "Open \(source.label)"
+            )
         }
     }
 }

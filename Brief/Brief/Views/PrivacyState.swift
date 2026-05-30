@@ -102,6 +102,15 @@ struct PrivacyState: Equatable {
     var autoItems: [AutoItem]
     var rules: [PrivacyRule]
 
+    // Two filter layers, surfaced in the header's Privacy row:
+    //  • automatic screening is the system default — always on (secrets/personal
+    //    caught without the user lifting a finger).
+    //  • user-controlled filters are the user's own rules — opt-in, and NOT yet
+    //    set up by default, so the header can actively invite the user to add
+    //    them (the trust→control→permission flywheel).
+    var autoScreeningOn: Bool = true
+    var userFiltersConfigured: Bool = false
+
     // Derived counts for the brief headline ("3 secrets, 4 personal today").
     var secretsCount: Int { autoItems.filter { $0.category == .secrets }.count }
     var personalCount: Int { autoItems.filter { $0.category == .personal }.count }

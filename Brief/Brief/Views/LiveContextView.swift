@@ -138,19 +138,17 @@ struct LiveContextView: View {
 
     private var header: some View {
         // H1 title sits on a baseline row with the day it covers + a dropdown to
-        // jump to another day's context, so "this is today's brief" is explicit
-        // and other days are one click away. Trust chip sits beneath the identity.
+        // jump to another day's context. Below: the data-governance summary —
+        // connected apps (where data came from) + protection (control over it).
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
-                    BriefH1(text: "Live Context")
-                    daySwitcher
-                }
-                Text("Dani Reyes · 24 highlights")
-                    .briefStyle(.monoMeta)
-                    .foregroundStyle(Color.briefInkTertiary)
+            HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
+                BriefH1(text: "Live Context")
+                daySwitcher
             }
-            PrivacyChip()
+            // Data-governance: Connected (sources) + Privacy (protection), as
+            // Notion-style property rows.
+            ContextSummaryBar()
+                .padding(.top, BriefSpacing.xs)
         }
     }
 
