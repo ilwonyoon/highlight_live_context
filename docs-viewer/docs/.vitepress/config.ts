@@ -36,6 +36,7 @@ export default defineConfig({
             { text: 'Priorities (P0 / P1 / P2)', link: '/brief/PRIORITIES' },
             { text: 'Privacy model', link: '/brief/PRIVACY_MODEL' },
             { text: 'Privacy execution (chat panel)', link: '/brief/PRIVACY_EXECUTION' },
+            { text: 'Privacy user control (filters)', link: '/brief/PRIVACY_USER_CONTROL' },
             { text: 'Onboarding & trust', link: '/brief/ONBOARDING' },
           ],
         },
