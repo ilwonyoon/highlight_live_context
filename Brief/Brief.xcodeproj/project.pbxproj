@@ -31,6 +31,7 @@
 		68A2AFA4A234C8167260CC07 /* PanelComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E47151C57AC0AAC1A67915 /* PanelComposer.swift */; };
 		6BDCD50FA980EE81440BB2CF /* PanelScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD688546ABB99DA1304DBE0 /* PanelScenario.swift */; };
 		7353A610C182E2779B0567CD /* LiveContextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FA0A6AFF7F0A58CC5CA1AE /* LiveContextDocument.swift */; };
+		737540FDB4178DA1B2367C4D /* ChatPanelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83703D1711E5E8A535AA6D67 /* ChatPanelSession.swift */; };
 		7613C7CEA171F31BEB3FA1D5 /* LiveContextStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410302074F14E65F26427829 /* LiveContextStore.swift */; };
 		7F469B37931CD2146F53CC56 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = B94690AA4C412EEBDD0DEC68 /* Fonts */; };
 		8397289E122FF6486BC3837A /* Icons in Resources */ = {isa = PBXBuildFile; fileRef = 82A24849D02419FA783CE207 /* Icons */; };
@@ -62,6 +63,7 @@
 		EC6246F485CD66A186801F37 /* ProvenanceTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D711534F2CB90256C209C64A /* ProvenanceTag.swift */; };
 		EF8131ED064F154C2489319A /* PrivacyPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5343EC698754B834158A9A47 /* PrivacyPanel.swift */; };
 		EFC7567A43435D818C9C546E /* BriefRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */; };
+		F19ECB5C3FDF8861CD6C3278 /* PrivacyScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D64D9B9C6015EF910B49920 /* PrivacyScenario.swift */; };
 		FB890F851979BF1983093DC3 /* DocStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E72C1D2E829038F21F4009 /* DocStyle.swift */; };
 		FDD9F80B537B78631A207B0E /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */; };
 /* End PBXBuildFile section */
@@ -86,6 +88,7 @@
 		28DC9014D9D1E134C18A1BB6 /* VariationConversational.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VariationConversational.swift; sourceTree = "<group>"; };
 		29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveContextStore+Verify.swift"; sourceTree = "<group>"; };
 		2AC7718A63BA4FD22459F54C /* ProvenancePopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvenancePopover.swift; sourceTree = "<group>"; };
+		2D64D9B9C6015EF910B49920 /* PrivacyScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyScenario.swift; sourceTree = "<group>"; };
 		410302074F14E65F26427829 /* LiveContextStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextStore.swift; sourceTree = "<group>"; };
 		4FC0624F98A3D54E4CE1D39F /* SelectableLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableLine.swift; sourceTree = "<group>"; };
 		5343EC698754B834158A9A47 /* PrivacyPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPanel.swift; sourceTree = "<group>"; };
@@ -102,6 +105,7 @@
 		7EB77D9253AB578A10D8B4A9 /* BriefChatKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefChatKit.swift; sourceTree = "<group>"; };
 		82A24849D02419FA783CE207 /* Icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Icons; path = Brief/Resources/Icons; sourceTree = SOURCE_ROOT; };
 		831F4A114AC5777CC6B98CEF /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
+		83703D1711E5E8A535AA6D67 /* ChatPanelSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPanelSession.swift; sourceTree = "<group>"; };
 		83AF7A462938AB5835F27B15 /* BriefShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefShadow.swift; sourceTree = "<group>"; };
 		8E341461981E57F45A0792F3 /* LinearModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearModels.swift; sourceTree = "<group>"; };
 		9D13C3032E0D6E58AB6E70FD /* ContextSummaryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextSummaryBar.swift; sourceTree = "<group>"; };
@@ -232,10 +236,12 @@
 			isa = PBXGroup;
 			children = (
 				083910E53C940F2E947DC399 /* ChatPanel.swift */,
+				83703D1711E5E8A535AA6D67 /* ChatPanelSession.swift */,
 				6B41A1CE5ED4324B724FEF9B /* EchoScenario.swift */,
 				15E47151C57AC0AAC1A67915 /* PanelComposer.swift */,
 				1D11EA82E6DFF97E4B43F74C /* PanelRoute.swift */,
 				ECD688546ABB99DA1304DBE0 /* PanelScenario.swift */,
+				2D64D9B9C6015EF910B49920 /* PrivacyScenario.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -340,6 +346,7 @@
 				D18359F6E006B9F6CD2808B6 /* CaptureModels.swift in Sources */,
 				0F7FCE7D1B5405FA34E2F12C /* ChatComposer.swift in Sources */,
 				D7C9F3559EB410CA8E054C5B /* ChatPanel.swift in Sources */,
+				737540FDB4178DA1B2367C4D /* ChatPanelSession.swift in Sources */,
 				94179AE080ED10D56A20A42A /* ContextSummaryBar.swift in Sources */,
 				CD23DB14163891E4173CCA84 /* DSComponents.swift in Sources */,
 				8F571438B320B58CE063513E /* DesignSystemView.swift in Sources */,
@@ -361,6 +368,7 @@
 				CEF0E1BB6F49A2EB9CBFABD1 /* PrivacyBucketCard.swift in Sources */,
 				EB8700F26D36A17B7ABD0E73 /* PrivacyChip.swift in Sources */,
 				EF8131ED064F154C2489319A /* PrivacyPanel.swift in Sources */,
+				F19ECB5C3FDF8861CD6C3278 /* PrivacyScenario.swift in Sources */,
 				E61DE40E7A435F50486D12A7 /* PrivacyState.swift in Sources */,
 				414825E85C19D5D86F6EA0F6 /* PrivacyWindowController.swift in Sources */,
 				265FDB92F53A475CB416EE84 /* ProvenancePopover.swift in Sources */,

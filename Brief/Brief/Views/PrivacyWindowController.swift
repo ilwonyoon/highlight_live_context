@@ -33,6 +33,16 @@ final class PrivacyWindowController {
     private var panel: NSPanel?
     private var isPresented = false
 
+    /// The shared conversation — the chat panel renders it; the input window
+    /// (added next) mutates it. One session so both surfaces stay in sync.
+    private let session = ChatPanelSession(scenario: PrivacyScenario())
+
+    // Event monitors for light-dismiss: Esc (local key) and a click outside the
+    // panel (global mouse + local for clicks landing in our own other windows).
+    private var keyMonitor: Any?
+    private var globalClickMonitor: Any?
+    private var localClickMonitor: Any?
+
     // MARK: Toggle / present / dismiss
 
     func toggle() {
@@ -62,6 +72,42 @@ final class PrivacyWindowController {
 
         Self.debug("after setFrame animate; isVisible=\(panel.isVisible) frame=\(NSStringFromRect(panel.frame))")
         isPresented = true
+        installDismissMonitors()
+    }
+
+    // MARK: Light-dismiss — Esc + click-outside
+
+    private func installDismissMonitors() {
+        // Esc closes the panel.
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 {   // Esc
+                self?.dismiss()
+                return nil             // swallow it
+            }
+            return event
+        }
+        // A click anywhere outside the panel closes it. Global catches other
+        // apps; local catches our own windows (and lets the event through).
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            self?.dismiss()
+        }
+        localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self, let panel = self.panel else { return event }
+            // If the click is NOT in our panel, dismiss; otherwise leave it be.
+            if event.window != panel {
+                self.dismiss()
+            }
+            return event
+        }
+    }
+
+    private func removeDismissMonitors() {
+        [keyMonitor, globalClickMonitor, localClickMonitor].forEach { m in
+            if let m { NSEvent.removeMonitor(m) }
+        }
+        keyMonitor = nil
+        globalClickMonitor = nil
+        localClickMonitor = nil
     }
 
     /// File-based debug log — the unified log / NSLog isn't captured in this
@@ -80,6 +126,7 @@ final class PrivacyWindowController {
 
     func dismiss() {
         guard isPresented, let panel else { return }
+        removeDismissMonitors()
         guard let screen = targetScreen() else { panel.orderOut(nil); isPresented = false; return }
         let offscreen = offscreenFrame(on: screen)
 
@@ -106,13 +153,15 @@ final class PrivacyWindowController {
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
         panel.isOpaque = false
-        panel.backgroundColor = .clear          // PrivacyPanel draws its own glass
+        panel.backgroundColor = .clear          // the panel content draws its own surface
         panel.hasShadow = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
-        let host = NSHostingView(rootView: PrivacyPanel(onDismiss: { [weak self] in
-            self?.dismiss()
-        }))
+        // The floating panel hosts the general AI ChatPanel (header + back, a
+        // streamed thread) driven by a shared ChatSession with the privacy
+        // scenario. The composer lives in a SEPARATE input window (added next),
+        // which shares this same session.
+        let host = NSHostingView(rootView: ChatPanel(session: session))
         host.frame = panel.contentView?.bounds ?? .zero
         host.autoresizingMask = [.width, .height]
         panel.contentView = host

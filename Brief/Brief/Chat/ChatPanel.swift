@@ -18,19 +18,11 @@ import SwiftUI
 // See PRIVACY_EXECUTION.md §3-§4.
 
 struct ChatPanel: View {
-    /// The domain plugged into this panel. The panel only ever talks to this.
-    let scenario: any PanelScenario
-    /// Close the whole panel (slide it out). Owned by the host.
-    let onClose: () -> Void
+    /// The shared conversation state (scenario, thread, nav). Owned by the host
+    /// so a separate input window can share it. ChatPanel renders header+thread.
+    @Bindable var session: ChatPanelSession
 
     var cornerRadius: CGFloat = BriefRadius.panel
-
-    @State private var nav = PanelNavStack()
-    @State private var turns: [IdentifiedTurn] = []
-    @State private var streamedIDs: Set<UUID> = []   // turns that have finished streaming once
-    @State private var draft = ""
-    @State private var isThinking = false
-    @State private var seeded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -41,84 +33,69 @@ struct ChatPanel: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.briefPaper)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(Color.briefHairlineSoft, lineWidth: 0.5)
-        )
-        .task { seedOpeningOnce() }
+        // No outline — the floating panel's shadow (NSPanel.hasShadow) carries
+        // "this surface is lifted" on its own. A stroke on top reads heavy.
+        .task { session.seedOpeningOnce() }
     }
 
-    // MARK: Header — back (pop) · title (current route) · close (dismiss)
+    // MARK: Header — back (pop) · title (current route)
 
     private var header: some View {
         HStack(spacing: BriefSpacing.md) {
-            if nav.canGoBack {
-                HeaderIconButton(systemName: "chevron.left", help: "Back") {
-                    withAnimation(.briefStandard) { nav.pop() }
-                }
+            // Back is always present on the left (the panel reads as one screen
+            // in a stack). At the root it has nothing to pop, so it's quiet;
+            // inside a detail it pops. No close button — the panel
+            // light-dismisses on Esc / click-outside.
+            HeaderIconButton(systemName: "chevron.left",
+                             help: "Back",
+                             enabled: session.nav.canGoBack) {
+                session.pop()
             }
 
-            // Söhne, not the Family serif — a chat is a conversation surface, not
-            // a document hero. (title3 = Söhne halbfett 17pt.)
-            Text(currentTitle)
-                .briefStyle(.title3)
+            Text(session.currentTitle)
+                .briefStyle(.title3Medium)
                 .foregroundStyle(Color.briefInkPrimary)
 
             Spacer(minLength: 0)
-
-            HeaderIconButton(systemName: "xmark", help: "Close", action: onClose)
         }
         .padding(.horizontal, BriefSpacing.xxl)
         .padding(.vertical, BriefSpacing.xl)
-    }
-
-    private var currentTitle: String {
-        switch nav.current {
-        case .conversation:    return scenario.title
-        case .detail(let id):  return destination(id)?.title ?? scenario.title
-        }
     }
 
     // MARK: Content — conversation (root) or a pushed detail
 
     @ViewBuilder
     private var content: some View {
-        switch nav.current {
+        switch session.nav.current {
         case .conversation:    conversation
         case .detail(let id):  detail(id)
         }
     }
 
-    // MARK: Conversation — thread + pinned composer
+    // MARK: Conversation — the thread (composer now lives in a separate window)
 
     private var conversation: some View {
-        VStack(spacing: 0) {
-            thread
-            PanelComposer(draft: $draft,
-                          placeholder: scenario.composerPlaceholder,
-                          isThinking: isThinking,
-                          onSend: send)
-        }
+        thread
     }
 
     private var thread: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: BriefSpacing.xl) {
-                    ForEach(turns) { item in
+                    ForEach(session.turns) { item in
                         TurnView(turn: item.turn,
-                                 animate: !streamedIDs.contains(item.id),
-                                 onStreamed: { streamedIDs.insert(item.id) },
-                                 onAction: confirm)
+                                 animate: !session.streamedIDs.contains(item.id),
+                                 onStreamed: { session.markStreamed(item.id) },
+                                 onAction: { session.confirm($0) })
                             .id(item.id)
                     }
 
                     // Drill-in destinations the scenario offers (e.g. "Automatic",
                     // "Your rules"). Rendered once, after the opening, as pushable
                     // rows — tapping pushes the detail route.
-                    ForEach(scenario.detailDestinations()) { dest in
+                    ForEach(session.scenario.detailDestinations()) { dest in
                         DestinationRow(title: dest.title) {
-                            withAnimation(.briefStandard) { nav.push(.detail(destinationID: dest.id)) }
+                            session.push(.detail(destinationID: dest.id))
                         }
                     }
                 }
@@ -128,8 +105,8 @@ struct ChatPanel: View {
             }
             .scrollIndicators(.visible)
             // Keep the latest turn in view as the conversation grows.
-            .onChange(of: turns.count) {
-                if let last = turns.last {
+            .onChange(of: session.turns.count) {
+                if let last = session.turns.last {
                     withAnimation(.briefStandard) { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
@@ -141,7 +118,7 @@ struct ChatPanel: View {
     private func detail(_ id: UUID) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BriefSpacing.xl) {
-                if let dest = destination(id) {
+                if let dest = session.destination(id) {
                     dest.card.erasedBody()
                 }
             }
@@ -151,54 +128,6 @@ struct ChatPanel: View {
         }
         .scrollIndicators(.visible)
     }
-
-    // MARK: The loop
-
-    private func seedOpeningOnce() {
-        guard !seeded else { return }
-        seeded = true
-        append(scenario.openingTurns())
-    }
-
-    private func send(_ text: String) {
-        append([.userText(text)])
-        isThinking = true
-        Task {
-            let reply = await scenario.respond(to: text)
-            isThinking = false
-            append(reply)
-        }
-    }
-
-    private func confirm(_ action: any PanelAction) {
-        isThinking = true
-        Task {
-            let follow = await scenario.confirm(action)
-            isThinking = false
-            append(follow)
-        }
-    }
-
-    private func append(_ newTurns: [PanelTurn]) {
-        turns.append(contentsOf: newTurns.map(IdentifiedTurn.init))
-    }
-
-    // MARK: Lookups
-
-    private func destination(_ id: UUID) -> PanelDestination? {
-        scenario.detailDestinations().first { $0.id == id }
-    }
-}
-
-// MARK: - IdentifiedTurn — a stable id so ForEach + "stream once" work
-//
-// PanelTurn is a plain enum (no identity). Wrapping each appended turn with a
-// UUID lets the thread diff correctly and lets us record which turns have
-// already streamed (so they don't re-animate on scroll/re-render).
-
-private struct IdentifiedTurn: Identifiable {
-    let id = UUID()
-    let turn: PanelTurn
 }
 
 // MARK: - TurnView — renders one turn with the chat-kit primitives
@@ -326,6 +255,7 @@ private struct DestinationRow: View {
 private struct HeaderIconButton: View {
     let systemName: String
     let help: String
+    var enabled: Bool = true
     let action: () -> Void
     @State private var hovering = false
 
@@ -333,66 +263,28 @@ private struct HeaderIconButton: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkTertiary)
+                .foregroundStyle(tint)
                 .frame(width: 26, height: 26)
-                .background(Circle().fill(hovering ? Color.briefSelectionRest : .clear))
+                .background(Circle().fill(hovering && enabled ? Color.briefSelectionRest : .clear))
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
+        .disabled(!enabled)
         .onHover { hovering = $0 }
         .animation(.briefHover, value: hovering)
         .help(help)
     }
-}
 
-// MARK: - ChatPanelSlideOver — the generic slide-over host
-//
-// Generic version of the old PrivacySlideOver: a ZStack over the whole window
-// with a dimming scrim and a trailing move-transition. ZStack + .transition
-// (NOT .overlay + .offset) so NavigationSplitView never clips it.
-
-struct ChatPanelSlideOver: ViewModifier {
-    @Binding var isPresented: Bool
-    let scenario: any PanelScenario
-
-    private let panelWidth: CGFloat = 400
-
-    func body(content: Content) -> some View {
-        ZStack(alignment: .trailing) {
-            content
-
-            if isPresented {
-                Color.briefScrim
-                    .ignoresSafeArea()
-                    .onTapGesture { isPresented = false }
-                    .transition(.opacity)
-
-                ChatPanel(scenario: scenario, onClose: { isPresented = false })
-                    .frame(width: panelWidth)
-                    .frame(maxHeight: .infinity)
-                    .transition(.move(edge: .trailing))
-            }
-        }
-        .animation(isPresented ? .briefPanel : .briefPanelOut, value: isPresented)
-    }
-}
-
-extension View {
-    /// Slide a ChatPanel in from the trailing edge over this view.
-    func chatPanelSlideOver(isPresented: Binding<Bool>, scenario: any PanelScenario) -> some View {
-        modifier(ChatPanelSlideOver(isPresented: isPresented, scenario: scenario))
+    private var tint: Color {
+        if !enabled { return Color.briefInkTertiary.opacity(0.4) }   // quiet when disabled
+        return hovering ? Color.briefInkPrimary : Color.briefInkTertiary
     }
 }
 
 // MARK: - Preview
 
 #Preview("Chat panel — echo") {
-    ZStack {
-        Color.briefPaper
-        Text("Window content behind the panel")
-            .briefStyle(.body)
-            .foregroundStyle(Color.briefInkTertiary)
-    }
-    .frame(width: 1000, height: 700)
-    .chatPanelSlideOver(isPresented: .constant(true), scenario: EchoScenario())
+    ChatPanel(session: ChatPanelSession(scenario: EchoScenario()))
+        .frame(width: 400, height: 600)
+        .background(Color.briefPaperSunken)
 }

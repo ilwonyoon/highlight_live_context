@@ -16,6 +16,9 @@ struct PrivacyBucketCard: View {
 
     let kind: Kind
     let state: PrivacyState
+    /// Pre-open the card (used by the chat panel's detail screens, which show the
+    /// bucket fully expanded rather than as a collapsed summary row).
+    var startExpanded: Bool = false
 
     @State private var expanded = false
 
@@ -43,6 +46,7 @@ struct PrivacyBucketCard: View {
         .contentShape(Rectangle())
         .onTapGesture { expanded.toggle() }
         .animation(.briefStandard, value: expanded)
+        .onAppear { if startExpanded { expanded = true } }
     }
 
     // MARK: Header row — icon + title + summary + count + chevron

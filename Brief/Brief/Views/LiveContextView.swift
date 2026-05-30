@@ -15,9 +15,6 @@ import SwiftUI
 struct LiveContextView: View {
     // Sidebar selection unifies the Context views and the Variations.
     @State private var selection: SidebarItem = .variation(.brief)
-    // Privacy is a slide-OVER, not a detail destination — tapping the shield
-    // presents it on top of the window (see PrivacyPanel / privacySlideOver).
-    @State private var showPrivacy = false
     // Shared live design tokens — the editor tunes this; the document reads it.
     @StateObject private var docStyle = DocStyle()
     // Day-switcher: which day's context is shown + popover visibility.
@@ -37,15 +34,6 @@ struct LiveContextView: View {
             detail
                 .background(Color.briefPaper)
         }
-        // Privacy panel slides in over the whole window from the right edge.
-        .privacySlideOver(isPresented: $showPrivacy)
-        // Esc closes the slide-over when it's open.
-        .background(
-            Button("") { showPrivacy = false }
-                .keyboardShortcut(.escape, modifiers: [])
-                .opacity(0)
-                .disabled(!showPrivacy)
-        )
     }
 
     // MARK: Sidebar
@@ -60,12 +48,12 @@ struct LiveContextView: View {
                 ForEach(ContextView.allCases) { view in
                     SidebarRow(label: view.label, icon: view.icon,
                                isSelected: view == .privacy
-                                   ? showPrivacy
+                                   ? false
                                    : selection == .context(view)) {
-                        // Privacy is a slide-over, not a detail destination —
-                        // present it over the current view; leave selection put.
+                        // Privacy is a floating screen-edge panel, not a detail
+                        // destination — toggle it in/out; leave selection put.
                         if view == .privacy {
-                            showPrivacy = true
+                            PrivacyWindowController.shared.toggle()
                         } else {
                             selection = .context(view)
                         }
@@ -147,8 +135,8 @@ struct LiveContextView: View {
             }
             // Data-governance: Connected (sources) + Privacy (protection), as
             // Notion-style property rows. The Privacy row opens the same
-            // slide-over as the sidebar shield — one presentation, one trigger.
-            ContextSummaryBar(onOpenPrivacy: { showPrivacy = true })
+            // floating screen-edge panel as the sidebar shield.
+            ContextSummaryBar(onOpenPrivacy: { PrivacyWindowController.shared.toggle() })
                 .padding(.top, BriefSpacing.xs)
         }
     }
