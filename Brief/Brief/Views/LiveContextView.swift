@@ -47,16 +47,11 @@ struct LiveContextView: View {
             Section {
                 ForEach(ContextView.allCases) { view in
                     SidebarRow(label: view.label, icon: view.icon,
-                               isSelected: view == .privacy
-                                   ? false
-                                   : selection == .context(view)) {
-                        // Privacy is a floating screen-edge panel, not a detail
-                        // destination — toggle it in/out; leave selection put.
-                        if view == .privacy {
-                            PrivacyWindowController.shared.toggle()
-                        } else {
-                            selection = .context(view)
-                        }
+                               isSelected: selection == .context(view)) {
+                        // Every Context view (incl. Privacy) selects into the main
+                        // area. Privacy shows the manual settings page; the chat
+                        // panel is a SEPARATE way to edit the same settings.
+                        selection = .context(view)
                     }
                     .listRowBackground(Color.clear)
                 }
@@ -87,6 +82,21 @@ struct LiveContextView: View {
 
     @ViewBuilder
     private var detail: some View {
+        switch selection {
+        case .context(.privacy):
+            // The manual privacy settings page — the same filters the chat panel
+            // edits, here as a conventional settings surface (PRIVACY_USER_CONTROL.md).
+            PrivacySettingsView()
+        case .context:
+            // Other Context views aren't built out yet.
+            comingSoon
+        case .variation:
+            variationDetail
+        }
+    }
+
+    @ViewBuilder
+    private var variationDetail: some View {
         switch selectedVariation {
         case .brief, .none:
             briefVariation            // A
@@ -97,6 +107,15 @@ struct LiveContextView: View {
         case .spacingLab:
             TypeEditorView(style: docStyle)
         }
+    }
+
+    private var comingSoon: some View {
+        VStack(spacing: BriefSpacing.sm) {
+            Text("Coming soon")
+                .briefStyle(.title3)
+                .foregroundStyle(Color.briefInkSecondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: Variation A — the reading document (default)
