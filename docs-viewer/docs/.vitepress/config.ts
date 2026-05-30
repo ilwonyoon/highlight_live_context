@@ -35,6 +35,7 @@ export default defineConfig({
             { text: 'Assignment (original brief)', link: '/brief/ASSIGNMENT' },
             { text: 'Priorities (P0 / P1 / P2)', link: '/brief/PRIORITIES' },
             { text: 'Privacy model', link: '/brief/PRIVACY_MODEL' },
+            { text: 'Privacy execution (chat panel)', link: '/brief/PRIVACY_EXECUTION' },
             { text: 'Onboarding & trust', link: '/brief/ONBOARDING' },
           ],
         },
