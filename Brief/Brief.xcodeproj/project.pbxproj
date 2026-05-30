@@ -49,7 +49,9 @@
 		D18359F6E006B9F6CD2808B6 /* CaptureModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7CEEC45D8216AFCD9F08011 /* CaptureModels.swift */; };
 		D191F961A186CA9486499C52 /* InteractionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106854B888494669D7792517 /* InteractionState.swift */; };
 		D1966E757BCF7C97518B45B4 /* BriefLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */; };
+		D7C9F3559EB410CA8E054C5B /* ChatPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 083910E53C940F2E947DC399 /* ChatPanel.swift */; };
 		DBF2B1E98C97F357FF0505AC /* EchoScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B41A1CE5ED4324B724FEF9B /* EchoScenario.swift */; };
+		DC3263079FA5BFC87EB3AE44 /* PanelRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D11EA82E6DFF97E4B43F74C /* PanelRoute.swift */; };
 		E47A7DDAC3301CDE6B24526D /* LiveContextStore+Verify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29197F082BB4C11C2A8994C3 /* LiveContextStore+Verify.swift */; };
 		E61DE40E7A435F50486D12A7 /* PrivacyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0A7C24339862BBAFB91429 /* PrivacyState.swift */; };
 		E8ED5107ECEEEF026B16D51A /* BriefMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66012BDC3DA03A3C02A82D2 /* BriefMarkdown.swift */; };
@@ -64,6 +66,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		083910E53C940F2E947DC399 /* ChatPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPanel.swift; sourceTree = "<group>"; };
 		0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefRadius.swift; sourceTree = "<group>"; };
 		0AD12733B745F12B56B905F5 /* BriefProseLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefProseLayout.swift; sourceTree = "<group>"; };
 		0DBB424D3D7FA38B10BAA317 /* MessageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModels.swift; sourceTree = "<group>"; };
@@ -73,6 +76,7 @@
 		148B8D29124CE99F14142CFD /* Mocks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Mocks; path = Brief/Resources/Mocks; sourceTree = SOURCE_ROOT; };
 		17950B2DE2CB3060D9D59C7B /* ReferenceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceModels.swift; sourceTree = "<group>"; };
 		18FA0A6AFF7F0A58CC5CA1AE /* LiveContextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextDocument.swift; sourceTree = "<group>"; };
+		1D11EA82E6DFF97E4B43F74C /* PanelRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelRoute.swift; sourceTree = "<group>"; };
 		1EF12A4D6674F9FF9F2B8451 /* BriefSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefSource.swift; sourceTree = "<group>"; };
 		2351246BBE0224CBF23E370D /* ChatComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatComposer.swift; sourceTree = "<group>"; };
 		239BA6C11B9F3029C3E756EA /* BriefIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefIcon.swift; sourceTree = "<group>"; };
@@ -225,7 +229,9 @@
 		F33BA32D642331B77C7F2B1D /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				083910E53C940F2E947DC399 /* ChatPanel.swift */,
 				6B41A1CE5ED4324B724FEF9B /* EchoScenario.swift */,
+				1D11EA82E6DFF97E4B43F74C /* PanelRoute.swift */,
 				ECD688546ABB99DA1304DBE0 /* PanelScenario.swift */,
 			);
 			path = Chat;
@@ -330,6 +336,7 @@
 				EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */,
 				D18359F6E006B9F6CD2808B6 /* CaptureModels.swift in Sources */,
 				0F7FCE7D1B5405FA34E2F12C /* ChatComposer.swift in Sources */,
+				D7C9F3559EB410CA8E054C5B /* ChatPanel.swift in Sources */,
 				94179AE080ED10D56A20A42A /* ContextSummaryBar.swift in Sources */,
 				CD23DB14163891E4173CCA84 /* DSComponents.swift in Sources */,
 				8F571438B320B58CE063513E /* DesignSystemView.swift in Sources */,
@@ -345,6 +352,7 @@
 				61FCEB66B972654FDBD3FA5B /* MeaningUnit.swift in Sources */,
 				920091F157EE93D97E36564F /* MeetingModels.swift in Sources */,
 				A8ED8D114218670619B9700D /* MessageModels.swift in Sources */,
+				DC3263079FA5BFC87EB3AE44 /* PanelRoute.swift in Sources */,
 				6BDCD50FA980EE81440BB2CF /* PanelScenario.swift in Sources */,
 				CEF0E1BB6F49A2EB9CBFABD1 /* PrivacyBucketCard.swift in Sources */,
 				EB8700F26D36A17B7ABD0E73 /* PrivacyChip.swift in Sources */,
