@@ -181,11 +181,14 @@ final class PrivacyWindowController {
         // Slide both windows back off the right edge together, then order them
         // out only once the (single, shared) animation has finished — otherwise
         // they vanish mid-slide or stagger like the present() path used to.
+        let inputPanel = self.inputPanel   // local capture for the closures
         NSAnimationContext.runAnimationGroup({ ctx in
             ctx.duration = 0.28
             ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
             panel.animator().setFrame(offscreen(panel.frame, on: screen), display: true)
-            inputPanel?.animator().setFrame(offscreen(inputPanel!.frame, on: screen), display: true)
+            if let inputPanel {
+                inputPanel.animator().setFrame(offscreen(inputPanel.frame, on: screen), display: true)
+            }
         }, completionHandler: {
             panel.orderOut(nil)
             inputPanel?.orderOut(nil)
