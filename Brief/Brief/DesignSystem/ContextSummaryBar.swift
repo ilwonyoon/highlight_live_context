@@ -35,7 +35,7 @@ struct ContextSummaryBar: View {
             propertyRow(label: "Context") {
                 CapturedValue(onManage: onManageConnections)
             }
-            propertyRow(label: "Privacy") {
+            propertyRow(label: "Privacy", alignment: .firstTextBaseline) {
                 PrivacyValue(privacy: privacy, action: onOpenPrivacy)
             }
         }
@@ -44,9 +44,12 @@ struct ContextSummaryBar: View {
     /// One property row: a small uppercase mono field-tag on the left, the value
     /// on the right. The tag reads as a label (a measured field), letting the
     /// value carry the data weight — no longer competing at the same size.
+    /// `alignment` lets a multi-line value (Privacy: CTA + status) baseline-align
+    /// its label to the first line instead of centering against the whole block.
     private func propertyRow<Value: View>(label: String,
-                                           @ViewBuilder value: () -> Value) -> some View {
-        HStack(alignment: .center, spacing: BriefSpacing.md) {
+                                          alignment: VerticalAlignment = .center,
+                                          @ViewBuilder value: () -> Value) -> some View {
+        HStack(alignment: alignment, spacing: BriefSpacing.md) {
             Text(label.uppercased())
                 .briefStyle(.monoLabel)
                 .foregroundStyle(Color.briefInkTertiary)
@@ -65,15 +68,22 @@ private struct CapturedValue: View {
     @State private var hovering = false
 
     private var total: Int { BriefContent.capturedTodayTotal }
+    /// How many sources are contributing today — the breadth half of the headline.
+    private var connectedCount: Int { BriefContent.capturedToday.count }
 
     var body: some View {
-        // The volume headline, as Söhne Mono (a measured value). A small chevron
-        // is the affordance — it says "there's more here" without the old inline
-        // row of icons. Click (or tap) opens the per-source breakdown; the whole
-        // thing is one button so it works on touch too.
+        // One measured line: volume (how much) · breadth (how many apps) — both
+        // describe the same thing (your incoming context), so they share ONE
+        // target. The ⌄ says "expand here": click opens the per-source breakdown.
         Button { showBreakdown.toggle() } label: {
             HStack(spacing: BriefSpacing.xs) {
                 Text("\(total) captured today")
+                    .briefStyle(.monoBody)
+                    .foregroundStyle(Color.briefInkSecondary)
+                Text("·")
+                    .briefStyle(.monoBody)
+                    .foregroundStyle(Color.briefInkTertiary)
+                Text("\(connectedCount) apps connected")
                     .briefStyle(.monoBody)
                     .foregroundStyle(Color.briefInkSecondary)
                 Image(systemName: "chevron.down")
@@ -247,54 +257,53 @@ private struct AddConnectionChip: View {
     }
 }
 
-// MARK: - Privacy value (two layers: auto on + user filters to set up)
+// MARK: - Privacy value (one line, one target → privacy panel)
+//
+// Both protection layers on a single measured line, mirroring the Context row.
+// The two layers ask opposite things, so the line carries that as HIERARCHY, not
+// as separate controls: the user's OWN filters lead (amber, lightly-cautioned —
+// the one safety action only they can take, and here haven't), and automatic
+// screening trails as the calm "basics are handled" reassurance. The whole line
+// is ONE target — the ⟩ opens the privacy panel, where both are managed.
 
 private struct PrivacyValue: View {
     let privacy: PrivacyState
     let action: () -> Void
     @State private var hovering = false
 
+    /// The user-action CTA copy. Kept here so it's a one-line swap.
+    private let filtersCTA = "Add your own filters"
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: BriefSpacing.sm) {
-                // Layer 1 — automatic screening, always on. A green dot on the
-                // left carries the "on" state (calmer than the word).
-                HStack(spacing: BriefSpacing.xs) {
-                    Circle()
-                        .fill(Color.briefHighlightDeep)
-                        .frame(width: 6, height: 6)
-                    Text("Auto-screening")
-                        .briefStyle(.monoBody)
-                        .foregroundStyle(Color.briefInkSecondary)
+                // HERO — the user's own filters (only they can set these).
+                if privacy.userFiltersConfigured {
+                    dotted(text: "\(privacy.rules.count) of your filters",
+                           color: Color.briefInkSecondary)
+                } else {
+                    HStack(spacing: BriefSpacing.xs) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(Color.briefCaution)
+                        Text(filtersCTA)
+                            .briefStyle(.monoBody)
+                            .foregroundStyle(Color.briefCaution)
+                    }
                 }
 
                 Text("·")
                     .briefStyle(.monoBody)
                     .foregroundStyle(Color.briefInkTertiary)
 
-                // Layer 2 — the user's own filters. Until set up, an active
-                // invitation: brand-inked text that underlines on hover (no
-                // arrow — the colour already reads as "actionable", and a mono
-                // arrow sat awkwardly against the type).
-                if privacy.userFiltersConfigured {
-                    Text("\(privacy.rules.count) filters")
-                        .briefStyle(.monoBody)
-                        .foregroundStyle(Color.briefInkSecondary)
-                } else {
-                    Text("Add your filters")
-                        .briefStyle(.monoBodyMedium)
-                        .foregroundStyle(Color.briefHighlightInk)
-                        .overlay(alignment: .bottom) {
-                            Rectangle()
-                                .fill(Color.briefHighlightInk)
-                                .frame(height: 1)
-                                .offset(y: 2)
-                                .opacity(hovering ? 1 : 0)
-                        }
-                }
+                // SUPPORT — automatic screening, the calm reassurance (trails).
+                dotted(text: "Auto-screening on", color: Color.briefInkTertiary)
+
+                // Line-level affordance: ⟩ opens the privacy panel.
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(hovering ? Color.briefInkSecondary : Color.briefInkTertiary)
             }
-            // No leading inset → "Auto-screening" left-aligns with "207" above.
-            // Hover capsule is drawn behind without shifting the text.
             .padding(.vertical, BriefSpacing.xs)
             .background(
                 RoundedRectangle(cornerRadius: BriefRadius.chip, style: .continuous)
@@ -306,6 +315,16 @@ private struct PrivacyValue: View {
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
         .animation(.briefHover, value: hovering)
-        .help("Open data & privacy")
+        .help("Set up the filters only you can — comp, deals, private confidences. Secrets, health & finance are screened automatically.")
+    }
+
+    /// A green-dot + mono label pair (the "on" indicator used for both layers).
+    private func dotted(text: String, color: Color) -> some View {
+        HStack(spacing: BriefSpacing.xs) {
+            Circle().fill(Color.briefHighlightDeep).frame(width: 6, height: 6)
+            Text(text)
+                .briefStyle(.monoBody)
+                .foregroundStyle(color)
+        }
     }
 }

@@ -52,6 +52,13 @@ extension Color {
     /// unreadable — handle at the row level if macOS forces white.
     static let briefAccent          = Color(red: 0.906, green: 0.996, blue: 0.043) // == highlight E7FE0B
 
+    // Caution — a warm amber for "you haven't done your part yet" nudges
+    // (e.g. user privacy filters not set up). Deliberately kept in the warm
+    // family so it reads as a gentle prompt on paper, not a red alarm. Used
+    // semantically: a recommended-but-untaken safety action, never decoration.
+    static let briefCaution     = Color(red: 0.710, green: 0.475, blue: 0.118) // B5791E warm amber (text/glyph)
+    static let briefCautionWash = Color(red: 0.969, green: 0.925, blue: 0.831) // F7ECD4 pale amber (pill fill)
+
     // Borders / dividers
     static let briefDivider  = Color(red: 0.890, green: 0.875, blue: 0.847)
     static let briefHairline = Color(red: 0.831, green: 0.812, blue: 0.776)

@@ -77,14 +77,13 @@ struct FilterCard: View {
         }
     }
 
-    // MARK: Header — statement + (collapsed: chip preview) + count + chevron
+    // MARK: Header — statement + (collapsed: chip preview) + disclosure cluster
     //
-    // Collapsed, the entire header is one Button that expands the card — a plain
-    // label, preview chips, the count, and a chevron. Expanded, the statement
-    // becomes an inline TextField (so taps edit, not collapse) and only the
-    // chevron — a separate Button — collapses it back. Splitting the two states
-    // keeps the tap target unambiguous (a Button reliably captures the whole row,
-    // where an .onTapGesture on an HStack of chips/labels does not).
+    // The disclosure cluster ("N filtered ⌄") is ONE consistent tap target that
+    // toggles the card in both states, so you never have to hunt for the bare
+    // chevron. Collapsed, the whole row is the target. Expanded, the cluster
+    // toggles — and the statement label does too, except when it's the inline
+    // rename field (editable cards), where a tap edits instead of collapsing.
 
     @ViewBuilder
     private var headerRow: some View {
@@ -92,14 +91,8 @@ struct FilterCard: View {
             HStack(alignment: .firstTextBaseline, spacing: BriefSpacing.md) {
                 statementView
                 Spacer(minLength: BriefSpacing.sm)
-                countText
-                if !filter.editable {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(Color.briefInkTertiary)
-                }
-                chevron
-                    .onTapGesture { expanded = false }
+                Button { expanded = false } label: { disclosureCluster }
+                    .buttonStyle(.plain)
             }
         } else {
             Button { expanded = true } label: {
@@ -107,13 +100,7 @@ struct FilterCard: View {
                     statementView
                     chipPreview
                     Spacer(minLength: BriefSpacing.sm)
-                    countText
-                    if !filter.editable {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 9, weight: .medium))
-                            .foregroundStyle(Color.briefInkTertiary)
-                    }
-                    chevron
+                    disclosureCluster
                 }
                 .contentShape(Rectangle())
             }
@@ -121,34 +108,38 @@ struct FilterCard: View {
         }
     }
 
+    /// The "N filtered ⌄" trailing cluster — the reusable disclosure control.
+    private var disclosureCluster: some View {
+        FilterDisclosureCluster(filteredCount: filter.filteredCount,
+                                locked: !filter.editable,
+                                expanded: expanded)
+    }
+
     @ViewBuilder
     private var statementView: some View {
         if filter.editable && expanded {
+            // Inline rename — a tap here edits the name, not collapses.
             TextField("Name this filter", text: $filter.statement)
                 .textFieldStyle(.plain)
                 .font(.briefBodySmall)
                 .foregroundStyle(Color.briefInkPrimary)
+        } else if expanded {
+            // Read-only expanded — keep the label a tap target to collapse.
+            Button { expanded = false } label: {
+                statementLabel.contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         } else {
-            Text(filter.statement)
-                .briefStyle(.bodySmall)
-                .foregroundStyle(Color.briefInkPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+            // Collapsed — the outer row Button handles the tap.
+            statementLabel
         }
     }
 
-    private var countText: some View {
-        Text("\(filter.filteredCount) filtered")
-            .briefStyle(.monoMeta)
-            .foregroundStyle(Color.briefInkTertiary)
-            .layoutPriority(1)
-    }
-
-    private var chevron: some View {
-        Image(systemName: "chevron.down")
-            .font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(Color.briefInkTertiary)
-            .rotationEffect(.degrees(expanded ? 0 : -90))
-            .layoutPriority(1)
+    private var statementLabel: some View {
+        Text(filter.statement)
+            .briefStyle(.bodySmall)
+            .foregroundStyle(Color.briefInkPrimary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: Collapsed chip preview — first 2 labels + overflow (no counts/✕)
@@ -291,6 +282,40 @@ struct FilterCard: View {
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
         .fixedSize()
+    }
+}
+
+// MARK: - FilterDisclosureCluster — the "N filtered ⌄" toggle target
+//
+// One reusable disclosure control: the filtered count, an optional lock (managed
+// filters), and a rotating chevron. `contentShape` makes the WHOLE cluster the
+// hit area, so it reads and behaves as a single expand/collapse affordance — the
+// caller wraps it in a Button (expanded) or lets the row Button cover it
+// (collapsed). Keeping it one component means the tap target is identical in both
+// states instead of shrinking to the bare chevron.
+
+private struct FilterDisclosureCluster: View {
+    let filteredCount: Int
+    let locked: Bool
+    let expanded: Bool
+
+    var body: some View {
+        HStack(spacing: BriefSpacing.sm) {
+            Text("\(filteredCount) filtered")
+                .briefStyle(.monoMeta)
+                .foregroundStyle(Color.briefInkTertiary)
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(Color.briefInkTertiary)
+            }
+            Image(systemName: "chevron.down")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(Color.briefInkTertiary)
+                .rotationEffect(.degrees(expanded ? 0 : -90))
+        }
+        .layoutPriority(1)
+        .contentShape(Rectangle())
     }
 }
 

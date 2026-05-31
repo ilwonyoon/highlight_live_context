@@ -25,8 +25,6 @@ struct PanelComposer: View {
     /// Label for the scope chip (the conversation's context).
     var contextLabel: String = "Privacy"
 
-    @FocusState private var focused: Bool
-
     var body: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
             // Context row — scope chip + attach.
@@ -38,22 +36,20 @@ struct PanelComposer: View {
             .padding(.horizontal, BriefSpacing.xxl)
             .padding(.top, BriefSpacing.lg)
 
-            // Input row — field + voice + (model | send).
+            // Input row — field + send. Send appears only once there's a draft;
+            // idle leaves the field clean (no voice / model controls — they had no
+            // wired behaviour yet and only added noise).
             HStack(spacing: BriefSpacing.sm) {
-                TextField(placeholder, text: $draft)
-                    .textFieldStyle(.plain)
-                    .font(.briefBody)
-                    .foregroundStyle(Color.briefInkPrimary)
-                    .focused($focused)
-                    .disabled(isThinking)
-                    .onSubmit(send)
+                // AppKit-backed field — SwiftUI's TextField won't render its
+                // placeholder inside this borderless panel and can't pin the
+                // caret / selection colours. NSTextField does all three exactly.
+                ComposerTextField(text: $draft,
+                                  placeholder: placeholder,
+                                  isEnabled: !isThinking,
+                                  onSubmit: send)
+                    .frame(maxWidth: .infinity)
 
-                VoiceButton {}
-
-                // Model picker gives way to Send once there's a draft.
-                if trimmed.isEmpty || isThinking {
-                    ModelPickerButton {}
-                } else {
+                if !trimmed.isEmpty && !isThinking {
                     SendButton(action: send)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -145,46 +141,95 @@ private struct AttachButton: View {
     }
 }
 
-// MARK: - Voice (mic) input
+// MARK: - ComposerTextField — AppKit-backed single-line input
+//
+// SwiftUI's TextField, inside the borderless input panel, refuses to render its
+// placeholder (title OR prompt) and won't let us pin the caret / selection
+// colours. An NSTextField gives all three deterministically:
+//   • placeholder via `placeholderAttributedString` — drawn by the same cell as
+//     the text, so it sits at the text's exact origin (no jump on first keypress)
+//   • caret via the field editor's `insertionPointColor` (ordinary ink, not the
+//     loud app accent)
+//   • selection left untouched → the system-standard highlight
 
-private struct VoiceButton: View {
-    let action: () -> Void
-    @State private var hovering = false
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "mic")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(hovering ? Color.briefSelectionRest : .clear))
+struct ComposerTextField: NSViewRepresentable {
+    @Binding var text: String
+    var placeholder: String
+    var isEnabled: Bool
+    var onSubmit: () -> Void
+
+    private static var bodyFont: NSFont {
+        NSFont(name: "TestSohne-Buch", size: 14) ?? .systemFont(ofSize: 14)
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeNSView(context: Context) -> CaretTextField {
+        let field = CaretTextField()
+        field.isBordered = false
+        field.drawsBackground = false
+        field.focusRingType = .none
+        field.usesSingleLineMode = true
+        field.lineBreakMode = .byTruncatingTail
+        field.cell?.isScrollable = true
+        field.delegate = context.coordinator
+        field.font = Self.bodyFont
+        field.textColor = NSColor(Color.briefInkPrimary)
+        field.caretColor = NSColor(Color.briefInkPrimary)
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        applyPlaceholder(to: field)
+        // Take focus once the (key) input window has placed the field.
+        DispatchQueue.main.async { field.window?.makeFirstResponder(field) }
+        return field
+    }
+
+    func updateNSView(_ field: CaretTextField, context: Context) {
+        if field.stringValue != text { field.stringValue = text }
+        field.isEnabled = isEnabled
+        applyPlaceholder(to: field)
+    }
+
+    private func applyPlaceholder(to field: NSTextField) {
+        field.placeholderAttributedString = NSAttributedString(
+            string: placeholder,
+            attributes: [
+                .foregroundColor: NSColor(Color.briefInkTertiary),
+                .font: Self.bodyFont,
+            ])
+    }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        let parent: ComposerTextField
+        init(_ parent: ComposerTextField) { self.parent = parent }
+
+        func controlTextDidChange(_ note: Notification) {
+            guard let field = note.object as? NSTextField else { return }
+            parent.text = field.stringValue
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.briefHover, value: hovering)
-        .help("Voice input")
+
+        func control(_ control: NSControl, textView: NSTextView,
+                     doCommandBy selector: Selector) -> Bool {
+            if selector == #selector(NSResponder.insertNewline(_:)) {
+                parent.onSubmit()
+                return true
+            }
+            return false
+        }
     }
 }
 
-// MARK: - Model picker — choose the model (custom mark, not "@")
-//
-// A small "spark in a hexagon"-style glyph reads as "the model/brain", distinct
-// from the @ mention it replaces. Uses an SF symbol that signals intelligence.
+/// NSTextField that colours its caret. The caret is drawn by the window's shared
+/// field editor (an NSTextView), reachable only once we're first responder.
+final class CaretTextField: NSTextField {
+    var caretColor: NSColor = .textColor
 
-private struct ModelPickerButton: View {
-    let action: () -> Void
-    @State private var hovering = false
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(hovering ? Color.briefSelectionRest : .clear))
+    override func becomeFirstResponder() -> Bool {
+        let ok = super.becomeFirstResponder()
+        if ok, let editor = currentEditor() as? NSTextView {
+            editor.insertionPointColor = caretColor
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.briefHover, value: hovering)
-        .help("Choose model")
+        return ok
     }
 }
 

@@ -105,15 +105,22 @@ final class PrivacyWindowController {
         let inputRest = inputRestFrame(on: screen)
 
         // Both windows start off the right edge, order on, then slide left
-        // together. Native animated setFrame is reliable for borderless panels.
+        // together. setFrame(animate:true) BLOCKS until its own animation ends,
+        // so calling it twice plays the panels in sequence (the visible "lag").
+        // Driving both through one NSAnimationContext + animator() proxies runs
+        // them on a single non-blocking transaction, so they slide as one.
         panel.setFrame(offscreen(rest, on: screen), display: false)
         inputPanel.setFrame(offscreen(inputRest, on: screen), display: false)
         panel.alphaValue = 1
         inputPanel.alphaValue = 1
         panel.orderFrontRegardless()
         inputPanel.orderFrontRegardless()
-        panel.setFrame(rest, display: true, animate: true)
-        inputPanel.setFrame(inputRest, display: true, animate: true)
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.34
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            panel.animator().setFrame(rest, display: true)
+            inputPanel.animator().setFrame(inputRest, display: true)
+        }
         // Give the composer keyboard focus.
         inputPanel.makeKey()
 
@@ -176,13 +183,21 @@ final class PrivacyWindowController {
         guard let screen = targetScreen() else {
             panel.orderOut(nil); inputPanel?.orderOut(nil); return
         }
-        // Slide both windows back off the right edge, then order out.
-        panel.setFrame(offscreen(panel.frame, on: screen), display: true, animate: true)
-        if let inputPanel {
-            inputPanel.setFrame(offscreen(inputPanel.frame, on: screen), display: true, animate: true)
-            inputPanel.orderOut(nil)
-        }
-        panel.orderOut(nil)
+        // Slide both windows back off the right edge together, then order them
+        // out only once the (single, shared) animation has finished — otherwise
+        // they vanish mid-slide or stagger like the present() path used to.
+        let inputPanel = self.inputPanel   // local capture for the closures
+        NSAnimationContext.runAnimationGroup({ ctx in
+            ctx.duration = 0.28
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            panel.animator().setFrame(offscreen(panel.frame, on: screen), display: true)
+            if let inputPanel {
+                inputPanel.animator().setFrame(offscreen(inputPanel.frame, on: screen), display: true)
+            }
+        }, completionHandler: {
+            panel.orderOut(nil)
+            inputPanel?.orderOut(nil)
+        })
     }
 
     // MARK: Window construction
