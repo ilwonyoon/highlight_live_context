@@ -12,10 +12,14 @@ import SwiftUI
 @MainActor
 final class PrivacyScenario: PanelScenario {
     private let store: PrivacyStore
+    private let liveStore: LiveContextStore?
     private let entry: PrivacyChatEntry
 
-    init(store: PrivacyStore = PrivacyStore(), entry: PrivacyChatEntry = .global) {
+    init(store: PrivacyStore = PrivacyStore(),
+         liveStore: LiveContextStore? = nil,
+         entry: PrivacyChatEntry = .global) {
         self.store = store
+        self.liveStore = liveStore
         self.entry = entry
     }
 
@@ -45,10 +49,12 @@ final class PrivacyScenario: PanelScenario {
         case .global:
             let filterCount = store.userFilters.count
             let autoCount = store.automaticFilters.count
-            return [
+            var turns: [PanelTurn] = [
                 .assistantText("Here's how I'm protecting you right now. \(autoCount) automatic rules are always on, and you've set \(filterCount) of your own. Tell me what to change — I'll show you exactly what will happen before anything is applied."),
-                .assistantCard(CurrentStateCard(store: store)),
+                .assistantCard(CurrentStateCard(store: store, liveStore: liveStore)),
             ]
+            turns.append(contentsOf: proactiveTurns())
+            return turns
 
         case .addAppSite:
             return [
@@ -68,11 +74,32 @@ final class PrivacyScenario: PanelScenario {
         }
     }
 
-    // MARK: Respond — parse → propose, never apply directly
+    // MARK: Proactive — data-grounded suggestions on entry (P2)
+
+    /// Surface what the system already flagged sensitive, as confirmable cards.
+    /// Empty when there's no Live Context wired or nothing notable was caught.
+    private func proactiveTurns() -> [PanelTurn] {
+        guard let liveStore else { return [] }
+        let suggestions = PrivacyScanner.proactiveSuggestions(from: liveStore.timeline)
+        guard !suggestions.isEmpty else { return [] }
+        var turns: [PanelTurn] = [
+            .assistantText("While you were away I looked over what's been captured. A few things stood out — nothing's changed yet, your call:"),
+        ]
+        turns.append(contentsOf: suggestions.map { .assistantCard(SuggestionCard(suggestion: $0)) })
+        return turns
+    }
+
+    // MARK: Respond — scan first (P3), else parse → propose, never apply directly
 
     func respond(to userText: String) async -> [PanelTurn] {
         // Simulate a brief thinking pause
         try? await Task.sleep(nanoseconds: 400_000_000)
+
+        // P3 — a "find/take out everything about X" request: scan and report
+        // what's there before proposing a filter.
+        if let topic = PrivacyIntentParser.scanQuery(userText) {
+            return scanTurns(for: topic)
+        }
 
         let intent = PrivacyIntentParser.parse(userText, store: store)
 
@@ -90,16 +117,55 @@ final class PrivacyScenario: PanelScenario {
         }
     }
 
+    // MARK: Scan — sweep the Live Context for a topic, then offer to filter it
+
+    private func scanTurns(for topic: String) -> [PanelTurn] {
+        let statement = "Don't keep anything about \(topic)"
+        let filterIntent = PrivacyIntent.addTopicFilter(statement: statement)
+
+        guard let liveStore else {
+            // No Live Context wired — can't scan, but can still set up the filter.
+            return [
+                .assistantText("I can add a filter for **\(topic)** so it's kept out going forward."),
+                .assistantCard(ProposalCard(
+                    proposal: PrivacyProposal(intent: filterIntent, store: store),
+                    store: store)),
+            ]
+        }
+
+        let result = PrivacyScanner.scan(liveStore.timeline, for: topic)
+        guard result.count > 0 else {
+            return [
+                .assistantText("I swept your Live Context for **\(topic)** and didn't find anything. I can still add a filter so future mentions are kept out."),
+                .assistantCard(ProposalCard(
+                    proposal: PrivacyProposal(intent: filterIntent, store: store),
+                    store: store)),
+            ]
+        }
+
+        return [
+            .assistantText("I found **\(result.count) \(result.count == 1 ? "item" : "items")** about \(topic) — \(result.sourceSummary). Want me to keep this topic out of your work context?"),
+            .assistantCard(ScanResultCard(result: result, applyIntent: filterIntent)),
+        ]
+    }
+
     // MARK: Confirm — user tapped the confirm button in a ProposalCard
 
     func confirm(_ action: any PanelAction) async -> [PanelTurn] {
         guard let privacyAction = action as? PrivacyProposalAction else { return [] }
         let result = store.apply(privacyAction.intent)
-        return [
-            .assistantText(result.success
-                ? "Done. \(result.summary)"
-                : result.summary),
-        ]
+        guard result.success else { return [.assistantText(result.summary)] }
+
+        // P4 — reflect the live effect of the filter set on the Live Context.
+        var message = "Done. \(result.summary)"
+        if let liveStore {
+            let hidden = PrivacyScanner.hiddenItems(in: liveStore.timeline,
+                                                    under: store.automaticFilters + store.userFilters)
+            if !hidden.isEmpty {
+                message += " Across your filters, \(hidden.count) \(hidden.count == 1 ? "item is" : "items are") now kept out of your Live Context."
+            }
+        }
+        return [.assistantText(message)]
     }
 
     func detailDestinations() -> [PanelDestination] { [] }
@@ -202,6 +268,13 @@ struct PrivacyProposalAction: PanelAction {
 // Current state summary card shown in the opening brief
 private struct CurrentStateCard: PanelCard {
     let store: PrivacyStore
+    var liveStore: LiveContextStore? = nil
+
+    private var hiddenCount: Int {
+        guard let liveStore else { return 0 }
+        return PrivacyScanner.hiddenItems(in: liveStore.timeline,
+                                          under: store.automaticFilters + store.userFilters).count
+    }
 
     func makeBody() -> some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
@@ -220,6 +293,12 @@ private struct CurrentStateCard: PanelCard {
             row(icon: "display",
                 label: "Screen capture",
                 value: store.capture.screenContext ? "On" : "Off")
+            if hiddenCount > 0 {
+                Divider().padding(.horizontal, BriefSpacing.xs)
+                row(icon: "eye.slash",
+                    label: "Hidden from context",
+                    value: "\(hiddenCount) items")
+            }
         }
         .padding(BriefSpacing.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -273,6 +352,81 @@ private struct ProposalCard: PanelCard {
                         .briefStyle(.bodySmall)
                         .foregroundStyle(Color.briefInkSecondary)
                         .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(BriefSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                .fill(Color.briefPaperRaised)
+                .overlay(RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                    .stroke(Color.briefHairlineSoft, lineWidth: 1))
+        )
+    }
+}
+
+// MARK: - SuggestionCard — a proactive, data-grounded suggestion (P2)
+
+private struct SuggestionCard: PanelCard {
+    let suggestion: ProactiveSuggestion
+
+    var primaryAction: PanelActionButton? {
+        guard let intent = suggestion.intent, let label = suggestion.confirmLabel else { return nil }
+        return PanelActionButton(label: label, action: PrivacyProposalAction(intent: intent))
+    }
+
+    func makeBody() -> some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.xs) {
+            HStack(spacing: BriefSpacing.sm) {
+                Image(systemName: suggestion.intent == nil ? "checkmark.shield.fill" : "sparkles")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.briefInkTertiary)
+                Text(suggestion.title)
+                    .briefStyle(.bodyMedium)
+                    .foregroundStyle(Color.briefInkPrimary)
+            }
+            Text(suggestion.detail)
+                .briefStyle(.bodySmall)
+                .foregroundStyle(Color.briefInkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(BriefSpacing.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                .fill(Color.briefPaperRaised)
+                .overlay(RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                    .stroke(Color.briefHairlineSoft, lineWidth: 1))
+        )
+    }
+}
+
+// MARK: - ScanResultCard — what an on-demand sweep found, with one-tap filter (P3)
+
+private struct ScanResultCard: PanelCard {
+    let result: ScanResult
+    let applyIntent: PrivacyIntent
+
+    var primaryAction: PanelActionButton? {
+        PanelActionButton(label: "Keep this out",
+                          action: PrivacyProposalAction(intent: applyIntent))
+    }
+
+    func makeBody() -> some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.sm) {
+            ForEach(result.bySource, id: \.source) { entry in
+                HStack(spacing: BriefSpacing.sm) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 4))
+                        .foregroundStyle(Color.briefInkTertiary)
+                    Text(entry.source.label)
+                        .briefStyle(.bodySmall)
+                        .foregroundStyle(Color.briefInkSecondary)
+                    Spacer(minLength: 0)
+                    Text("\(entry.count)")
+                        .briefStyle(.monoMeta)
+                        .foregroundStyle(Color.briefInkTertiary)
                 }
             }
         }

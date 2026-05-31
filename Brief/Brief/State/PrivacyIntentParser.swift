@@ -88,6 +88,45 @@ struct PrivacyIntentParser {
         return .unrecognized(raw: raw)
     }
 
+    // MARK: - Scan detection (P3)
+    //
+    // A scan request is "show me / take out everything about X" — the user wants
+    // the assistant to SWEEP the Live Context and report what it found before any
+    // filter is applied. Returns the cleaned topic, or nil if this isn't a scan.
+    // Checked by the scenario BEFORE parse(), so it routes to a results card
+    // instead of a blind propose.
+
+    private static let scanTriggers = [
+        "everything about", "anything about", "everything related to",
+        "anything related to", "all about", "scan for", "search for",
+        "look for", "find everything", "find anything", "find all",
+        "what do you have about", "what do you have on",
+        "sweep", "scan", "전부 빼", "다 빼", "모두 빼", "빼줘", "빼 줘",
+        "지워줘", "찾아줘", "찾아",
+    ]
+
+    static func scanQuery(_ text: String) -> String? {
+        let t = text.lowercased().trimmingCharacters(in: .whitespaces)
+        guard scanTriggers.contains(where: { t.contains($0) }) else { return nil }
+
+        // Strip the trigger phrases + a little filler to recover the bare topic.
+        var topic = t
+        for trigger in scanTriggers.sorted(by: { $0.count > $1.count }) {
+            topic = topic.replacingOccurrences(of: trigger, with: " ")
+        }
+        for filler in ["take out", "remove", "delete", "hide", "keep out",
+                       "anything", "everything", "all", "stuff", "talk", "얘기",
+                       "관련", "관련된", "내용", "다", "모두", "전부", "please"] {
+            topic = topic.replacingOccurrences(of: filler, with: " ")
+        }
+        topic = topic
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+            .trimmingCharacters(in: .whitespaces)
+        return topic.isEmpty ? nil : topic
+    }
+
     // MARK: - Helpers
 
     private static func matches(_ text: String, verbs: [String], nouns: [String]) -> Bool {

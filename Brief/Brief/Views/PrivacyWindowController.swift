@@ -45,16 +45,21 @@ final class PrivacyWindowController {
     /// The real store, captured at configure(); used to rebuild the scenario when
     /// the panel is opened from a different entry point.
     private var store: PrivacyStore?
+    /// The Live Context, captured at configure(); lets the scenario be proactive
+    /// (P2) and scan on demand (P3).
+    private var liveStore: LiveContextStore?
     /// Which entry the cached session/panels were built for. Opening from a
     /// different entry rebuilds them with a freshly tailored scenario.
     private var currentEntry: PrivacyChatEntry = .global
 
-    /// Wire the shared PrivacyStore so chat edits and settings UI stay in sync.
+    /// Wire the shared stores so chat edits stay in sync with the settings UI
+    /// (PrivacyStore) and the assistant can read the Live Context (LiveContextStore).
     /// Call once from LiveContextView.onAppear before the panel is first opened.
-    func configure(store: PrivacyStore) {
+    func configure(store: PrivacyStore, liveStore: LiveContextStore? = nil) {
         // Only rebuild if the panel hasn't been presented yet
         guard !isPresented else { return }
         self.store = store
+        self.liveStore = liveStore
         rebuildSession(entry: .global)
     }
 
@@ -63,7 +68,7 @@ final class PrivacyWindowController {
     private func rebuildSession(entry: PrivacyChatEntry) {
         currentEntry = entry
         let store = store ?? PrivacyStore()
-        session = ChatPanelSession(scenario: PrivacyScenario(store: store, entry: entry))
+        session = ChatPanelSession(scenario: PrivacyScenario(store: store, liveStore: liveStore, entry: entry))
         // Reset cached panels so they're rebuilt with the new session on next present()
         panel = nil
         inputPanel = nil

@@ -16,6 +16,9 @@ struct LiveContextView: View {
     @State private var selection: SidebarItem = .variation(.brief)
     @StateObject private var docStyle = DocStyle()
     @StateObject private var privacyStore = PrivacyStore()
+    // The Live Context — read by the privacy assistant for proactive
+    // suggestions (P2) and on-demand scans (P3).
+    @StateObject private var liveStore = LiveContextStore()
     // Day-switcher: which day's context is shown + popover visibility.
     @State private var selectedDay: BriefDayOption = .today
     @State private var showDayPicker = false
@@ -34,7 +37,7 @@ struct LiveContextView: View {
                 .background(Color.briefPaper)
         }
         .onAppear {
-            PrivacyWindowController.shared.configure(store: privacyStore)
+            PrivacyWindowController.shared.configure(store: privacyStore, liveStore: liveStore)
         }
     }
 
