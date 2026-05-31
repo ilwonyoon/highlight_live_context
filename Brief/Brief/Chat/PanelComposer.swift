@@ -38,7 +38,9 @@ struct PanelComposer: View {
             .padding(.horizontal, BriefSpacing.xxl)
             .padding(.top, BriefSpacing.lg)
 
-            // Input row — field + voice + (model | send).
+            // Input row — field + send. Send appears only once there's a draft;
+            // idle leaves the field clean (no voice / model controls — they had no
+            // wired behaviour yet and only added noise).
             HStack(spacing: BriefSpacing.sm) {
                 TextField(placeholder, text: $draft)
                     .textFieldStyle(.plain)
@@ -48,12 +50,7 @@ struct PanelComposer: View {
                     .disabled(isThinking)
                     .onSubmit(send)
 
-                VoiceButton {}
-
-                // Model picker gives way to Send once there's a draft.
-                if trimmed.isEmpty || isThinking {
-                    ModelPickerButton {}
-                } else {
+                if !trimmed.isEmpty && !isThinking {
                     SendButton(action: send)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -142,49 +139,6 @@ private struct AttachButton: View {
         .onHover { hovering = $0 }
         .animation(.briefHover, value: hovering)
         .help("Add context")
-    }
-}
-
-// MARK: - Voice (mic) input
-
-private struct VoiceButton: View {
-    let action: () -> Void
-    @State private var hovering = false
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "mic")
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(hovering ? Color.briefSelectionRest : .clear))
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.briefHover, value: hovering)
-        .help("Voice input")
-    }
-}
-
-// MARK: - Model picker — choose the model (custom mark, not "@")
-//
-// A small "spark in a hexagon"-style glyph reads as "the model/brain", distinct
-// from the @ mention it replaces. Uses an SF symbol that signals intelligence.
-
-private struct ModelPickerButton: View {
-    let action: () -> Void
-    @State private var hovering = false
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(hovering ? Color.briefInkPrimary : Color.briefInkSecondary)
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(hovering ? Color.briefSelectionRest : .clear))
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.briefHover, value: hovering)
-        .help("Choose model")
     }
 }
 
