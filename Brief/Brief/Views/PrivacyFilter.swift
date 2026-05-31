@@ -34,6 +34,26 @@ struct FilterTag: Identifiable, Equatable {
     var count: Int          // times THIS tag caught something
 }
 
+/// Which layer of the defense-in-depth pipeline this filter operates on.
+enum FilterLayer: Equatable {
+    case appSite       // Layer 1 — block whole sources (apps, domains) before capture
+    case topicKeyword  // Layer 2/3 — screen content by topic or keyword within captures
+
+    var icon: String {
+        switch self {
+        case .appSite:      return "app.fill"
+        case .topicKeyword: return "text.magnifyingglass"
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .appSite:      return "APPS & SITES"
+        case .topicKeyword: return "TOPICS & KEYWORDS"
+        }
+    }
+}
+
 /// A privacy filter — automatic (read-only) or user-authored (editable).
 struct PrivacyFilter: Identifiable, Equatable {
     let id = UUID()
@@ -43,6 +63,27 @@ struct PrivacyFilter: Identifiable, Equatable {
     var filteredCount: Int      // how many times this filter caught something (P4)
     var editable: Bool          // ★ the only automatic/user difference
     var active: Bool = true     // user can pause without deleting (automatic always true)
+    var layer: FilterLayer = .topicKeyword
+}
+
+// MARK: - Capture switches — the pipeline's master + source-block toggles
+//
+// These integrate Highlight's existing Data & Privacy toggles into the Brief's
+// privacy surface, placed by where they sit in the defense-in-depth pipeline
+// (PRIVACY_MODEL.md): Screen Context is the master capture switch (top); Secure
+// Capture is the Layer-1 automatic source block; Send Telemetry is an orthogonal
+// data-sharing control (bottom). Each is just { on/off } here — the policy lives
+// in the system; the UI stays a sentence.
+
+/// The three capture/data toggles carried over from Highlight's Data & Privacy.
+struct CaptureSettings: Equatable {
+    var screenContext: Bool   // master: observe the screen at all
+    var secureCapture: Bool   // Layer-1 automatic: block banking/health/auth sources
+    var telemetry: Bool       // share anonymized logs so the team can fix problems
+
+    static let dani = CaptureSettings(screenContext: true,
+                                      secureCapture: true,
+                                      telemetry: true)
 }
 
 // MARK: - Mock — Dani Reyes (PRIVACY_USER_CONTROL.md §7)
@@ -69,20 +110,38 @@ extension PrivacyFilter {
     ]
 
     /// User-authored filters — editable. (Dani's two planted rules.)
+    ///
+    /// The first card is the **source-level** block — Highlight's "Privacy Deny
+    /// List" (apps & domains), folded into the same filter card. It blocks whole
+    /// sources before capture (Layer 1); the keyword filters below it screen
+    /// *within* what's allowed (Layer 3). Same card, same section — the tags are
+    /// app/domain names instead of keywords.
     static let userMock: [PrivacyFilter] = [
+        PrivacyFilter(
+            statement: "Never capture these apps & sites",
+            tags: [FilterTag(label: "1Password", count: 0),
+                   FilterTag(label: "Messages", count: 12),
+                   FilterTag(label: "Banking", count: 4),
+                   FilterTag(label: "acorn-bank.com", count: 3)],
+            duration: .permanent,
+            filteredCount: 19,
+            editable: true,
+            layer: .appSite),
         PrivacyFilter(
             statement: "Don't keep candidate compensation",
             tags: [FilterTag(label: "comp", count: 3),
                    FilterTag(label: "salary", count: 1)],
             duration: .days(30),
             filteredCount: 4,
-            editable: true),
+            editable: true,
+            layer: .topicKeyword),
         PrivacyFilter(
             statement: "Keep a teammate's private family situation out",
             tags: [FilterTag(label: "family", count: 1),
                    FilterTag(label: "personal", count: 1)],
             duration: .permanent,
             filteredCount: 2,
-            editable: true),
+            editable: true,
+            layer: .topicKeyword),
     ]
 }

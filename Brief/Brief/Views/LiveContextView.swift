@@ -13,10 +13,9 @@ import SwiftUI
 // wrapped in SelectableLine so it can be layered on later.
 
 struct LiveContextView: View {
-    // Sidebar selection unifies the Context views and the Variations.
     @State private var selection: SidebarItem = .variation(.brief)
-    // Shared live design tokens — the editor tunes this; the document reads it.
     @StateObject private var docStyle = DocStyle()
+    @StateObject private var privacyStore = PrivacyStore()
     // Day-switcher: which day's context is shown + popover visibility.
     @State private var selectedDay: BriefDayOption = .today
     @State private var showDayPicker = false
@@ -84,11 +83,10 @@ struct LiveContextView: View {
     private var detail: some View {
         switch selection {
         case .context(.privacy):
-            // The manual privacy settings page — the same filters the chat panel
-            // edits, here as a conventional settings surface (PRIVACY_USER_CONTROL.md).
-            PrivacySettingsView()
+            PrivacySettingsView(store: privacyStore)
+        case .context(.secureCaptureTest):
+            SecureCaptureBannerTestView()
         case .context:
-            // Other Context views aren't built out yet.
             comingSoon
         case .variation:
             variationDetail
@@ -416,27 +414,29 @@ enum Variation: String, CaseIterable, Identifiable, Hashable {
 }
 
 enum ContextView: String, CaseIterable, Identifiable, Hashable {
-    case liveContext, screenInsights, groupedInsights, connections, privacy
+    case liveContext, screenInsights, groupedInsights, connections, privacy, secureCaptureTest
 
     var id: String { rawValue }
 
     var label: String {
         switch self {
-        case .liveContext:     return "Live Context"
-        case .screenInsights:  return "Screen Insights"
-        case .groupedInsights: return "Grouped Insights"
-        case .connections:     return "Connections"
-        case .privacy:         return "Privacy"
+        case .liveContext:        return "Live Context"
+        case .screenInsights:     return "Screen Insights"
+        case .groupedInsights:    return "Grouped Insights"
+        case .connections:        return "Connections"
+        case .privacy:            return "Privacy"
+        case .secureCaptureTest:  return "Banner Test"
         }
     }
 
     var icon: String {
         switch self {
-        case .liveContext:     return "waveform.path.ecg"
-        case .screenInsights:  return "display"
-        case .groupedInsights: return "rectangle.3.group"
-        case .connections:     return "link"
-        case .privacy:         return "checkmark.shield"
+        case .liveContext:        return "waveform.path.ecg"
+        case .screenInsights:     return "display"
+        case .groupedInsights:    return "rectangle.3.group"
+        case .connections:        return "link"
+        case .privacy:            return "checkmark.shield"
+        case .secureCaptureTest:  return "paintbrush"
         }
     }
 }

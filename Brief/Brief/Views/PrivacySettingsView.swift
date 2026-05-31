@@ -2,26 +2,21 @@ import SwiftUI
 
 // MARK: - PrivacySettingsView — the manual privacy settings page
 //
-// A conventional settings surface where the user hand-edits everything — no chat
-// needed: rename a filter, add/remove tags, change its duration, pause or delete,
-// and add brand-new filters. Two sections (PRIVACY_USER_CONTROL.md §5):
-//   • YOUR FILTERS — editable
-//   • AUTOMATIC — read-only (P2)
-//
-// This is Path B (manual, complete on its own). The chat panel is Path A — it
-// drives this SAME state by talking.
+// Ordered by the defense-in-depth pipeline: Capture → Blocked Apps → Filters → Data Sharing.
+// State lives in PrivacyStore, shared with the chat panel — both paths edit the same data.
 
 struct PrivacySettingsView: View {
-    @State private var userFilters = PrivacyFilter.userMock
-    private let automaticFilters = PrivacyFilter.automaticMock
+    @ObservedObject var store: PrivacyStore
 
     var body: some View {
         SelectionSurface {
             ScrollView {
                 VStack(alignment: .leading, spacing: BriefSpacing.xxxl) {
                     header
-                    yourFiltersSection
-                    automaticSection
+                    SecureCaptureBanner()
+                    captureSection
+                    filtersSection
+                    dataSharingSection
                     Spacer(minLength: BriefSpacing.mega)
                 }
                 .frame(maxWidth: BriefLayout.readingWidth, alignment: .topLeading)
@@ -38,76 +33,126 @@ struct PrivacySettingsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
             BriefH1(text: "Privacy")
-            Text("What Highlight keeps out of your work context. Edit it here, or just tell the assistant.")
+            Text("What Highlight captures, and what it keeps out of your work context. Edit it here, or just tell the assistant.")
                 .briefStyle(.body)
                 .foregroundStyle(Color.briefInkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: Your filters (editable) — add / edit / delete
+    // MARK: Capture
 
-    private var yourFiltersSection: some View {
+    private var captureSection: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
-            sectionHeader(title: "YOUR FILTERS") {
-                Button(action: addFilter) {
-                    HStack(spacing: BriefSpacing.xs) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 10, weight: .semibold))
-                        Text("Add a filter")
-                            .briefStyle(.bodySmall)
+            sectionHeader(title: "CAPTURE") { EmptyView() }
+            CaptureToggleRow(
+                title: "Observe my screen",
+                description: "Let Highlight watch your screen to enrich your Live Context. Turn this off and nothing new is captured.",
+                isOn: $store.capture.screenContext)
+        }
+    }
+
+    // MARK: Filters — two containers
+
+    private var filtersSection: some View {
+        VStack(alignment: .leading, spacing: BriefSpacing.xxxl) {
+            blockedAppsBox
+            filtersBox
+        }
+        .animation(.briefStandard, value: store.userFilters.count)
+    }
+
+    // Container 1 — BLOCKED APPS & SITES
+    private var blockedAppsBox: some View {
+        let appSiteFilters = store.userFilters.filter { $0.layer == .appSite }
+        return VStack(alignment: .leading, spacing: BriefSpacing.md) {
+            sectionHeader(title: "BLOCKED APPS & SITES") { EmptyView() }
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(appSiteFilters.enumerated()), id: \.element.id) { i, filter in
+                    if i > 0 { listDivider }
+                    if let idx = store.userFilters.firstIndex(where: { $0.id == filter.id }) {
+                        FilterCard(filter: $store.userFilters[idx],
+                                   startExpanded: filter.id == store.newlyAddedID,
+                                   inList: true,
+                                   onDelete: { store.removeFilter(id: filter.id) })
                     }
-                    .foregroundStyle(Color.briefHighlightInk)
                 }
-                .buttonStyle(.plain)
-                .help("Add a new filter")
+                listDivider
+                addRowButton(label: "Add app or site", icon: "plus.circle.fill") {
+                    store.addAppSite()
+                }
             }
-
-            if userFilters.isEmpty {
-                Text("No filters yet — add one, or just tell the assistant what to keep out.")
-                    .briefStyle(.bodySmall)
-                    .foregroundStyle(Color.briefInkTertiary)
-                    .padding(.vertical, BriefSpacing.sm)
-            }
-
-            ForEach($userFilters) { $filter in
-                FilterCard(filter: $filter, onDelete: { delete(filter) })
-            }
+            .listBox
         }
-        .animation(.briefStandard, value: userFilters.count)
     }
 
-    // MARK: Automatic (read-only)
+    // Container 2 — FILTERS (automatic pinned top, user editable below)
+    private var filtersBox: some View {
+        let topicFilters = store.userFilters.filter { $0.layer == .topicKeyword }
+        let autoFilters = store.automaticFilters
+        return VStack(alignment: .leading, spacing: BriefSpacing.md) {
+            sectionHeader(title: "FILTERS") { EmptyView() }
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(autoFilters.enumerated()), id: \.element.id) { i, filter in
+                    if i > 0 { listDivider }
+                    FilterCard(readOnly: filter, inList: true)
+                }
+                ForEach(topicFilters) { filter in
+                    listDivider
+                    if let idx = store.userFilters.firstIndex(where: { $0.id == filter.id }) {
+                        FilterCard(filter: $store.userFilters[idx],
+                                   startExpanded: filter.id == store.newlyAddedID,
+                                   inList: true,
+                                   onDelete: { store.removeFilter(id: filter.id) })
+                    }
+                }
+                listDivider
+                addRowButton(label: "Add a filter", icon: "plus.circle.fill") {
+                    store.addTopicFilter()
+                }
+            }
+            .listBox
+        }
+    }
 
-    private var automaticSection: some View {
+    // MARK: Data sharing
+
+    private var dataSharingSection: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.md) {
-            sectionHeader(title: "AUTOMATIC") {
-                Text("managed by Highlight")
-                    .briefStyle(.monoMeta)
-                    .foregroundStyle(Color.briefInkTertiary)
-            }
-            ForEach(automaticFilters) { filter in
-                FilterCard(readOnly: filter)
-            }
+            sectionHeader(title: "DATA SHARING") { EmptyView() }
+            CaptureToggleRow(
+                title: "Help improve Highlight",
+                description: "Share anonymized logs from your AI interactions so the team can spot and fix problems. Covers screen data, actions, chats, and meeting notes.",
+                isOn: $store.capture.telemetry)
         }
     }
 
-    // MARK: Mutations
+    // MARK: Shared UI helpers
 
-    private func addFilter() {
-        let new = PrivacyFilter(statement: "",
-                                tags: [],
-                                duration: .permanent,
-                                filteredCount: 0,
-                                editable: true)
-        userFilters.insert(new, at: 0)   // newest on top
+    private func addRowButton(label: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: BriefSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.briefInkTertiary)
+                Text(label)
+                    .briefStyle(.bodySmall)
+                    .foregroundStyle(Color.briefInkSecondary)
+            }
+            .padding(.horizontal, BriefSpacing.xl)
+            .padding(.vertical, BriefSpacing.sm)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
-    private func delete(_ filter: PrivacyFilter) {
-        userFilters.removeAll { $0.id == filter.id }
+    private var listDivider: some View {
+        Rectangle()
+            .fill(Color.briefHairlineSoft.opacity(0.4))
+            .frame(height: 0.5)
+            .padding(.horizontal, BriefSpacing.xl)
     }
-
-    // MARK: Section header — label + trailing accessory
 
     private func sectionHeader<Accessory: View>(title: String,
                                                 @ViewBuilder accessory: () -> Accessory) -> some View {
@@ -121,8 +166,21 @@ struct PrivacySettingsView: View {
     }
 }
 
+private extension View {
+    var listBox: some View {
+        self.background(
+            RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                .fill(Color.briefPaperRaised)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BriefRadius.card, style: .continuous)
+                        .stroke(Color.briefHairlineSoft, lineWidth: 1)
+                )
+        )
+    }
+}
+
 #Preview {
-    PrivacySettingsView()
+    PrivacySettingsView(store: PrivacyStore())
         .frame(width: 900, height: 760)
         .background(Color.briefPaper)
 }
