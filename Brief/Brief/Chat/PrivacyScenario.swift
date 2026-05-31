@@ -12,23 +12,60 @@ import SwiftUI
 @MainActor
 final class PrivacyScenario: PanelScenario {
     private let store: PrivacyStore
+    private let entry: PrivacyChatEntry
 
-    init(store: PrivacyStore = PrivacyStore()) {
+    init(store: PrivacyStore = PrivacyStore(), entry: PrivacyChatEntry = .global) {
         self.store = store
+        self.entry = entry
     }
 
-    var title: String { "Privacy" }
-    var composerPlaceholder: String { "Tell me what to keep private…" }
+    var title: String {
+        switch entry {
+        case .global:         return "Privacy"
+        case .addAppSite:     return "Block an app or site"
+        case .addTopicFilter: return "Add a filter"
+        case .editFilter:     return "Edit filter"
+        }
+    }
 
-    // MARK: Opening brief
+    // Placeholder is flavored per entry so the composer invites the right input.
+    var composerPlaceholder: String {
+        switch entry {
+        case .global:         return "Tell me what to keep private…"
+        case .addAppSite:     return "Name an app or site to block…"
+        case .addTopicFilter: return "Describe what to keep private…"
+        case .editFilter:     return "Rename, add a keyword, pause, or remove…"
+        }
+    }
+
+    // MARK: Opening brief — proactive, tailored to where chat was opened from
 
     func openingTurns() -> [PanelTurn] {
-        let filterCount = store.userFilters.count
-        let autoCount = store.automaticFilters.count
-        return [
-            .assistantText("Here's how I'm protecting you right now. \(autoCount) automatic rules are always on, and you've set \(filterCount) of your own. Tell me what to change — I'll show you exactly what will happen before anything is applied."),
-            .assistantCard(CurrentStateCard(store: store)),
-        ]
+        switch entry {
+        case .global:
+            let filterCount = store.userFilters.count
+            let autoCount = store.automaticFilters.count
+            return [
+                .assistantText("Here's how I'm protecting you right now. \(autoCount) automatic rules are always on, and you've set \(filterCount) of your own. Tell me what to change — I'll show you exactly what will happen before anything is applied."),
+                .assistantCard(CurrentStateCard(store: store)),
+            ]
+
+        case .addAppSite:
+            return [
+                .assistantText("Which app or site should I keep out of your work context? Tell me a name like **Slack**, **WhatsApp**, or a website — new activity from it won't be captured."),
+            ]
+
+        case .addTopicFilter:
+            return [
+                .assistantText("What topic should I keep private? Describe it in your own words — like *\"anything about my salary\"* or *\"my medical appointments\"* — and I'll turn it into a filter."),
+            ]
+
+        case .editFilter(let id):
+            let name = store.userFilters.first(where: { $0.id == id })?.statement ?? "this filter"
+            return [
+                .assistantText("Editing **\(name)**. Tell me what to change — rename it, add a keyword, pause it, or remove it — and I'll show you the effect before applying."),
+            ]
+        }
     }
 
     // MARK: Respond — parse → propose, never apply directly

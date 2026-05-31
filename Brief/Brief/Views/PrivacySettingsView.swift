@@ -79,7 +79,7 @@ struct PrivacySettingsView: View {
                 }
                 listDivider
                 addRowButton(label: "Add app or site", icon: "plus.circle.fill") {
-                    store.addAppSite()
+                    PrivacyWindowController.shared.present(entry: .addAppSite)
                 }
             }
             .listBox
@@ -108,7 +108,7 @@ struct PrivacySettingsView: View {
                 }
                 listDivider
                 addRowButton(label: "Add a filter", icon: "plus.circle.fill") {
-                    store.addTopicFilter()
+                    PrivacyWindowController.shared.present(entry: .addTopicFilter)
                 }
             }
             .listBox

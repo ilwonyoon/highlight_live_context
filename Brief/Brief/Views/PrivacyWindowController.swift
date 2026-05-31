@@ -42,12 +42,28 @@ final class PrivacyWindowController {
     /// Seeded with a default store; call configure(store:) to wire the real one.
     private var session = ChatPanelSession(scenario: PrivacyScenario())
 
+    /// The real store, captured at configure(); used to rebuild the scenario when
+    /// the panel is opened from a different entry point.
+    private var store: PrivacyStore?
+    /// Which entry the cached session/panels were built for. Opening from a
+    /// different entry rebuilds them with a freshly tailored scenario.
+    private var currentEntry: PrivacyChatEntry = .global
+
     /// Wire the shared PrivacyStore so chat edits and settings UI stay in sync.
     /// Call once from LiveContextView.onAppear before the panel is first opened.
     func configure(store: PrivacyStore) {
         // Only rebuild if the panel hasn't been presented yet
         guard !isPresented else { return }
-        session = ChatPanelSession(scenario: PrivacyScenario(store: store))
+        self.store = store
+        rebuildSession(entry: .global)
+    }
+
+    /// Rebuild the shared session (and drop cached panels) for a given entry, so
+    /// the opening turns + composer placeholder match where chat was opened from.
+    private func rebuildSession(entry: PrivacyChatEntry) {
+        currentEntry = entry
+        let store = store ?? PrivacyStore()
+        session = ChatPanelSession(scenario: PrivacyScenario(store: store, entry: entry))
         // Reset cached panels so they're rebuilt with the new session on next present()
         panel = nil
         inputPanel = nil
@@ -63,11 +79,17 @@ final class PrivacyWindowController {
 
     func toggle() {
         NSLog("[PrivacyPanel] toggle() — isPresented=\(isPresented)")
-        if isPresented { dismiss() } else { present() }
+        if isPresented { dismiss() } else { present(entry: .global) }
     }
 
-    func present() {
+    /// Open the panel, tailored to the entry point it was launched from. If a
+    /// different entry than the cached one is requested, the session is rebuilt
+    /// so the opening brief + placeholder match.
+    func present(entry: PrivacyChatEntry = .global) {
         guard !isPresented else { return }
+        if entry != currentEntry || panel == nil {
+            rebuildSession(entry: entry)
+        }
         let panel = panel ?? makeConversationPanel()
         self.panel = panel
         let inputPanel = inputPanel ?? makeInputPanel()
