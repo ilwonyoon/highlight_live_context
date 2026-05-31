@@ -26,6 +26,7 @@ struct TimelineItem: Identifiable, Hashable {
         case .chrome(let v):     return v.sensitive
         case .clipboard(let c):  return c.sensitive
         case .screenshot(let s): return s.sensitive
+        case .calendar(let e):   return e.sensitive
         default:                 return nil
         }
     }
@@ -45,6 +46,7 @@ enum AnyLiveContextEvent: Hashable {
     case screenshot(ScreenshotCapture)
     case chatSession(ChatSession)
     case chatMessage(ChatMessage)
+    case calendar(CalendarEvent)
 }
 
 @MainActor
@@ -69,6 +71,7 @@ final class LiveContextStore: ObservableObject {
     @Published private(set) var screenshots: [ScreenshotCapture] = []
     @Published private(set) var chatSessions: [ChatSession] = []
     @Published private(set) var chatMessages: [ChatMessage] = []
+    @Published private(set) var calendarEvents: [CalendarEvent] = []
 
     /// All hot events from all sources, merged and sorted ascending by time.
     @Published private(set) var timeline: [TimelineItem] = []
@@ -149,6 +152,7 @@ final class LiveContextStore: ObservableObject {
         linear = decodeLines(LinearEvent.self, "linear", decoder)
         clipboard = decodeLines(ClipboardEntry.self, "clipboard", decoder)
         screenshots = decodeLines(ScreenshotCapture.self, "screenshot", decoder)
+        calendarEvents = decodeLines(CalendarEvent.self, "calendar", decoder)
 
         // Voice + chat streams each mix a header kind with detail kinds.
         loadVoiceStream(decoder)
@@ -239,8 +243,9 @@ final class LiveContextStore: ObservableObject {
         add(linear,       AnyLiveContextEvent.linear)
         add(clipboard,    AnyLiveContextEvent.clipboard)
         add(screenshots,  AnyLiveContextEvent.screenshot)
-        add(chatSessions, AnyLiveContextEvent.chatSession)
-        add(chatMessages, AnyLiveContextEvent.chatMessage)
+        add(chatSessions,    AnyLiveContextEvent.chatSession)
+        add(chatMessages,    AnyLiveContextEvent.chatMessage)
+        add(calendarEvents,  AnyLiveContextEvent.calendar)
         timeline = items.sorted { $0.timestamp < $1.timestamp }
     }
 

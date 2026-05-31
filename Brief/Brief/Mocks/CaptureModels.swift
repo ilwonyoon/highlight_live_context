@@ -46,6 +46,35 @@ struct ScreenshotCapture: LiveContextEvent, SensitiveFlaggable, Codable, Identif
     }
 }
 
+// MARK: Calendar
+
+/// calendar.jsonl — a calendar event captured via Google Calendar sync.
+struct CalendarEvent: LiveContextEvent, SensitiveFlaggable, Codable, Identifiable, Hashable {
+    let id: String
+    let source: BriefSourceTag
+    let timestamp: Date
+    let day: BriefDay
+    let title: String
+    let startTs: Date
+    let endTs: Date
+    let durationMin: Int
+    let organizer: String?
+    let attendees: [String]
+    let location: String?
+    let status: String          // "confirmed" | "tentative" | "cancelled"
+    let calendarId: String      // "work" | "personal"
+    let description: String?
+    let sensitive: SensitiveFlag?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, source, day, title, startTs, endTs, durationMin,
+             organizer, attendees, location, status, calendarId, description, sensitive
+        case timestamp = "ts"
+    }
+
+    var isPersonal: Bool { calendarId == "personal" }
+}
+
 // MARK: Chat (user ↔ Highlight)
 
 /// A chat session header (kind == "session").

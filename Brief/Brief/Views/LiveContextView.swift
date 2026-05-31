@@ -33,6 +33,9 @@ struct LiveContextView: View {
             detail
                 .background(Color.briefPaper)
         }
+        .onAppear {
+            PrivacyWindowController.shared.configure(store: privacyStore)
+        }
     }
 
     // MARK: Sidebar

@@ -103,6 +103,7 @@ enum BriefSourceTag: String, Codable, Hashable, CaseIterable {
     case clipboard
     case screenshot
     case chat
+    case calendar
 
     /// The design-system BriefSource, when one exists (the 8 Connections).
     var briefSource: BriefSource? { BriefSource(rawValue: rawValue) }
@@ -114,6 +115,7 @@ enum BriefSourceTag: String, Codable, Hashable, CaseIterable {
         case .clipboard:  return "Clipboard"
         case .screenshot: return "Screenshot"
         case .chat:       return "Chat"
+        case .calendar:   return "Calendar"
         default:          return rawValue.capitalized
         }
     }

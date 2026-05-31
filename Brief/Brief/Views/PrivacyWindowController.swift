@@ -38,9 +38,20 @@ final class PrivacyWindowController {
     private var inputPanel: NSPanel?   // composer — a separate window below
     private var isPresented = false
 
-    /// The shared conversation — both windows observe/mutate this one session,
-    /// so a message typed in the input window appears in the conversation thread.
-    private let session = ChatPanelSession(scenario: PrivacyScenario())
+    /// The shared conversation — both windows observe/mutate this one session.
+    /// Seeded with a default store; call configure(store:) to wire the real one.
+    private var session = ChatPanelSession(scenario: PrivacyScenario())
+
+    /// Wire the shared PrivacyStore so chat edits and settings UI stay in sync.
+    /// Call once from LiveContextView.onAppear before the panel is first opened.
+    func configure(store: PrivacyStore) {
+        // Only rebuild if the panel hasn't been presented yet
+        guard !isPresented else { return }
+        session = ChatPanelSession(scenario: PrivacyScenario(store: store))
+        // Reset cached panels so they're rebuilt with the new session on next present()
+        panel = nil
+        inputPanel = nil
+    }
 
     // Event monitors for light-dismiss: Esc (local key) and a click outside the
     // panel (global mouse + local for clicks landing in our own other windows).

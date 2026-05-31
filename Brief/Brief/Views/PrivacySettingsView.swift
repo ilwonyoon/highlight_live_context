@@ -32,7 +32,7 @@ struct PrivacySettingsView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: BriefSpacing.sm) {
-            BriefH1(text: "Privacy")
+            BriefH1(text: "Data & Privacy")
             Text("What Highlight captures, and what it keeps out of your work context. Edit it here, or just tell the assistant.")
                 .briefStyle(.body)
                 .foregroundStyle(Color.briefInkSecondary)
