@@ -68,6 +68,7 @@
 		EB36B2AFD2021B314877BF02 /* BriefSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD1C79BEB4B0F609C5C2D1D /* BriefSpacing.swift */; };
 		EB8700F26D36A17B7ABD0E73 /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2B51F39E361DA9CDA55A31D /* PrivacyChip.swift */; };
 		EC6246F485CD66A186801F37 /* ProvenanceTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D711534F2CB90256C209C64A /* ProvenanceTag.swift */; };
+		ED9F1C1DDBE72DF767695ED1 /* PrivacyChatEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21D0883C545227E79D59A10 /* PrivacyChatEntry.swift */; };
 		EF8131ED064F154C2489319A /* PrivacyPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5343EC698754B834158A9A47 /* PrivacyPanel.swift */; };
 		EFC7567A43435D818C9C546E /* BriefRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0859E70B2354AD7CEC5CA404 /* BriefRadius.swift */; };
 		F19ECB5C3FDF8861CD6C3278 /* PrivacyScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D64D9B9C6015EF910B49920 /* PrivacyScenario.swift */; };
@@ -126,6 +127,7 @@
 		A4E571BF97B024A67776EFB4 /* TypeSpecimenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeSpecimenView.swift; sourceTree = "<group>"; };
 		ACBF80FC85DD2581E35A5F73 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AD99B54395E7ECC596D7F78B /* LiveContextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveContextEvent.swift; sourceTree = "<group>"; };
+		B21D0883C545227E79D59A10 /* PrivacyChatEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyChatEntry.swift; sourceTree = "<group>"; };
 		B8ACB051B3CA398DCA68CBC3 /* BriefLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefLayout.swift; sourceTree = "<group>"; };
 		B94690AA4C412EEBDD0DEC68 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fonts; path = Brief/Resources/Fonts; sourceTree = SOURCE_ROOT; };
 		C0B9B48C51DEB159690DD23B /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 		84E5FCF0D2F8C53B0822D902 /* State */ = {
 			isa = PBXGroup;
 			children = (
+				B21D0883C545227E79D59A10 /* PrivacyChatEntry.swift */,
 				E75AD9B6D646CB203BBA7FE2 /* PrivacyIntent.swift */,
 				F56C30DD54933EA7F0FDA6AD /* PrivacyIntentParser.swift */,
 				19228ED38EC3565CABB4F51D /* PrivacyStore.swift */,
@@ -400,6 +403,7 @@
 				DC3263079FA5BFC87EB3AE44 /* PanelRoute.swift in Sources */,
 				6BDCD50FA980EE81440BB2CF /* PanelScenario.swift in Sources */,
 				CEF0E1BB6F49A2EB9CBFABD1 /* PrivacyBucketCard.swift in Sources */,
+				ED9F1C1DDBE72DF767695ED1 /* PrivacyChatEntry.swift in Sources */,
 				EB8700F26D36A17B7ABD0E73 /* PrivacyChip.swift in Sources */,
 				DFCCF4DC8F85CEB87DEE8635 /* PrivacyFilter.swift in Sources */,
 				FAEAD7C9FC3C3DFA6100778C /* PrivacyIntent.swift in Sources */,
